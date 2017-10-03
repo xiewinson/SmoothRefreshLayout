@@ -8,6 +8,7 @@ import android.content.Context;
 import android.os.Build;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
@@ -128,10 +129,11 @@ public class SmoothRefreshLayout extends FrameLayout {
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
+
         if (!isEnabled() || refreshing || animatorRunning) {
             return super.dispatchTouchEvent(ev);
-
         }
+
         switch (ev.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 lastY = ev.getY();
@@ -145,26 +147,29 @@ public class SmoothRefreshLayout extends FrameLayout {
                 float dy = currentY - lastY;
                 //下拉
                 if (dy > 0) {
-                    if (!canChildScrollUp() || contentView.getY() != 0) {
+                    if (!canChildScrollUp()
+                            && refreshHeaderView.getY() != maxRefreshHeaderY
+                            && contentView.getPaddingTop() != maxRefreshHeaderY + refreshHeaderHeight ) {
                         scrollHeader(dy);
                     }
                 }
                 //上拉
                 else {
+                    if(contentView.getPaddingTop() != maxRefreshHeaderY
+                            || refreshHeaderView.getY() != minRefreshHeaderY)
                     scrollHeader(dy);
                 }
-
                 lastY = currentY;
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
                 if (isTriggerChildTouch) {
-                    ev.setAction(MotionEvent.ACTION_CANCEL);
+//                    ev.setAction(MotionEvent.ACTION_CANCEL);
                 }
+                isTriggerChildTouch = false;
                 adjustAnimator();
 
-                isTriggerChildTouch = false;
-                return super.dispatchTouchEvent(ev);
+                break;
         }
         return super.dispatchTouchEvent(ev);
     }
@@ -180,20 +185,6 @@ public class SmoothRefreshLayout extends FrameLayout {
     }
 
     private boolean canChildScrollUp() {
-//        View firstChild = contentView.getChildAt(0);
-//        if(firstChild ==null) {
-//            return true;
-//        }
-//        int childAdapterPosition = contentView.getChildAdapterPosition(firstChild);
-//        if(childAdapterPosition != 0) {
-//            return true;
-//        }
-//
-//        if(contentView.getPaddingTop() == firstChild.getY()) {
-//            return false;
-//        }
-//        return true;
-
         return contentView != null && contentView.canScrollVertically(-1);
     }
 
@@ -202,7 +193,7 @@ public class SmoothRefreshLayout extends FrameLayout {
         isTriggerChildTouch = false;
     }
 
-    private void scrollHeader(float dy) {
+    private int scrollHeader(float dy) {
         refreshHeaderView.setVisibility(VISIBLE);
         if (dy > 0) {
             dy *= 0.5f;
@@ -225,8 +216,12 @@ public class SmoothRefreshLayout extends FrameLayout {
         if (refreshHeaderView.getY() != result) {
             refreshHeaderView.setY(result);
             contentView.setPadding(contentView.getPaddingLeft(), (int) (result + refreshHeaderHeight), contentView.getPaddingLeft(), contentView.getPaddingRight());
+//            if(result < 0) {
+//                contentView.scrollBy(0, (int) result);
+//            }
             isTriggerChildTouch = true;
         }
+        return (int) result;
     }
 
 
