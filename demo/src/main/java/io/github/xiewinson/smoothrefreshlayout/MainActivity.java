@@ -56,19 +56,19 @@ public class MainActivity extends AppCompatActivity {
                 }, 3000);
             }
         });
-        refreshLayout.addRefreshHeaderView(new IHeaderWrapper() {
-            @Override
-            public View getRefreshHeaderView() {
-                Button button = new Button(MainActivity.this);
-                button.setText("啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦");
-                return button;
-            }
-
-            @Override
-            public void onStateChanged(int state) {
-
-            }
-        });
+//        refreshLayout.addRefreshHeaderView(new IHeaderWrapper() {
+//            @Override
+//            public View getRefreshHeaderView() {
+//                Button button = new Button(MainActivity.this);
+//                button.setText("啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦");
+//                return button;
+//            }
+//
+//            @Override
+//            public void onStateChanged(int state) {
+//
+//            }
+//        });
     }
 
     private static class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {

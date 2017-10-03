@@ -92,7 +92,7 @@ public class SmoothRefreshLayout extends FrameLayout {
         post(new Runnable() {
             @Override
             public void run() {
-                if (viewGroupWrapper == null) {
+                if (refreshHeaderWrapper == null) {
                     addRefreshHeaderView(new DefaultHeaderWrapper(getContext()));
                 }
             }
@@ -161,7 +161,6 @@ public class SmoothRefreshLayout extends FrameLayout {
                 if (isTriggerChildTouch) {
                     ev.setAction(MotionEvent.ACTION_CANCEL);
                 }
-                reset();
                 adjustAnimator();
 
                 isTriggerChildTouch = false;
