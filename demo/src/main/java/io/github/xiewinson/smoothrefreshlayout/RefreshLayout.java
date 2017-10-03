@@ -1,56 +1,53 @@
-package io.github.xiewinson.smoothrefreshlayout.library;
+/*
+ * Copyright (c) 2017. Istuary Innovation Group, Ltd.
+ *  Unauthorized copying of this file, via any medium is strictly prohibited proprietary and
+ *  confidential.
+ *  Created on 星期三, 11 一月 2017 10:29:06 +0800.
+ *  ProjectName: ironhide-android; ModuleName: IronHideLibrary; ClassName: RefreshLayout.java.
+ *  Author: Lena; Last Modified: 星期三, 11 一月 2017 10:29:06 +0800.
+ *  This file is originally created by winson.
+ */
+
+package io.github.xiewinson.smoothrefreshlayout;
 
 import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Build;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
+import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
-import io.github.xiewinson.smoothrefreshlayout.library.listener.OnRefreshListener;
-import io.github.xiewinson.smoothrefreshlayout.library.listener.OnViewGroupScrollListener;
-import io.github.xiewinson.smoothrefreshlayout.library.wrapper.content.IViewGroupWrapper;
-import io.github.xiewinson.smoothrefreshlayout.library.wrapper.content.ViewGroupWrapper;
-import io.github.xiewinson.smoothrefreshlayout.library.wrapper.header.DefaultHeaderWrapper;
-import io.github.xiewinson.smoothrefreshlayout.library.wrapper.header.IHeaderWrapper;
+import io.github.xiewinson.smoothrefreshlayout.library.DeviceUtil;
 
 /**
- * Created by winson on 2017/10/3.
+ * Created by winson on 2017/1/11.
  */
 
-public class SmoothRefreshLayout extends FrameLayout {
+public class RefreshLayout extends FrameLayout {
 
-    public SmoothRefreshLayout(Context context) {
-        this(context, null);
-    }
-
-    public SmoothRefreshLayout(Context context, AttributeSet attrs) {
-        this(context, attrs, 0);
-    }
-
-    public SmoothRefreshLayout(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-    }
-
-    private IViewGroupWrapper viewGroupWrapper;
-    private IHeaderWrapper refreshHeaderWrapper;
-    private View refreshHeaderView;
-    private View contentView;
-    private int refreshHeaderHeight;
-    private int maxRefreshHeaderY;
-    private int minRefreshHeaderY;
+    private LinearLayout headerView;
+    private RecyclerView contentView;
+    private TextView titleTv;
+    private int headerHeight;
+    private int maxHeaderY;
+    private int minHeaderY;
 
     private float lastY;
 
-    //是否处于刷新
     private boolean refreshing;
-    //是否正在执行动画
     private boolean animatorRunning = false;
     private boolean isTriggerChildTouch = false;
 
@@ -69,62 +66,105 @@ public class SmoothRefreshLayout extends FrameLayout {
 
     RecyclerView.OnScrollListener onScrollListener;
 
+    public RefreshLayout(Context context) {
+        this(context, null);
+    }
+
+    public RefreshLayout(Context context, AttributeSet attrs) {
+        this(context, attrs, 0);
+    }
+
+    public RefreshLayout(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+        init(context);
+    }
+
+    private void init(Context context) {
+
+    }
+
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        init();
-    }
+        setLongClickable(true);
+        addRefreshView(getContext());
+        contentView = (RecyclerView) getChildAt(1);
+        contentView.setClipToPadding(false);
 
-    private void init() {
 
-        contentView = getChildAt(0);
-        viewGroupWrapper = ViewGroupWrapper.Factory.getInstance(contentView);
-        viewGroupWrapper.setViewGroupScrollListener(new OnViewGroupScrollListener() {
+        onScrollListener = new RecyclerView.OnScrollListener() {
+
             @Override
-            public void onScroll(View topChild, boolean isFirst) {
-                if (topChild != null && refreshing) {
-                    refreshHeaderView.setTranslationY(isFirst ? topChild.getY() - refreshHeaderHeight : -refreshHeaderHeight);
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                View childAt = recyclerView.getChildAt(0);
+                if (childAt != null && refreshing) {
+                    if (recyclerView.getChildAdapterPosition(childAt) == 0) {
+                        headerView.setTranslationY(childAt.getY() - headerHeight);
+                    } else {
+                        headerView.setTranslationY(-headerHeight);
+
+                    }
                 }
             }
-        });
 
-        //如果用户没有自定义HeaderWrapper，则配置DefaultHeaderWrapper
-        post(new Runnable() {
             @Override
-            public void run() {
-                if (viewGroupWrapper == null) {
-                    addRefreshHeaderView(new DefaultHeaderWrapper(getContext()));
-                }
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
             }
-        });
+        };
+        ((RecyclerView) contentView).addOnScrollListener(onScrollListener);
+
     }
 
-    public void addRefreshHeaderView(IHeaderWrapper headerWrapper) {
-        this.refreshHeaderWrapper = headerWrapper;
-        this.refreshHeaderView = headerWrapper.getRefreshHeaderView();
-        initRefreshHeaderView();
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        if (animatorSet != null && animatorSet.isRunning()) {
+            animatorSet.cancel();
+        }
+        onRefreshListener = null;
+        if (contentView != null) {
+            contentView.removeOnScrollListener(onScrollListener);
+        }
     }
 
-    private void initRefreshHeaderView() {
-        refreshHeaderView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+    private void addRefreshView(Context context) {
+        headerView = new LinearLayout(context);
+        headerView.setBackgroundColor(Color.BLUE);
+        headerView.setGravity(Gravity.CENTER);
+
+        ImageView iv = new ImageView(context);
+        int size = DeviceUtil.getPxByDp(context, 24);
+        headerView.addView(iv, new LinearLayout.LayoutParams(size, size));
+
+        titleTv = new TextView(context);
+        titleTv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
+        titleTv.setGravity(Gravity.CENTER);
+        LinearLayout.LayoutParams tvParams = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+        tvParams.leftMargin = DeviceUtil.getPxByDp(context, 8);
+        headerView.addView(titleTv, tvParams);
+
+        headerView.setPadding(size, size, size, size);
+        addView(headerView, 0, new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+        headerView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
+                headerHeight = headerView.getMeasuredHeight();
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                    refreshHeaderView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                    headerView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
                 } else {
-                    refreshHeaderView.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+                    headerView.getViewTreeObserver().removeGlobalOnLayoutListener(this);
                 }
-
-                refreshHeaderHeight = refreshHeaderView.getMeasuredHeight();
-                refreshHeaderView.setY(-refreshHeaderHeight);
-                maxRefreshHeaderY = contentView.getPaddingTop();
-                minRefreshHeaderY = maxRefreshHeaderY - refreshHeaderHeight;
+                headerView.setY(-headerHeight);
+                maxHeaderY = contentView.getPaddingTop();
+                minHeaderY = maxHeaderY - headerHeight;
             }
         });
-        refreshHeaderView.setVisibility(INVISIBLE);
-        addView(refreshHeaderView, 0, new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
-
+        requestLayout();
+        headerView.setVisibility(INVISIBLE);
     }
+
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
@@ -135,9 +175,9 @@ public class SmoothRefreshLayout extends FrameLayout {
         switch (ev.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 lastY = ev.getY();
-                maxRefreshHeaderY = contentView.getPaddingTop();
-                minRefreshHeaderY = maxRefreshHeaderY - refreshHeaderHeight;
-                refreshHeaderView.setY(minRefreshHeaderY);
+                maxHeaderY = contentView.getPaddingTop();
+                minHeaderY = maxHeaderY - headerHeight;
+                headerView.setY(minHeaderY);
                 break;
 
             case MotionEvent.ACTION_MOVE:
@@ -171,8 +211,8 @@ public class SmoothRefreshLayout extends FrameLayout {
     }
 
     private void adjustAnimator() {
-        float translationY = refreshHeaderView.getY();
-        if (translationY >= maxRefreshHeaderY - GAP_DISTANCE) {
+        float translationY = headerView.getY();
+        if (translationY >= maxHeaderY - GAP_DISTANCE) {
             expandHeaderAnimator(0);
         } else {
             setRefreshTitle(TIPS_PULL_TO_REFRESH);
@@ -204,32 +244,35 @@ public class SmoothRefreshLayout extends FrameLayout {
     }
 
     private void scrollHeader(float dy) {
-        refreshHeaderView.setVisibility(VISIBLE);
+        headerView.setVisibility(VISIBLE);
         if (dy > 0) {
             dy *= 0.5f;
         }
-        float result = refreshHeaderView.getY() + dy;
+        float result = headerView.getY() + dy;
 
-        if (result < minRefreshHeaderY) {
-            result = minRefreshHeaderY;
+        if (result < minHeaderY) {
+            result = minHeaderY;
         }
-        if (result > maxRefreshHeaderY) {
-            result = maxRefreshHeaderY;
+        if (result > maxHeaderY) {
+            result = maxHeaderY;
         }
 
-        if (result >= maxRefreshHeaderY - GAP_DISTANCE) {
+        if (result >= maxHeaderY - GAP_DISTANCE) {
             setRefreshTitle(TIPS_RELEASE_TO_REFRESH);
         } else {
             setRefreshTitle(TIPS_PULL_TO_REFRESH);
         }
 
-        if (refreshHeaderView.getY() != result) {
-            refreshHeaderView.setY(result);
-            contentView.setPadding(contentView.getPaddingLeft(), (int) (result + refreshHeaderHeight), contentView.getPaddingLeft(), contentView.getPaddingRight());
+        if (headerView.getY() != result) {
+            headerView.setY(result);
+            contentView.setPadding(contentView.getPaddingLeft(), (int) (result + headerHeight), contentView.getPaddingLeft(), contentView.getPaddingRight());
             isTriggerChildTouch = true;
         }
     }
 
+    public interface OnRefreshListener {
+        void onRefresh();
+    }
 
     public OnRefreshListener getOnRefreshListener() {
         return onRefreshListener;
@@ -253,7 +296,7 @@ public class SmoothRefreshLayout extends FrameLayout {
             postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    SmoothRefreshLayout.this.refreshing = false;
+                    RefreshLayout.this.refreshing = false;
                     setRefreshTitle(TIPS_REFRESH_COMPLETED);
                     collaspHeaderAnimator();
                 }
@@ -263,7 +306,7 @@ public class SmoothRefreshLayout extends FrameLayout {
 
     //展开刷新header的动画
     private void expandHeaderAnimator(int duration) {
-        refreshHeaderView.setVisibility(VISIBLE);
+        headerView.setVisibility(VISIBLE);
         if (animatorSet != null) {
             animatorSet.cancel();
         }
@@ -271,8 +314,8 @@ public class SmoothRefreshLayout extends FrameLayout {
         animatorSet = new AnimatorSet();
 
         animatorSet.playTogether(
-                ObjectAnimator.ofFloat(refreshHeaderView, "y", maxRefreshHeaderY),
-                getContentViewPaddingTopAnimator(maxRefreshHeaderY + refreshHeaderHeight, true)
+                ObjectAnimator.ofFloat(headerView, "y", maxHeaderY),
+                getContentViewPaddingTopAnimator(maxHeaderY + headerHeight, true)
         );
         animatorSet.addListener(new Animator.AnimatorListener() {
             @Override
@@ -304,7 +347,7 @@ public class SmoothRefreshLayout extends FrameLayout {
         animatorRunning = false;
         refreshing = true;
 
-        contentView.setPadding(contentView.getPaddingLeft(), (int) (maxRefreshHeaderY + refreshHeaderHeight), contentView.getPaddingRight(), contentView.getPaddingBottom());
+        contentView.setPadding(contentView.getPaddingLeft(), (int) (maxHeaderY + headerHeight), contentView.getPaddingRight(), contentView.getPaddingBottom());
 
         if (onRefreshListener != null) {
 //            postDelayed(new Runnable() {
@@ -323,8 +366,8 @@ public class SmoothRefreshLayout extends FrameLayout {
         }
         animatorSet = new AnimatorSet();
         animatorSet.playTogether(
-                ObjectAnimator.ofFloat(refreshHeaderView, "y", minRefreshHeaderY),
-                getContentViewPaddingTopAnimator(maxRefreshHeaderY, false)
+                ObjectAnimator.ofFloat(headerView, "y", minHeaderY),
+                getContentViewPaddingTopAnimator(maxHeaderY, false)
         );
         animatorSet.addListener(new Animator.AnimatorListener() {
             @Override
@@ -351,13 +394,14 @@ public class SmoothRefreshLayout extends FrameLayout {
     }
 
     private void onCollaspAnimatorEnd() {
-        contentView.setPadding(contentView.getPaddingLeft(), maxRefreshHeaderY, contentView.getPaddingRight(), contentView.getPaddingBottom());
-        refreshHeaderView.setY(minRefreshHeaderY);
+        contentView.setPadding(contentView.getPaddingLeft(), maxHeaderY, contentView.getPaddingRight(), contentView.getPaddingBottom());
+        headerView.setY(minHeaderY);
         animatorRunning = false;
         refreshing = false;
-        refreshHeaderView.setVisibility(INVISIBLE);
+        headerView.setVisibility(INVISIBLE);
     }
 
+    @NonNull
     private ValueAnimator getContentViewPaddingTopAnimator(int endValue, final boolean scrollContentView) {
         ValueAnimator valueAnimator = ValueAnimator.ofInt(contentView.getPaddingTop(), endValue);
         valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
@@ -384,11 +428,11 @@ public class SmoothRefreshLayout extends FrameLayout {
 //        setRefreshTitle(TIPS_REFRESH_COMPLETED);
 //        animatorSet = new AnimatorSet();
 //        int max = contentView.getPaddingTop();
-//        int min = max - refreshHeaderHeight;
+//        int min = max - headerHeight;
 //
 //        animatorSet.playTogether(
 //                getContentViewPaddingTopAnimator(min),
-//                ObjectAnimator.ofFloat(refreshHeaderView, "y", refreshHeaderView.getY(), min - refreshHeaderHeight)
+//                ObjectAnimator.ofFloat(headerView, "y", headerView.getY(), min - headerHeight)
 //        );
 //        animatorSet.addListener(new Animator.AnimatorListener() {
 //            @Override
@@ -424,22 +468,8 @@ public class SmoothRefreshLayout extends FrameLayout {
     }
 
     private void setRefreshTitle(String title) {
-//        if (titleTv != null) {
-//            titleTv.setText(title);
-//        }
-    }
-
-    @Override
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-        if (animatorSet != null && animatorSet.isRunning()) {
-            animatorSet.cancel();
-        }
-        onRefreshListener = null;
-        if (viewGroupWrapper != null) {
-            viewGroupWrapper.removeViewGroupScrollListener();
+        if (titleTv != null) {
+            titleTv.setText(title);
         }
     }
-
-
 }
