@@ -51,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
                 refreshLayout.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        refreshLayout.setRefresh(false);
+                        refreshLayout.setRefreshing(false);
                     }
                 }, 3000);
             }
@@ -90,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(ViewHolder holder, int position) {
-            ((ViewHolder) holder).bindData(data.get(position));
+             holder.bindData(data.get(position));
         }
 
         @Override
