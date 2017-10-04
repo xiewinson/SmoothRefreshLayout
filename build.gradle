@@ -27,10 +27,10 @@ ext {
     version_code = 1
     version_name = "alpha"
 
-    compile_sdk_version = 26
+    compile_sdk_version = 25
     min_sdk_version = 21
-    target_sdk_version = 26
+    target_sdk_version = 25
 
     build_tools_version = "26.0.0"
-    support_version = '26.+'
+    support_version = '25.+'
 }

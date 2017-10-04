@@ -6,9 +6,7 @@ import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.os.Build;
-import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
@@ -44,7 +42,7 @@ public class SmoothRefreshLayout extends FrameLayout {
     private View refreshHeaderView;
     private View contentView;
     private int refreshHeaderHeight;
-    private int maxRefreshHeaderY;
+    private int refreshingHeaderY;
     private int minRefreshHeaderY;
 
     private float lastY;
@@ -67,8 +65,6 @@ public class SmoothRefreshLayout extends FrameLayout {
     public static final int GAP_DISTANCE = 10;
 
     public static final int DEFAULT_ANIMATOR_DURATION = 300;
-
-    RecyclerView.OnScrollListener onScrollListener;
 
     @Override
     protected void onFinishInflate() {
@@ -116,15 +112,20 @@ public class SmoothRefreshLayout extends FrameLayout {
                     refreshHeaderView.getViewTreeObserver().removeGlobalOnLayoutListener(this);
                 }
 
-                refreshHeaderHeight = refreshHeaderView.getMeasuredHeight();
-                refreshHeaderView.setY(-refreshHeaderHeight);
-                maxRefreshHeaderY = contentView.getPaddingTop();
-                minRefreshHeaderY = maxRefreshHeaderY - refreshHeaderHeight;
+                initRefreshHeaderParams();
+
             }
         });
         refreshHeaderView.setVisibility(INVISIBLE);
         addView(refreshHeaderView, 0, new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 
+    }
+
+    private void initRefreshHeaderParams() {
+        refreshHeaderHeight = refreshHeaderView.getMeasuredHeight();
+        refreshingHeaderY = contentView.getPaddingTop();
+        minRefreshHeaderY = refreshingHeaderY - refreshHeaderHeight;
+        refreshHeaderView.setY(minRefreshHeaderY);
     }
 
     @Override
@@ -137,9 +138,7 @@ public class SmoothRefreshLayout extends FrameLayout {
         switch (ev.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 lastY = ev.getY();
-                maxRefreshHeaderY = contentView.getPaddingTop();
-                minRefreshHeaderY = maxRefreshHeaderY - refreshHeaderHeight;
-                refreshHeaderView.setY(minRefreshHeaderY);
+                initRefreshHeaderParams();
                 break;
 
             case MotionEvent.ACTION_MOVE:
@@ -148,16 +147,16 @@ public class SmoothRefreshLayout extends FrameLayout {
                 //下拉
                 if (dy > 0) {
                     if (!canChildScrollUp()
-                            && refreshHeaderView.getY() != maxRefreshHeaderY
-                            && contentView.getPaddingTop() != maxRefreshHeaderY + refreshHeaderHeight ) {
+                            && refreshHeaderView.getY() != refreshingHeaderY
+                            && contentView.getPaddingTop() != refreshingHeaderY + refreshHeaderHeight) {
                         scrollHeader(dy);
                     }
                 }
                 //上拉
                 else {
-                    if(contentView.getPaddingTop() != maxRefreshHeaderY
+                    if (contentView.getPaddingTop() != refreshingHeaderY
                             || refreshHeaderView.getY() != minRefreshHeaderY)
-                    scrollHeader(dy);
+                        scrollHeader(dy);
                 }
                 lastY = currentY;
                 break;
@@ -176,7 +175,7 @@ public class SmoothRefreshLayout extends FrameLayout {
 
     private void adjustAnimator() {
         float translationY = refreshHeaderView.getY();
-        if (translationY >= maxRefreshHeaderY - GAP_DISTANCE) {
+        if (translationY >= refreshingHeaderY - GAP_DISTANCE) {
             expandHeaderAnimator(0);
         } else {
             setRefreshTitle(TIPS_PULL_TO_REFRESH);
@@ -203,11 +202,11 @@ public class SmoothRefreshLayout extends FrameLayout {
         if (result < minRefreshHeaderY) {
             result = minRefreshHeaderY;
         }
-        if (result > maxRefreshHeaderY) {
-            result = maxRefreshHeaderY;
+        if (result > refreshingHeaderY) {
+            result = refreshingHeaderY;
         }
 
-        if (result >= maxRefreshHeaderY - GAP_DISTANCE) {
+        if (result >= refreshingHeaderY - GAP_DISTANCE) {
             setRefreshTitle(TIPS_RELEASE_TO_REFRESH);
         } else {
             setRefreshTitle(TIPS_PULL_TO_REFRESH);
@@ -265,8 +264,8 @@ public class SmoothRefreshLayout extends FrameLayout {
         animatorSet = new AnimatorSet();
 
         animatorSet.playTogether(
-                ObjectAnimator.ofFloat(refreshHeaderView, "y", maxRefreshHeaderY),
-                getContentViewPaddingTopAnimator(maxRefreshHeaderY + refreshHeaderHeight, true)
+                ObjectAnimator.ofFloat(refreshHeaderView, "y", refreshingHeaderY),
+                getContentViewPaddingTopAnimator(refreshingHeaderY + refreshHeaderHeight, true)
         );
         animatorSet.addListener(new Animator.AnimatorListener() {
             @Override
@@ -298,7 +297,7 @@ public class SmoothRefreshLayout extends FrameLayout {
         animatorRunning = false;
         refreshing = true;
 
-        contentView.setPadding(contentView.getPaddingLeft(), (int) (maxRefreshHeaderY + refreshHeaderHeight), contentView.getPaddingRight(), contentView.getPaddingBottom());
+        contentView.setPadding(contentView.getPaddingLeft(), (int) (refreshingHeaderY + refreshHeaderHeight), contentView.getPaddingRight(), contentView.getPaddingBottom());
 
         if (onRefreshListener != null) {
 //            postDelayed(new Runnable() {
@@ -318,7 +317,7 @@ public class SmoothRefreshLayout extends FrameLayout {
         animatorSet = new AnimatorSet();
         animatorSet.playTogether(
                 ObjectAnimator.ofFloat(refreshHeaderView, "y", minRefreshHeaderY),
-                getContentViewPaddingTopAnimator(maxRefreshHeaderY, false)
+                getContentViewPaddingTopAnimator(refreshingHeaderY, false)
         );
         animatorSet.addListener(new Animator.AnimatorListener() {
             @Override
@@ -345,7 +344,7 @@ public class SmoothRefreshLayout extends FrameLayout {
     }
 
     private void onCollaspAnimatorEnd() {
-        contentView.setPadding(contentView.getPaddingLeft(), maxRefreshHeaderY, contentView.getPaddingRight(), contentView.getPaddingBottom());
+        contentView.setPadding(contentView.getPaddingLeft(), refreshingHeaderY, contentView.getPaddingRight(), contentView.getPaddingBottom());
         refreshHeaderView.setY(minRefreshHeaderY);
         animatorRunning = false;
         refreshing = false;
