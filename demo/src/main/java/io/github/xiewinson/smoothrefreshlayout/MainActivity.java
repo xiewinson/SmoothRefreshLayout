@@ -1,5 +1,6 @@
 package io.github.xiewinson.smoothrefreshlayout;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -22,6 +23,7 @@ import java.util.List;
 
 import io.github.xiewinson.smoothrefreshlayout.library.SmoothRefreshLayout;
 import io.github.xiewinson.smoothrefreshlayout.library.listener.OnRefreshListener;
+import io.github.xiewinson.smoothrefreshlayout.library.wrapper.header.DefaultHeaderWrapper;
 import io.github.xiewinson.smoothrefreshlayout.library.wrapper.header.IHeaderWrapper;
 
 public class MainActivity extends AppCompatActivity {
@@ -56,6 +58,8 @@ public class MainActivity extends AppCompatActivity {
                 }, 3000);
             }
         });
+
+        refreshLayout.setRefreshing(true);
 //        refreshLayout.addRefreshHeaderView(new IHeaderWrapper() {
 //            @Override
 //            public View getRefreshHeaderView() {
