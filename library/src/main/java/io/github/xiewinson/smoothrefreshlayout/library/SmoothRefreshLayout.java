@@ -8,6 +8,7 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.FrameLayout;
 
 import io.github.xiewinson.smoothrefreshlayout.library.listener.OnRefreshListener;
@@ -43,8 +44,9 @@ public class SmoothRefreshLayout extends FrameLayout {
     private int refreshingHeaderY;
     private int minRefreshHeaderY;
     private int maxRefreshHeaderY;
+    private int correctOverScrollMode;
 
-    private float lastY;
+    private float lastRefreshHeaderY;
 
     //是否处于刷新
     private boolean refreshing;
@@ -61,7 +63,7 @@ public class SmoothRefreshLayout extends FrameLayout {
     public static final String TIPS_RELEASE_TO_REFRESH = "放开刷新";
     private static final String TIPS_REFRESH_COMPLETED = "刷新完成";
 
-    public static final int DEFAULT_ANIMATOR_DURATION = 3000;
+    public static final int DEFAULT_ANIMATOR_DURATION = 300;
 
     public OnRefreshListener getOnRefreshListener() {
         return onRefreshListener;
@@ -135,18 +137,20 @@ public class SmoothRefreshLayout extends FrameLayout {
 
         switch (ev.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                lastY = ev.getY();
+                lastRefreshHeaderY = ev.getY();
+                correctOverScrollMode = contentView.getOverScrollMode();
                 initRefreshHeaderParams();
                 break;
 
             case MotionEvent.ACTION_MOVE:
                 float currentY = ev.getY();
-                float dy = currentY - lastY;
+                float dy = currentY - lastRefreshHeaderY;
                 //下拉
                 if (dy > 0) {
                     if (!canChildScrollUp()
                             && refreshHeaderView.getY() != maxRefreshHeaderY
                             && contentView.getPaddingTop() != maxRefreshHeaderY + refreshHeaderHeight) {
+                        contentView.setOverScrollMode(OVER_SCROLL_NEVER);
                         moveRefreshHeader(dy);
                     }
                 }
@@ -156,16 +160,16 @@ public class SmoothRefreshLayout extends FrameLayout {
                             || refreshHeaderView.getY() != minRefreshHeaderY)
                         moveRefreshHeader(dy);
                 }
-                lastY = currentY;
+                lastRefreshHeaderY = currentY;
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
-                if (isInterceptChildTouch && contentView.getPaddingTop() >= refreshingHeaderY + refreshHeaderHeight) {
+//                if (isInterceptChildTouch && contentView.getPaddingTop() >= refreshingHeaderY + refreshHeaderHeight) {
 //                    ev.setAction(MotionEvent.ACTION_CANCEL);
-                }
+//                }
                 isInterceptChildTouch = false;
                 handleTouchActionUp();
-
+                contentView.setOverScrollMode(correctOverScrollMode);
                 break;
         }
         return super.dispatchTouchEvent(ev);
@@ -326,15 +330,6 @@ public class SmoothRefreshLayout extends FrameLayout {
             refreshHeaderAnimator.cancel();
         }
         refreshHeaderAnimator = getRefreshHeaderAnimator((int) refreshHeaderView.getY(), minRefreshHeaderY);
-//        refreshHeaderAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-//            @Override
-//            public void onAnimationUpdate(ValueAnimator animation) {
-//                int newValue = (int) animation.getAnimatedValue();
-//                int oldValue = (int) refreshHeaderView.getY();
-//                contentView.scrollBy(0, oldValue - newValue);
-//                refreshHeaderView.setY(newValue);
-//            }
-//        });
         refreshHeaderAnimator.addListener(new Animator.AnimatorListener() {
             @Override
             public void onAnimationStart(Animator animation) {
@@ -379,12 +374,21 @@ public class SmoothRefreshLayout extends FrameLayout {
             }
         });
 
-        if ((startValue < refreshingHeaderY && startValue > minRefreshHeaderY)
-                || (startValue > refreshingHeaderY && startValue < refreshingHeaderY + refreshHeaderHeight)) {
-            valueAnimator.setDuration(100);
+//        if ((startValue < refreshingHeaderY && startValue > minRefreshHeaderY)
+//                || (startValue > refreshingHeaderY && startValue < refreshingHeaderY + refreshHeaderHeight)) {
+//            valueAnimator.setDuration(100);
+//        } else {
+//            valueAnimator.setDuration(DEFAULT_ANIMATOR_DURATION);
+//        }
+        int duration;
+        if (startValue < endValue) {
+            duration = DEFAULT_ANIMATOR_DURATION;
         } else {
-            valueAnimator.setDuration(DEFAULT_ANIMATOR_DURATION);
+            duration = Math.min((int) (((float) startValue - minRefreshHeaderY) / refreshHeaderHeight * DEFAULT_ANIMATOR_DURATION),
+                    DEFAULT_ANIMATOR_DURATION);
         }
+        valueAnimator.setDuration(duration);
+        valueAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
         return valueAnimator;
     }
 
