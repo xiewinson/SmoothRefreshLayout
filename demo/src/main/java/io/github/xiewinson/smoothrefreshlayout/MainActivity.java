@@ -1,20 +1,12 @@
 package io.github.xiewinson.smoothrefreshlayout;
 
-import android.graphics.Color;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -23,8 +15,6 @@ import java.util.List;
 
 import io.github.xiewinson.smoothrefreshlayout.library.SmoothRefreshLayout;
 import io.github.xiewinson.smoothrefreshlayout.library.listener.OnRefreshListener;
-import io.github.xiewinson.smoothrefreshlayout.library.wrapper.header.DefaultHeaderWrapper;
-import io.github.xiewinson.smoothrefreshlayout.library.wrapper.header.IHeaderWrapper;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -42,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
         ListAdapter listAdapter = new ListAdapter();
         recyclerView.setAdapter(listAdapter);
         List<String> data = new ArrayList<>();
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 50; i++) {
             data.add(String.valueOf(i));
         }
         listAdapter.addItems(data);
