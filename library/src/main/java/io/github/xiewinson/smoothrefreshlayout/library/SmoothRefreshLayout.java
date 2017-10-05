@@ -11,7 +11,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
-import android.widget.Scroller;
 
 import io.github.xiewinson.smoothrefreshlayout.library.listener.OnRefreshListener;
 import io.github.xiewinson.smoothrefreshlayout.library.listener.OnViewGroupScrollListener;
@@ -53,7 +52,7 @@ public class SmoothRefreshLayout extends FrameLayout {
     private boolean refreshing;
     //是否正在执行动画
     private boolean animatorRunning = false;
-    private boolean isTriggerChildTouch = false;
+    private boolean isInterceptChildTouch = false;
 
     private AnimatorSet animatorSet;
 
@@ -163,18 +162,18 @@ public class SmoothRefreshLayout extends FrameLayout {
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
-                if (isTriggerChildTouch && contentView.getPaddingTop() >= refreshingHeaderY + refreshHeaderHeight) {
+                if (isInterceptChildTouch && contentView.getPaddingTop() >= refreshingHeaderY + refreshHeaderHeight) {
                     ev.setAction(MotionEvent.ACTION_CANCEL);
                 }
-                isTriggerChildTouch = false;
-                adjustAnimator();
+                isInterceptChildTouch = false;
+                releaseRefreshHeaderAnimator();
 
                 break;
         }
         return super.dispatchTouchEvent(ev);
     }
 
-    private void adjustAnimator() {
+    private void releaseRefreshHeaderAnimator() {
         float translationY = refreshHeaderView.getY();
         if (translationY >= refreshingHeaderY) {
             expandHeaderAnimator(100);
@@ -214,7 +213,7 @@ public class SmoothRefreshLayout extends FrameLayout {
 //            if(result < 0) {
 //                contentView.scrollBy(0, (int) result);
 //            }
-            isTriggerChildTouch = true;
+            isInterceptChildTouch = true;
         }
         return (int) result;
     }
@@ -248,6 +247,7 @@ public class SmoothRefreshLayout extends FrameLayout {
 
     //展开刷新header的动画
     private void expandHeaderAnimator(int duration) {
+        animatorRunning = true;
         refreshHeaderView.setVisibility(VISIBLE);
         if (animatorSet != null) {
             animatorSet.cancel();
@@ -262,7 +262,6 @@ public class SmoothRefreshLayout extends FrameLayout {
         animatorSet.addListener(new Animator.AnimatorListener() {
             @Override
             public void onAnimationStart(Animator animation) {
-                animatorRunning = true;
             }
 
             @Override
@@ -295,8 +294,6 @@ public class SmoothRefreshLayout extends FrameLayout {
 
         if (onRefreshListener != null) {
             onRefreshListener.onRefresh();
-//                }
-//            }, 5000);
         }
     }
 
@@ -351,7 +348,6 @@ public class SmoothRefreshLayout extends FrameLayout {
                 int oldPaddingTop = contentView.getPaddingTop();
                 contentView.setPadding(contentView.getPaddingLeft(), value, contentView.getPaddingRight(), contentView.getPaddingBottom());
                 //                refreshHeaderView.setY(value - refreshHeaderHeight);
-
                 if (scrollContentView) {
                     contentView.scrollBy(0, -(value - oldPaddingTop));
                 }

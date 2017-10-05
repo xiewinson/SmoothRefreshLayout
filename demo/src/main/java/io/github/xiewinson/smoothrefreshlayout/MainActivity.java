@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
                     public void run() {
                         refreshLayout.setRefreshing(false);
                     }
-                }, 3000);
+                }, 1000);
             }
         });
 
