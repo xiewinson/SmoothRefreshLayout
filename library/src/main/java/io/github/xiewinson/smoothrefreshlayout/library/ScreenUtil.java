@@ -22,7 +22,7 @@ import android.util.TypedValue;
 import android.view.Window;
 import android.view.WindowManager;
 
-public class DeviceUtil {
+public class ScreenUtil {
 
     public static int sScreenWidth;
     public static int sScreenHeight;
