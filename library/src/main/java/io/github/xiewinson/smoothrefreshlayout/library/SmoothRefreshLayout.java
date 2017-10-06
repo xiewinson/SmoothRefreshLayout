@@ -18,6 +18,7 @@ import io.github.xiewinson.smoothrefreshlayout.library.wrapper.content.IViewGrou
 import io.github.xiewinson.smoothrefreshlayout.library.wrapper.content.ViewGroupWrapper;
 import io.github.xiewinson.smoothrefreshlayout.library.wrapper.header.DefaultHeaderWrapper;
 import io.github.xiewinson.smoothrefreshlayout.library.wrapper.header.IRefreshHeaderWrapper;
+import io.github.xiewinson.smoothrefreshlayout.library.wrapper.header.RefreshHeaderWrapper;
 
 /**
  * Created by winson on 2017/10/3.
@@ -61,11 +62,6 @@ public class SmoothRefreshLayout extends FrameLayout {
 
     private OnRefreshListener onRefreshListener;
 
-    public static final String TIPS_REFRESHING = "正在刷新";
-    public static final String TIPS_PULL_TO_REFRESH = "下拉刷新";
-    public static final String TIPS_RELEASE_TO_REFRESH = "放开刷新";
-    private static final String TIPS_REFRESH_COMPLETED = "刷新完成";
-
     public static final int DEFAULT_ANIMATOR_DURATION = 300;
 
     public OnRefreshListener getOnRefreshListener() {
@@ -98,7 +94,7 @@ public class SmoothRefreshLayout extends FrameLayout {
         addRefreshHeaderView(new DefaultHeaderWrapper(getContext()));
     }
 
-    public void addRefreshHeaderView(IRefreshHeaderWrapper headerWrapper) {
+    public void addRefreshHeaderView(RefreshHeaderWrapper headerWrapper) {
         this.refreshHeaderWrapper = headerWrapper;
         this.refreshHeaderView = headerWrapper.getRefreshHeaderView();
         initRefreshHeaderView();
@@ -393,10 +389,6 @@ public class SmoothRefreshLayout extends FrameLayout {
     }
 
     private void setState(@RefreshHeaderState int state) {
-//        if (titleTv != null) {
-//            titleTv.setText(title);
-//        }
-
         if (state != currentRefreshState && refreshHeaderWrapper != null) {
             refreshHeaderWrapper.onStateChanged(state);
         }
