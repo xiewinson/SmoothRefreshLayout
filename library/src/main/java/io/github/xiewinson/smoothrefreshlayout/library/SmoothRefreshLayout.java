@@ -17,7 +17,7 @@ import io.github.xiewinson.smoothrefreshlayout.library.listener.OnViewGroupScrol
 import io.github.xiewinson.smoothrefreshlayout.library.wrapper.content.IViewGroupWrapper;
 import io.github.xiewinson.smoothrefreshlayout.library.wrapper.content.ViewGroupWrapper;
 import io.github.xiewinson.smoothrefreshlayout.library.wrapper.header.DefaultHeaderWrapper;
-import io.github.xiewinson.smoothrefreshlayout.library.wrapper.header.IHeaderWrapper;
+import io.github.xiewinson.smoothrefreshlayout.library.wrapper.header.IRefreshHeaderWrapper;
 
 /**
  * Created by winson on 2017/10/3.
@@ -38,7 +38,7 @@ public class SmoothRefreshLayout extends FrameLayout {
     }
 
     private IViewGroupWrapper viewGroupWrapper;
-    private IHeaderWrapper refreshHeaderWrapper;
+    private IRefreshHeaderWrapper refreshHeaderWrapper;
     private View refreshHeaderView;
     private View contentView;
     private int refreshHeaderHeight;
@@ -98,7 +98,7 @@ public class SmoothRefreshLayout extends FrameLayout {
         addRefreshHeaderView(new DefaultHeaderWrapper(getContext()));
     }
 
-    public void addRefreshHeaderView(IHeaderWrapper headerWrapper) {
+    public void addRefreshHeaderView(IRefreshHeaderWrapper headerWrapper) {
         this.refreshHeaderWrapper = headerWrapper;
         this.refreshHeaderView = headerWrapper.getRefreshHeaderView();
         initRefreshHeaderView();

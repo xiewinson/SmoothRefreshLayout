@@ -17,17 +17,17 @@ import io.github.xiewinson.smoothrefreshlayout.library.annotation.RefreshHeaderS
  * Created by winson on 2017/10/3.
  */
 
-public class DefaultHeaderWrapper implements IHeaderWrapper {
+public class DefaultHeaderWrapper extends RefreshHeaderWrapper {
     private LinearLayout refreshHeaderView;
     private TextView titleTv;
-    private Context context;
 
     public DefaultHeaderWrapper(Context context) {
-        this.context = context;
+        super(context);
     }
 
+
     @Override
-    public View getRefreshHeaderView() {
+    public View initRefreshHeaderView() {
         refreshHeaderView = new LinearLayout(context);
 //        refreshHeaderView.setBackgroundColor(Color.BLUE);
         refreshHeaderView.setGravity(Gravity.CENTER);

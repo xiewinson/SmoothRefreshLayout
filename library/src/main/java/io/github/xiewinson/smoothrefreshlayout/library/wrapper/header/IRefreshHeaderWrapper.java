@@ -9,7 +9,7 @@ import io.github.xiewinson.smoothrefreshlayout.library.annotation.RefreshHeaderS
  * Created by winson on 2017/10/3.
  */
 
-public interface IHeaderWrapper {
+public interface IRefreshHeaderWrapper {
     View getRefreshHeaderView();
 
     void onStateChanged(@RefreshHeaderState int state);
