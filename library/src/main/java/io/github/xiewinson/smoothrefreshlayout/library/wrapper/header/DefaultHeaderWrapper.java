@@ -2,6 +2,7 @@ package io.github.xiewinson.smoothrefreshlayout.library.wrapper.header;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.support.annotation.FloatRange;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
@@ -11,13 +12,15 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import io.github.xiewinson.smoothrefreshlayout.library.DeviceUtil;
+import io.github.xiewinson.smoothrefreshlayout.library.annotation.RefreshHeaderState;
 
 /**
  * Created by winson on 2017/10/3.
  */
 
 public class DefaultHeaderWrapper implements IHeaderWrapper {
-    private View refreshHeaderView;
+    private LinearLayout refreshHeaderView;
+    private TextView titleTv;
     private Context context;
 
     public DefaultHeaderWrapper(Context context) {
@@ -26,7 +29,7 @@ public class DefaultHeaderWrapper implements IHeaderWrapper {
 
     @Override
     public View getRefreshHeaderView() {
-        LinearLayout refreshHeaderView = new LinearLayout(context);
+        refreshHeaderView = new LinearLayout(context);
         refreshHeaderView.setBackgroundColor(Color.BLUE);
         refreshHeaderView.setGravity(Gravity.CENTER);
 
@@ -34,8 +37,7 @@ public class DefaultHeaderWrapper implements IHeaderWrapper {
         int size = DeviceUtil.getPxByDp(context, 24);
         refreshHeaderView.addView(iv, new LinearLayout.LayoutParams(size, size));
 
-        TextView titleTv = new TextView(context);
-        titleTv.setText("哈哈哈哈哈哈");
+        titleTv = new TextView(context);
         titleTv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
         titleTv.setGravity(Gravity.CENTER);
         LinearLayout.LayoutParams tvParams = new LinearLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT);
@@ -47,7 +49,25 @@ public class DefaultHeaderWrapper implements IHeaderWrapper {
     }
 
     @Override
-    public void onStateChanged(int state) {
+    public void onStateChanged(@RefreshHeaderState int state) {
+        switch (state) {
+            case RefreshHeaderState.PULL_TO_REFRESH:
+                titleTv.setText("下拉进行刷新");
+                break;
+            case RefreshHeaderState.RELEASE_TO_REFRESH:
+                titleTv.setText("放开开始刷新");
+                break;
+            case RefreshHeaderState.REFRESHING:
+                titleTv.setText("正在进行刷新");
+                break;
+            case RefreshHeaderState.REFRESH_COMPLETED:
+                titleTv.setText("刷新已经完成");
+                break;
+        }
+    }
+
+    @Override
+    public void onPullRefreshHeader(@FloatRange(from = 0, to = 1.0f) float offset) {
 
     }
 }
