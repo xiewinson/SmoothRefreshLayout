@@ -6,16 +6,21 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context="io.github.xiewinson.smoothrefreshlayout.MainActivity">
-
-    <io.github.xiewinson.smoothrefreshlayout.library.SmoothRefreshLayout
-        android:clipChildren="false"
+    <ScrollView
+        android:padding="48dp"
         android:layout_width="match_parent"
-        android:id="@+id/refreshLayout"
         android:layout_height="match_parent">
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/recyclerview"
+        <LinearLayout
+            android:gravity="center"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
-    </io.github.xiewinson.smoothrefreshlayout.library.SmoothRefreshLayout>
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+            <Button
+                android:text="RecyclerView"
+                android:id="@+id/btn_recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+    </ScrollView>
 
 </LinearLayout>

@@ -51,7 +51,7 @@ public class SmoothRefreshLayout extends FrameLayout {
     private int maxRefreshHeaderY;
     private int correctOverScrollMode;
 
-    private float lastRefreshHeaderY;
+    private float lastRefreshHeaderY = -1;
 
     private int currentRefreshState;
 
@@ -59,7 +59,6 @@ public class SmoothRefreshLayout extends FrameLayout {
     private boolean refreshing;
     //是否正在执行动画
     private boolean animatorRunning = false;
-    private boolean isInterceptChildTouch = false;
 
     private ValueAnimator refreshHeaderAnimator;
 
@@ -83,7 +82,7 @@ public class SmoothRefreshLayout extends FrameLayout {
             @Override
             public void onScroll(View topChild, boolean isFirst) {
                 if (refreshHeaderView != null && topChild != null && refreshing) {
-                    refreshHeaderView.setTranslationY(isFirst ? topChild.getY() - refreshHeaderHeight : -refreshHeaderHeight);
+                    refreshHeaderView.setY(isFirst ? topChild.getY() - refreshHeaderHeight : -refreshHeaderHeight);
                 }
             }
         });
@@ -96,18 +95,6 @@ public class SmoothRefreshLayout extends FrameLayout {
     }
 
     private void initRefreshHeaderView() {
-//        refreshHeaderView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-//            @Override
-//            public void onGlobalLayout() {
-//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-//                    refreshHeaderView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-//                } else {
-//                    refreshHeaderView.getViewTreeObserver().removeGlobalOnLayoutListener(this);
-//                }
-//
-//
-//            }
-//        });
         refreshHeaderView.setVisibility(INVISIBLE);
         addView(refreshHeaderView, 0, new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
         post(new Runnable() {
@@ -129,9 +116,10 @@ public class SmoothRefreshLayout extends FrameLayout {
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
 
-        if (!isEnabled() || refreshing || animatorRunning) {
+        if (!isEnabled() || refreshing || animatorRunning || (ev.getAction() != MotionEvent.ACTION_DOWN && lastRefreshHeaderY < 0)) {
             return super.dispatchTouchEvent(ev);
         }
+
 
         switch (ev.getAction()) {
             case MotionEvent.ACTION_DOWN:
@@ -162,14 +150,11 @@ public class SmoothRefreshLayout extends FrameLayout {
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
-//                if (isInterceptChildTouch && contentView.getPaddingTop() >= refreshingHeaderY + refreshHeaderHeight) {
-//                    ev.setAction(MotionEvent.ACTION_CANCEL);
-//                }
-                isInterceptChildTouch = false;
                 if (handleTouchActionUp()) {
                     ev.setAction(MotionEvent.ACTION_CANCEL);
                 }
                 contentView.setOverScrollMode(correctOverScrollMode);
+                lastRefreshHeaderY = -1;
                 break;
         }
         return super.dispatchTouchEvent(ev);
@@ -188,11 +173,11 @@ public class SmoothRefreshLayout extends FrameLayout {
      * @return 若返回true，则将变为刷新状态
      */
     private boolean handleTouchActionUp() {
-        float translationY = refreshHeaderView.getY();
-        if (translationY >= refreshingHeaderY) {
+        float currentY = refreshHeaderView.getY();
+        if (currentY >= refreshingHeaderY) {
             expandRefreshHeader();
             return true;
-        } else if (translationY < refreshingHeaderY && translationY > minRefreshHeaderY) {
+        } else if (currentY < refreshingHeaderY && currentY >= minRefreshHeaderY) {
             setState(RefreshHeaderState.PULL_TO_REFRESH);
             collaspRefreshHeader();
         }
@@ -204,18 +189,19 @@ public class SmoothRefreshLayout extends FrameLayout {
     }
 
     private int moveRefreshHeader(float dy) {
-        refreshHeaderView.setVisibility(VISIBLE);
         if (dy > 0) {
             dy *= 0.3f;
         }
         int result = (int) (refreshHeaderView.getY() + dy);
 
-        if (result < minRefreshHeaderY) {
+        if (result <= minRefreshHeaderY) {
+            refreshHeaderView.setVisibility(INVISIBLE);
             result = minRefreshHeaderY;
+        } else {
+            refreshHeaderView.setVisibility(VISIBLE);
         }
-        if (result > maxRefreshHeaderY) {
-            result = maxRefreshHeaderY;
-        }
+
+        result = Math.min(result, maxRefreshHeaderY);
 
         if (result >= refreshingHeaderY) {
             setState(RefreshHeaderState.RELEASE_TO_REFRESH);
@@ -225,10 +211,7 @@ public class SmoothRefreshLayout extends FrameLayout {
 
         if (refreshHeaderView.getY() != result) {
             moveViews(result);
-//            if(result < 0) {
-//                contentView.scrollBy(0, (int) result);
-//            }
-            isInterceptChildTouch = true;
+            contentView.scrollBy(0, (int) dy);
         }
 
         return result;
@@ -241,7 +224,7 @@ public class SmoothRefreshLayout extends FrameLayout {
                 contentView.getPaddingLeft(),
                 contentView.getPaddingRight());
 
-        float offset = (Math.abs(value - minRefreshHeaderY)) / (float)(refreshingHeaderY - minRefreshHeaderY);
+        float offset = (Math.abs(value - minRefreshHeaderY)) / (float) (refreshingHeaderY - minRefreshHeaderY);
         offset = offset < 0 ? 0 : offset;
         offset = offset > 1 ? 1 : offset;
         refreshHeaderWrapper.onPullRefreshHeader(offset);
@@ -271,7 +254,11 @@ public class SmoothRefreshLayout extends FrameLayout {
                 public void run() {
                     SmoothRefreshLayout.this.refreshing = false;
                     setState(RefreshHeaderState.REFRESH_COMPLETED);
-                    collaspRefreshHeader();
+                    if (viewGroupWrapper.firstChildIsFirstItem()) {
+                        collaspRefreshHeader();
+                    } else {
+                        onCollaspAnimatorEnd();
+                    }
                 }
             }, DEFAULT_ANIMATOR_DURATION);
         }

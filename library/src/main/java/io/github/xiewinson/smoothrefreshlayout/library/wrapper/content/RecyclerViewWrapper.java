@@ -50,4 +50,10 @@ public class RecyclerViewWrapper extends ViewGroupWrapper {
         super.removeViewGroupScrollListener();
         recyclerView.removeOnScrollListener(onScrollListener);
     }
+
+    @Override
+    public boolean firstChildIsFirstItem() {
+        View child = recyclerView.getChildAt(0);
+        return child != null && recyclerView.getChildAdapterPosition(child) == 0;
+    }
 }

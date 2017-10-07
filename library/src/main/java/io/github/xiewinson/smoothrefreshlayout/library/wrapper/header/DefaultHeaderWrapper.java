@@ -38,7 +38,7 @@ public class DefaultHeaderWrapper extends RefreshHeaderWrapper {
                 titleTv.setText("下拉进行刷新");
                 break;
             case RefreshHeaderState.RELEASE_TO_REFRESH:
-                titleTv.setText("放开开始刷新");
+                titleTv.setText("松开开始刷新");
                 break;
             case RefreshHeaderState.REFRESHING:
                 titleTv.setText("正在进行刷新");
