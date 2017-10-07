@@ -38,6 +38,12 @@ public class SmoothRefreshLayout extends FrameLayout {
         super(context, attrs, defStyleAttr);
     }
 
+    @Override
+    protected void onFinishInflate() {
+        super.onFinishInflate();
+        init();
+    }
+
     private IViewGroupWrapper viewGroupWrapper;
     private IRefreshHeaderWrapper refreshHeaderWrapper;
     private View refreshHeaderView;
@@ -72,12 +78,6 @@ public class SmoothRefreshLayout extends FrameLayout {
         this.onRefreshListener = onRefreshListener;
     }
 
-    @Override
-    protected void onFinishInflate() {
-        super.onFinishInflate();
-        init();
-    }
-
     private void init() {
 
         contentView = getChildAt(0);
@@ -90,7 +90,6 @@ public class SmoothRefreshLayout extends FrameLayout {
                 }
             }
         });
-
         addRefreshHeaderView(new DefaultHeaderWrapper(getContext()));
     }
 
@@ -167,7 +166,9 @@ public class SmoothRefreshLayout extends FrameLayout {
 //                    ev.setAction(MotionEvent.ACTION_CANCEL);
 //                }
                 isInterceptChildTouch = false;
-                handleTouchActionUp();
+                if(handleTouchActionUp()){
+                    ev.setAction(MotionEvent.ACTION_CANCEL);
+                }
                 contentView.setOverScrollMode(correctOverScrollMode);
                 break;
         }
@@ -183,14 +184,20 @@ public class SmoothRefreshLayout extends FrameLayout {
         return super.onInterceptTouchEvent(ev);
     }
 
-    private void handleTouchActionUp() {
+    /**
+     *
+     * @return 若返回true，则将变为刷新状态
+     */
+    private boolean handleTouchActionUp() {
         float translationY = refreshHeaderView.getY();
         if (translationY >= refreshingHeaderY) {
             expandRefreshHeader();
+            return true;
         } else if (translationY < refreshingHeaderY && translationY > minRefreshHeaderY) {
             setState(RefreshHeaderState.PULL_TO_REFRESH);
             collaspRefreshHeader();
         }
+        return false;
     }
 
     private boolean canChildScrollUp() {
