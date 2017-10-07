@@ -15,6 +15,7 @@ import java.util.List;
 
 import io.github.xiewinson.smoothrefreshlayout.library.SmoothRefreshLayout;
 import io.github.xiewinson.smoothrefreshlayout.library.listener.OnRefreshListener;
+import io.github.xiewinson.smoothrefreshlayout.library.wrapper.header.DefaultHeaderWrapper;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -48,9 +49,10 @@ public class MainActivity extends AppCompatActivity {
                 }, 1000);
             }
         });
+        refreshLayout.setRefreshHeader(new DefaultHeaderWrapper(this));
 
         refreshLayout.setRefreshing(true);
-//        refreshLayout.addRefreshHeaderView(new IHeaderWrapper() {
+//        refreshLayout.setRefreshHeader(new IHeaderWrapper() {
 //            @Override
 //            public View getRefreshHeaderView() {
 //                Button button = new Button(MainActivity.this);
@@ -84,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(ViewHolder holder, int position) {
-             holder.bindData(data.get(position));
+            holder.bindData(data.get(position));
         }
 
         @Override

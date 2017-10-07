@@ -3,11 +3,9 @@ package io.github.xiewinson.smoothrefreshlayout.library;
 import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.content.Context;
-import android.os.Build;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewTreeObserver;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.FrameLayout;
 
@@ -16,7 +14,6 @@ import io.github.xiewinson.smoothrefreshlayout.library.listener.OnRefreshListene
 import io.github.xiewinson.smoothrefreshlayout.library.listener.OnViewGroupScrollListener;
 import io.github.xiewinson.smoothrefreshlayout.library.wrapper.content.IViewGroupWrapper;
 import io.github.xiewinson.smoothrefreshlayout.library.wrapper.content.ViewGroupWrapper;
-import io.github.xiewinson.smoothrefreshlayout.library.wrapper.header.DefaultHeaderWrapper;
 import io.github.xiewinson.smoothrefreshlayout.library.wrapper.header.IRefreshHeaderWrapper;
 import io.github.xiewinson.smoothrefreshlayout.library.wrapper.header.RefreshHeaderWrapper;
 
@@ -68,7 +65,7 @@ public class SmoothRefreshLayout extends FrameLayout {
 
     private OnRefreshListener onRefreshListener;
 
-    public static final int DEFAULT_ANIMATOR_DURATION = 300;
+    public static final int DEFAULT_ANIMATOR_DURATION = 200;
 
     public OnRefreshListener getOnRefreshListener() {
         return onRefreshListener;
@@ -90,32 +87,35 @@ public class SmoothRefreshLayout extends FrameLayout {
                 }
             }
         });
-        addRefreshHeaderView(new DefaultHeaderWrapper(getContext()));
     }
 
-    public void addRefreshHeaderView(RefreshHeaderWrapper headerWrapper) {
+    public void setRefreshHeader(RefreshHeaderWrapper headerWrapper) {
         this.refreshHeaderWrapper = headerWrapper;
         this.refreshHeaderView = headerWrapper.getRefreshHeaderView();
         initRefreshHeaderView();
     }
 
     private void initRefreshHeaderView() {
-        refreshHeaderView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout() {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                    refreshHeaderView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                } else {
-                    refreshHeaderView.getViewTreeObserver().removeGlobalOnLayoutListener(this);
-                }
-
-                initRefreshHeaderParams();
-
-            }
-        });
+//        refreshHeaderView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+//            @Override
+//            public void onGlobalLayout() {
+//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+//                    refreshHeaderView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+//                } else {
+//                    refreshHeaderView.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+//                }
+//
+//
+//            }
+//        });
         refreshHeaderView.setVisibility(INVISIBLE);
         addView(refreshHeaderView, 0, new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
-
+        post(new Runnable() {
+            @Override
+            public void run() {
+                initRefreshHeaderParams();
+            }
+        });
     }
 
     private void initRefreshHeaderParams() {
@@ -166,7 +166,7 @@ public class SmoothRefreshLayout extends FrameLayout {
 //                    ev.setAction(MotionEvent.ACTION_CANCEL);
 //                }
                 isInterceptChildTouch = false;
-                if(handleTouchActionUp()){
+                if (handleTouchActionUp()) {
                     ev.setAction(MotionEvent.ACTION_CANCEL);
                 }
                 contentView.setOverScrollMode(correctOverScrollMode);
@@ -185,7 +185,6 @@ public class SmoothRefreshLayout extends FrameLayout {
     }
 
     /**
-     *
      * @return 若返回true，则将变为刷新状态
      */
     private boolean handleTouchActionUp() {
@@ -247,7 +246,10 @@ public class SmoothRefreshLayout extends FrameLayout {
     }
 
     public void setRefreshing(boolean refreshing) {
-
+        
+        if(refreshHeaderWrapper == null) {
+            throw new IllegalArgumentException("please use setRefreshHeader before setRefreshing");
+        }
         //已经开始这个状态直接返回
         if (this.refreshing == refreshing || animatorRunning) {
             return;
