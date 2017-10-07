@@ -230,10 +230,7 @@ public class SmoothRefreshLayout extends FrameLayout {
 //            }
             isInterceptChildTouch = true;
         }
-        float offset = (Math.abs(result) - refreshingHeaderY) / (float) refreshHeaderHeight;
-        offset = offset < 0 ? 0 : offset;
-        offset = offset > 1 ? 1 : offset;
-        refreshHeaderWrapper.onPullRefreshHeader(offset);
+
         return result;
     }
 
@@ -243,11 +240,16 @@ public class SmoothRefreshLayout extends FrameLayout {
                 value + refreshHeaderHeight,
                 contentView.getPaddingLeft(),
                 contentView.getPaddingRight());
+
+        float offset = (Math.abs(value - minRefreshHeaderY)) / (float)(refreshingHeaderY - minRefreshHeaderY);
+        offset = offset < 0 ? 0 : offset;
+        offset = offset > 1 ? 1 : offset;
+        refreshHeaderWrapper.onPullRefreshHeader(offset);
     }
 
     public void setRefreshing(boolean refreshing) {
-        
-        if(refreshHeaderWrapper == null) {
+
+        if (refreshHeaderWrapper == null) {
             throw new IllegalArgumentException("please use setRefreshHeader before setRefreshing");
         }
         //已经开始这个状态直接返回
