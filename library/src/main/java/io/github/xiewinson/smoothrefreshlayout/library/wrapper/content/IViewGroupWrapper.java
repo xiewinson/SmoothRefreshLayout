@@ -7,7 +7,13 @@ import io.github.xiewinson.smoothrefreshlayout.library.listener.OnViewGroupScrol
  */
 
 public interface IViewGroupWrapper {
+
     void setViewGroupScrollListener(OnViewGroupScrollListener onViewGroupScrollListener);
+
     void removeViewGroupScrollListener();
+
     boolean firstChildIsFirstItem();
+
+    void scrollBy(int dx, int dy);
+
 }

@@ -7,13 +7,7 @@
     android:orientation="vertical"
     tools:context="io.github.xiewinson.smoothrefreshlayout.RecyclerViewActivity">
 
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/toolbar"
-        android:layout_width="match_parent"
-        app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-        android:layout_height="wrap_content"
-        android:background="?colorPrimary"
-        android:title="RecyclerView" />
+    <include layout="@layout/toolbar"/>
 
     <io.github.xiewinson.smoothrefreshlayout.library.SmoothRefreshLayout
         android:id="@+id/refreshLayout"

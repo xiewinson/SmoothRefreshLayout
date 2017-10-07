@@ -106,6 +106,9 @@ public class SmoothRefreshLayout extends FrameLayout {
     }
 
     private void initRefreshHeaderParams() {
+        if (refreshHeaderView == null) {
+            throw new IllegalArgumentException("please use setRefreshHeader before initRefreshHeaderParams");
+        }
         refreshHeaderHeight = refreshHeaderView.getMeasuredHeight();
         refreshingHeaderY = contentView.getPaddingTop();
         minRefreshHeaderY = refreshingHeaderY - refreshHeaderHeight;
@@ -359,7 +362,7 @@ public class SmoothRefreshLayout extends FrameLayout {
                 int newValue = (int) animation.getAnimatedValue();
                 int oldValue = (int) refreshHeaderView.getY();
                 moveViews(newValue);
-                contentView.scrollBy(0, oldValue - newValue);
+                viewGroupWrapper.scrollBy(0, oldValue - newValue);
             }
         });
 

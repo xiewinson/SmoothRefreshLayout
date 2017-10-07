@@ -56,4 +56,5 @@ public class RecyclerViewWrapper extends ViewGroupWrapper {
         View child = recyclerView.getChildAt(0);
         return child != null && recyclerView.getChildAdapterPosition(child) == 0;
     }
+
 }

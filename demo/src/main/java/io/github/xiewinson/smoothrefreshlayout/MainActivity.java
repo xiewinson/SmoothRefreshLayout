@@ -19,6 +19,14 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(new Intent(v.getContext(), RecyclerViewActivity.class));
             }
         });
+
+
+        findViewById(R.id.btn_scroll_view).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(v.getContext(), NestedScrollViewActivity.class));
+            }
+        });
     }
 
 }

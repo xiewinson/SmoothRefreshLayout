@@ -29,7 +29,7 @@ public class RecyclerViewActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recycler_view);
-        initActionBar();
+        initActionBar("RecyclerView");
         refreshLayout = (SmoothRefreshLayout) findViewById(R.id.refreshLayout);
         recyclerView = (RecyclerView) findViewById(R.id.recyclerview);
 
