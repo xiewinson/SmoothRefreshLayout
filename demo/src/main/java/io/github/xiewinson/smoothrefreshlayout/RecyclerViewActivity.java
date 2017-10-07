@@ -1,23 +1,26 @@
 package io.github.xiewinson.smoothrefreshlayout;
 
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import io.github.xiewinson.smoothrefreshlayout.library.ScreenUtil;
 import io.github.xiewinson.smoothrefreshlayout.library.SmoothRefreshLayout;
 import io.github.xiewinson.smoothrefreshlayout.library.listener.OnRefreshListener;
-import io.github.xiewinson.smoothrefreshlayout.library.wrapper.header.DefaultHeaderWrapper;
+import io.github.xiewinson.smoothrefreshlayout.library.wrapper.header.DefaultRefreshHeaderWrapper;
 
-public class RecyclerViewActivity extends AppCompatActivity {
+public class RecyclerViewActivity extends BaseActivity {
 
     private RecyclerView recyclerView;
     private SmoothRefreshLayout refreshLayout;
@@ -26,10 +29,22 @@ public class RecyclerViewActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recycler_view);
+        initActionBar();
         refreshLayout = (SmoothRefreshLayout) findViewById(R.id.refreshLayout);
         recyclerView = (RecyclerView) findViewById(R.id.recyclerview);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        DividerItemDecoration decoration = new DividerItemDecoration(this, DividerItemDecoration.VERTICAL);
+        Drawable divider = new ColorDrawable(Color.TRANSPARENT) {
+            @Override
+            public int getIntrinsicHeight() {
+                return ScreenUtil.getPxByDp(RecyclerViewActivity.this, 8);
+            }
+        };
+        decoration.setDrawable(divider);
+        recyclerView.addItemDecoration(decoration);
+
         ListAdapter listAdapter = new ListAdapter();
         recyclerView.setAdapter(listAdapter);
         List<String> data = new ArrayList<>();
@@ -49,7 +64,7 @@ public class RecyclerViewActivity extends AppCompatActivity {
                 }, 1000);
             }
         });
-        refreshLayout.setRefreshHeader(new DefaultHeaderWrapper(this));
+        refreshLayout.setRefreshHeader(new DefaultRefreshHeaderWrapper(this));
         refreshLayout.setRefreshing(true);
     }
 
@@ -72,7 +87,7 @@ public class RecyclerViewActivity extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(ListAdapter.ViewHolder holder, int position) {
-            holder.bindData(data.get(position));
+            holder.bindData("item" + data.get(position));
         }
 
         @Override
@@ -89,7 +104,6 @@ public class RecyclerViewActivity extends AppCompatActivity {
                 tv.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        Toast.makeText(view.getContext(), "点击事件", Toast.LENGTH_SHORT).show();
                     }
                 });
             }

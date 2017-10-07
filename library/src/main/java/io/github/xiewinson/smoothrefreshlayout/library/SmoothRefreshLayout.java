@@ -221,8 +221,8 @@ public class SmoothRefreshLayout extends FrameLayout {
         refreshHeaderView.setY(value);
         contentView.setPadding(contentView.getPaddingLeft(),
                 value + refreshHeaderHeight,
-                contentView.getPaddingLeft(),
-                contentView.getPaddingRight());
+                contentView.getPaddingRight(),
+                contentView.getPaddingBottom());
 
         float offset = (Math.abs(value - minRefreshHeaderY)) / (float) (refreshingHeaderY - minRefreshHeaderY);
         offset = offset < 0 ? 0 : offset;

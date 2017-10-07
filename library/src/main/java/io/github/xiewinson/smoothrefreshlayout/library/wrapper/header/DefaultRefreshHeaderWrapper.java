@@ -14,11 +14,11 @@ import io.github.xiewinson.smoothrefreshlayout.library.annotation.RefreshHeaderS
  * Created by winson on 2017/10/3.
  */
 
-public class DefaultHeaderWrapper extends RefreshHeaderWrapper {
+public class DefaultRefreshHeaderWrapper extends RefreshHeaderWrapper {
     private TextView titleTv;
     private ImageView iconIv;
 
-    public DefaultHeaderWrapper(Context context) {
+    public DefaultRefreshHeaderWrapper(Context context) {
         super(context);
     }
 
@@ -35,16 +35,16 @@ public class DefaultHeaderWrapper extends RefreshHeaderWrapper {
     public void onStateChanged(@RefreshHeaderState int state) {
         switch (state) {
             case RefreshHeaderState.PULL_TO_REFRESH:
-                titleTv.setText("下拉进行刷新");
+                titleTv.setText("下拉刷新…");
                 break;
             case RefreshHeaderState.RELEASE_TO_REFRESH:
-                titleTv.setText("松开开始刷新");
+                titleTv.setText("松开刷新…");
                 break;
             case RefreshHeaderState.REFRESHING:
-                titleTv.setText("正在进行刷新");
+                titleTv.setText("正在刷新…");
                 break;
             case RefreshHeaderState.REFRESH_COMPLETED:
-                titleTv.setText("刷新已经完成");
+                titleTv.setText("刷新完成…");
                 break;
         }
     }

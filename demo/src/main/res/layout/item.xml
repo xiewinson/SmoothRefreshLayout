@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="?colorAccent"
     android:orientation="vertical">
 
     <TextView
@@ -9,5 +10,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="?selectableItemBackground"
-        android:padding="16dp" />
+        android:padding="16dp"
+        android:textColor="@android:color/white" />
 </LinearLayout>
