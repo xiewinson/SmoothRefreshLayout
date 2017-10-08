@@ -4,7 +4,6 @@ import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
@@ -187,7 +186,7 @@ public class SmoothRefreshLayout extends FrameLayout {
      */
     private boolean handleTouchActionUp() {
         float currentY = refreshHeaderView.getY();
-        if (currentY >= refreshingHeaderY) {
+        if (currentY >= refreshingHeaderY || currentRefreshState == RefreshHeaderState.RELEASE_TO_REFRESH) {
             expandRefreshHeader();
             return true;
         } else if (currentY < refreshingHeaderY && currentY >= minRefreshHeaderY) {
