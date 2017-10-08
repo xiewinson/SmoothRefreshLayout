@@ -88,9 +88,9 @@ public class SmoothRefreshLayout extends FrameLayout {
             }
 
             @Override
-            public void onScrollRelative(int offset) {
+            public void onScrollRelative(int dy) {
                 if (refreshHeaderView != null && refreshing) {
-                    refreshHeaderView.setY(refreshHeaderView.getY() + offset);
+                    refreshHeaderView.setY(refreshHeaderView.getY() + dy);
                 }
             }
         });
@@ -234,17 +234,18 @@ public class SmoothRefreshLayout extends FrameLayout {
 
     }
 
-    private void moveViews(int value) {
+    private float moveViews(int value) {
         refreshHeaderView.setY(value);
         contentView.setPadding(contentView.getPaddingLeft(),
                 value + refreshHeaderHeight,
                 contentView.getPaddingRight(),
                 contentView.getPaddingBottom());
 
-        float offset = (Math.abs(value - minRefreshHeaderY)) / (float) (refreshingHeaderY - minRefreshHeaderY);
-        offset = offset < 0 ? 0 : offset;
-        offset = offset > 1 ? 1 : offset;
-        refreshHeaderWrapper.onPullRefreshHeader(offset);
+        float ratio = (Math.abs(value - minRefreshHeaderY)) / (float) (refreshingHeaderY - minRefreshHeaderY);
+        ratio = ratio < 0 ? 0 : ratio;
+        ratio = ratio > 1 ? 1 : ratio;
+        refreshHeaderWrapper.onPullRefreshHeader(ratio);
+        return ratio;
     }
 
     public void setRefreshing(boolean refreshing) {
@@ -319,7 +320,6 @@ public class SmoothRefreshLayout extends FrameLayout {
     private void onExpandAnimatorEnd() {
         animatorRunning = false;
         refreshing = true;
-
         contentView.setPadding(contentView.getPaddingLeft(),
                 refreshingHeaderY + refreshHeaderHeight,
                 contentView.getPaddingRight(),
@@ -379,7 +379,7 @@ public class SmoothRefreshLayout extends FrameLayout {
             public void onAnimationUpdate(ValueAnimator animation) {
                 int newValue = (int) animation.getAnimatedValue();
                 int oldValue = (int) refreshHeaderView.getY();
-                moveViews(newValue);
+                float ratio = moveViews(newValue);
                 viewGroupWrapper.scrollBy(0, oldValue - newValue);
             }
         });

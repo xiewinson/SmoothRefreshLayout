@@ -52,5 +52,7 @@ public class DefaultRefreshHeaderWrapper extends RefreshHeaderWrapper {
     @Override
     public void onPullRefreshHeader(@FloatRange(from = 0, to = 1.0f) float offset) {
         iconIv.setRotation(offset * 180);
+        getRefreshHeaderView().setAlpha(offset);
+
     }
 }
