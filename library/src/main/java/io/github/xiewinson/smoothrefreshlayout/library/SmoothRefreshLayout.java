@@ -52,8 +52,7 @@ public class SmoothRefreshLayout extends FrameLayout {
     private int correctOverScrollMode;
 
     private float lastRefreshHeaderY = -1;
-
-    private int currentRefreshState;
+    private int currentRefreshState = -1;
 
     //是否处于刷新
     private boolean refreshing;
@@ -267,11 +266,11 @@ public class SmoothRefreshLayout extends FrameLayout {
                 }
             });
         } else {
+            setState(RefreshHeaderState.REFRESH_COMPLETED);
             postDelayed(new Runnable() {
                 @Override
                 public void run() {
                     SmoothRefreshLayout.this.refreshing = false;
-                    setState(RefreshHeaderState.REFRESH_COMPLETED);
                     if (contentWrapper.topChildIsFirstItem()) {
                         collaspRefreshHeader();
                     } else {
@@ -324,6 +323,7 @@ public class SmoothRefreshLayout extends FrameLayout {
         if (onRefreshListener != null) {
             onRefreshListener.onRefresh();
         }
+        currentRefreshState = -1;
     }
 
     //松手时返回顶部的动画
@@ -361,6 +361,8 @@ public class SmoothRefreshLayout extends FrameLayout {
         animatorRunning = false;
         refreshing = false;
         refreshHeaderView.setVisibility(INVISIBLE);
+        currentRefreshState = -1;
+
     }
 
     private ValueAnimator getRefreshHeaderAnimator(int startValue, int endValue) {

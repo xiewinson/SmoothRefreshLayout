@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import io.github.xiewinson.smoothrefreshlayout.library.ScreenUtil;
@@ -45,9 +46,9 @@ public class RecyclerViewActivity extends BaseActivity {
         decoration.setDrawable(divider);
         recyclerView.addItemDecoration(decoration);
 
-        ListAdapter listAdapter = new ListAdapter();
+        final ListAdapter listAdapter = new ListAdapter();
         recyclerView.setAdapter(listAdapter);
-        List<String> data = new ArrayList<>();
+        final List<String> data = new ArrayList<>();
         for (int i = 0; i < 50; i++) {
             data.add(String.valueOf(i));
         }
@@ -60,17 +61,14 @@ public class RecyclerViewActivity extends BaseActivity {
                     @Override
                     public void run() {
                         refreshLayout.setRefreshing(false);
+                        Collections.shuffle(data);
+                        listAdapter.setItems(data);
                     }
                 }, 1000);
             }
         });
         refreshLayout.setRefreshHeader(new DefaultRefreshHeaderWrapper(this));
-        refreshLayout.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                refreshLayout.setRefreshing(true);
-            }
-        }, 1000);
+
     }
 
     private static class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
@@ -81,6 +79,12 @@ public class RecyclerViewActivity extends BaseActivity {
 
 
         private void addItems(List<String> list) {
+            data.addAll(list);
+            notifyDataSetChanged();
+        }
+
+        private void setItems(List<String> list) {
+            data.clear();
             data.addAll(list);
             notifyDataSetChanged();
         }
