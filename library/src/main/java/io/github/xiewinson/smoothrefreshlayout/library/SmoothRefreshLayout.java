@@ -41,7 +41,7 @@ public class SmoothRefreshLayout extends FrameLayout {
         init();
     }
 
-    private IContentViewWrapper viewGroupWrapper;
+    private IContentViewWrapper contentWrapper;
     private IRefreshHeaderWrapper refreshHeaderWrapper;
     private View refreshHeaderView;
     private View contentView;
@@ -77,8 +77,8 @@ public class SmoothRefreshLayout extends FrameLayout {
     private void init() {
 
         contentView = getChildAt(0);
-        viewGroupWrapper = ContentViewWrapper.Factory.getInstance(contentView);
-        viewGroupWrapper.setViewGroupScrollListener(new OnContentViewScrollListener() {
+        contentWrapper = ContentViewWrapper.Factory.getInstance(contentView);
+        contentWrapper.setViewGroupScrollListener(new OnContentViewScrollListener() {
             @Override
             public void onScrollAbsolute(int firstItemY) {
                 if (refreshHeaderView != null && refreshing) {
@@ -259,7 +259,7 @@ public class SmoothRefreshLayout extends FrameLayout {
 
         if (refreshing) {
             this.refreshing = true;
-            viewGroupWrapper.scrollToTop();
+            contentWrapper.scrollToTop();
             post(new Runnable() {
                 @Override
                 public void run() {
@@ -272,7 +272,7 @@ public class SmoothRefreshLayout extends FrameLayout {
                 public void run() {
                     SmoothRefreshLayout.this.refreshing = false;
                     setState(RefreshHeaderState.REFRESH_COMPLETED);
-                    if (viewGroupWrapper.topChildIsFirstItem()) {
+                    if (contentWrapper.topChildIsFirstItem()) {
                         collaspRefreshHeader();
                     } else {
                         onCollaspAnimatorEnd();
@@ -319,10 +319,7 @@ public class SmoothRefreshLayout extends FrameLayout {
     private void onExpandAnimatorEnd() {
         animatorRunning = false;
         refreshing = true;
-        contentView.setPadding(contentView.getPaddingLeft(),
-                refreshingHeaderY + refreshHeaderHeight,
-                contentView.getPaddingRight(),
-                contentView.getPaddingBottom());
+        moveViews(refreshingHeaderY);
 
         if (onRefreshListener != null) {
             onRefreshListener.onRefresh();
@@ -360,11 +357,7 @@ public class SmoothRefreshLayout extends FrameLayout {
     }
 
     private void onCollaspAnimatorEnd() {
-        contentView.setPadding(contentView.getPaddingLeft(),
-                refreshingHeaderY,
-                contentView.getPaddingRight(),
-                contentView.getPaddingBottom());
-        refreshHeaderView.setY(minRefreshHeaderY);
+        moveViews(minRefreshHeaderY);
         animatorRunning = false;
         refreshing = false;
         refreshHeaderView.setVisibility(INVISIBLE);
@@ -378,8 +371,8 @@ public class SmoothRefreshLayout extends FrameLayout {
             public void onAnimationUpdate(ValueAnimator animation) {
                 int newValue = (int) animation.getAnimatedValue();
                 int oldValue = (int) refreshHeaderView.getY();
-                float ratio = moveViews(newValue);
-                viewGroupWrapper.scrollBy(0, oldValue - newValue);
+                moveViews(newValue);
+                contentWrapper.scrollBy(0, oldValue - newValue);
             }
         });
 
@@ -420,8 +413,8 @@ public class SmoothRefreshLayout extends FrameLayout {
             refreshHeaderAnimator.cancel();
         }
         onRefreshListener = null;
-        if (viewGroupWrapper != null) {
-            viewGroupWrapper.removeContentViewScrollListener();
+        if (contentWrapper != null) {
+            contentWrapper.removeContentViewScrollListener();
         }
     }
 
