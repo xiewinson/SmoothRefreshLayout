@@ -4,35 +4,34 @@ import android.support.v4.widget.NestedScrollView;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ScrollView;
 
-import io.github.xiewinson.smoothrefreshlayout.library.listener.OnViewGroupScrollListener;
+import io.github.xiewinson.smoothrefreshlayout.library.listener.OnContentViewScrollListener;
 
 /**
  * Created by winson on 2017/10/3.
  */
 
-public abstract class ViewGroupWrapper implements IViewGroupWrapper {
+public abstract class ContentViewWrapper implements IContentViewWrapper {
     private ViewGroup viewGroup;
-    private OnViewGroupScrollListener onViewGroupScrollListener;
+    private OnContentViewScrollListener onViewGroupScrollListener;
 
-    public ViewGroupWrapper(ViewGroup viewGroup) {
+    public ContentViewWrapper(ViewGroup viewGroup) {
         this.viewGroup = viewGroup;
         viewGroup.setClipToPadding(false);
     }
 
     @Override
-    public void setViewGroupScrollListener(OnViewGroupScrollListener onViewGroupScrollListener) {
+    public void setViewGroupScrollListener(OnContentViewScrollListener onViewGroupScrollListener) {
         this.onViewGroupScrollListener = onViewGroupScrollListener;
     }
 
     @Override
-    public void removeViewGroupScrollListener() {
+    public void removeContentViewScrollListener() {
         this.onViewGroupScrollListener = null;
     }
 
     public static class Factory {
-        public static IViewGroupWrapper getInstance(View viewGroup) {
+        public static IContentViewWrapper getInstance(View viewGroup) {
             if (viewGroup instanceof RecyclerView) {
                 return new RecyclerViewWrapper((RecyclerView) viewGroup);
             } else if (viewGroup instanceof NestedScrollView) {
@@ -46,4 +45,10 @@ public abstract class ViewGroupWrapper implements IViewGroupWrapper {
     public void scrollBy(int dx, int dy) {
         viewGroup.scrollBy(dx, dy);
     }
+
+    @Override
+    public boolean topChildIsFirstItem() {
+        return true;
+    }
+
 }

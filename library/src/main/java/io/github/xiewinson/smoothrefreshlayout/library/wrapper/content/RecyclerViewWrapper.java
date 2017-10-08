@@ -3,13 +3,13 @@ package io.github.xiewinson.smoothrefreshlayout.library.wrapper.content;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 
-import io.github.xiewinson.smoothrefreshlayout.library.listener.OnViewGroupScrollListener;
+import io.github.xiewinson.smoothrefreshlayout.library.listener.OnContentViewScrollListener;
 
 /**
  * Created by winson on 2017/10/3.
  */
 
-public class RecyclerViewWrapper extends ViewGroupWrapper {
+public class RecyclerViewWrapper extends ContentViewWrapper {
     private RecyclerView recyclerView;
     private RecyclerView.OnScrollListener onScrollListener;
 
@@ -19,7 +19,7 @@ public class RecyclerViewWrapper extends ViewGroupWrapper {
     }
 
     @Override
-    public void setViewGroupScrollListener(final OnViewGroupScrollListener onViewGroupScrollListener) {
+    public void setViewGroupScrollListener(final OnContentViewScrollListener onViewGroupScrollListener) {
         super.setViewGroupScrollListener(onViewGroupScrollListener);
         onScrollListener = new RecyclerView.OnScrollListener() {
 
@@ -46,15 +46,19 @@ public class RecyclerViewWrapper extends ViewGroupWrapper {
     }
 
     @Override
-    public void removeViewGroupScrollListener() {
-        super.removeViewGroupScrollListener();
+    public void removeContentViewScrollListener() {
+        super.removeContentViewScrollListener();
         recyclerView.removeOnScrollListener(onScrollListener);
     }
 
     @Override
-    public boolean firstChildIsFirstItem() {
+    public boolean topChildIsFirstItem() {
         View child = recyclerView.getChildAt(0);
         return child != null && recyclerView.getChildAdapterPosition(child) == 0;
+    }
+
+    @Override
+    public void scrollToTop() {
     }
 
 }
