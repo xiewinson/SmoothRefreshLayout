@@ -76,6 +76,9 @@ public class SmoothRefreshLayout extends FrameLayout {
     private void init() {
 
         contentView = getChildAt(0);
+        if(contentView == null) {
+            throw new NullPointerException("you must put a contentView");
+        }
         contentWrapper = ContentViewWrapper.Factory.getInstance(contentView);
         contentWrapper.setViewGroupScrollListener(new OnContentViewScrollListener() {
             @Override

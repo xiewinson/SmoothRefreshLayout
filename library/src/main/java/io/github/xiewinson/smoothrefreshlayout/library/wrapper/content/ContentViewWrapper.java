@@ -34,7 +34,8 @@ public abstract class ContentViewWrapper implements IContentViewWrapper {
         public static IContentViewWrapper getInstance(View viewGroup) {
             if (viewGroup instanceof RecyclerView) {
                 return new RecyclerViewWrapper((RecyclerView) viewGroup);
-            } else if (viewGroup instanceof NestedScrollView) {
+            }
+            else if (viewGroup instanceof NestedScrollView) {
                 return new NestedScrollViewWrapper((NestedScrollView) viewGroup);
             }
             return null;
