@@ -52,7 +52,7 @@ public class SmoothRefreshLayout extends FrameLayout {
     private int correctOverScrollMode;
 
     private float lastRefreshHeaderY = -1;
-    private int currentRefreshState = -1;
+    private int currentRefreshState = RefreshHeaderState.NONE;
 
     //是否处于刷新
     private boolean refreshing;
@@ -76,7 +76,7 @@ public class SmoothRefreshLayout extends FrameLayout {
     private void init() {
 
         contentView = getChildAt(0);
-        if(contentView == null) {
+        if (contentView == null) {
             throw new NullPointerException("you must put a contentView");
         }
         contentWrapper = ContentViewWrapper.Factory.getInstance(contentView);
@@ -326,7 +326,7 @@ public class SmoothRefreshLayout extends FrameLayout {
         if (onRefreshListener != null) {
             onRefreshListener.onRefresh();
         }
-        currentRefreshState = -1;
+        currentRefreshState = RefreshHeaderState.NONE;
     }
 
     //松手时返回顶部的动画
@@ -405,7 +405,7 @@ public class SmoothRefreshLayout extends FrameLayout {
     }
 
     private void setState(@RefreshHeaderState int state) {
-        if (state != currentRefreshState && refreshHeaderWrapper != null) {
+        if (state != this.currentRefreshState && refreshHeaderWrapper != null) {
             refreshHeaderWrapper.onStateChanged(state);
         }
         this.currentRefreshState = state;
