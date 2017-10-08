@@ -46,9 +46,4 @@ public abstract class ContentViewWrapper implements IContentViewWrapper {
         viewGroup.scrollBy(dx, dy);
     }
 
-    @Override
-    public boolean topChildIsFirstItem() {
-        return true;
-    }
-
 }

@@ -2,6 +2,7 @@ package io.github.xiewinson.smoothrefreshlayout.library.wrapper.content;
 
 import android.support.v4.widget.NestedScrollView;
 import android.view.View;
+import android.view.ViewGroup;
 
 import io.github.xiewinson.smoothrefreshlayout.library.listener.OnContentViewScrollListener;
 
@@ -25,7 +26,7 @@ public class NestedScrollViewWrapper extends ContentViewWrapper {
             @Override
             public void onScrollChange(NestedScrollView v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
                 if (onViewGroupScrollListener != null) {
-                    onViewGroupScrollListener.onScroll(v.getChildAt(0), true);
+                    onViewGroupScrollListener.onScrollRelative(oldScrollY - scrollY);
                 }
             }
         });
@@ -38,8 +39,13 @@ public class NestedScrollViewWrapper extends ContentViewWrapper {
 
     @Override
     public boolean topChildIsFirstItem() {
-        View child = scrollView.getChildAt(0);
-        return child != null && child.getY() > -child.getHeight();
+        View parent = scrollView.getChildAt(0);
+        if (parent instanceof ViewGroup) {
+            View child = ((ViewGroup) parent).getChildAt(0);
+            return child != null && scrollView.getScrollY() < child.getHeight();
+
+        }
+        return false;
     }
 
     /**
@@ -55,5 +61,6 @@ public class NestedScrollViewWrapper extends ContentViewWrapper {
 
     @Override
     public void scrollToTop() {
+        scrollView.smoothScrollTo(0, 0);
     }
 }

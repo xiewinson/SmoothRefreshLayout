@@ -28,12 +28,7 @@ public class RecyclerViewWrapper extends ContentViewWrapper {
                 super.onScrolled(recyclerView, dx, dy);
                 if (onViewGroupScrollListener != null) {
                     View topChild = recyclerView.getChildAt(0);
-
-                    if (topChild == null) {
-                        onViewGroupScrollListener.onScroll(null, false);
-                    } else {
-                        onViewGroupScrollListener.onScroll(topChild, recyclerView.getChildAdapterPosition(topChild) == 0);
-                    }
+                    onViewGroupScrollListener.onScrollAbsolute((topChild == null || !topChildIsFirstItem()) ? 0 : (int) topChild.getY());
                 }
             }
 
@@ -59,6 +54,7 @@ public class RecyclerViewWrapper extends ContentViewWrapper {
 
     @Override
     public void scrollToTop() {
+        recyclerView.smoothScrollToPosition(0);
     }
 
 }

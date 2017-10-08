@@ -4,6 +4,7 @@ import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
@@ -80,9 +81,16 @@ public class SmoothRefreshLayout extends FrameLayout {
         viewGroupWrapper = ContentViewWrapper.Factory.getInstance(contentView);
         viewGroupWrapper.setViewGroupScrollListener(new OnContentViewScrollListener() {
             @Override
-            public void onScroll(View topChild, boolean isFirst) {
-                if (refreshHeaderView != null && topChild != null && refreshing) {
-                    refreshHeaderView.setY(isFirst ? topChild.getY() - refreshHeaderHeight : -refreshHeaderHeight);
+            public void onScrollAbsolute(int firstItemY) {
+                if (refreshHeaderView != null && refreshing) {
+                    refreshHeaderView.setY(firstItemY - refreshHeaderHeight);
+                }
+            }
+
+            @Override
+            public void onScrollRelative(int offset) {
+                if (refreshHeaderView != null && refreshing) {
+                    refreshHeaderView.setY(refreshHeaderView.getY() + offset);
                 }
             }
         });
@@ -251,6 +259,7 @@ public class SmoothRefreshLayout extends FrameLayout {
 
         if (refreshing) {
             this.refreshing = true;
+            viewGroupWrapper.scrollToTop();
             post(new Runnable() {
                 @Override
                 public void run() {
