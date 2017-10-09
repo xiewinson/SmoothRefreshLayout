@@ -13,7 +13,6 @@ import android.widget.FrameLayout;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.lang.reflect.Field;
 
 import io.github.xiewinson.smoothrefreshlayout.library.annotation.RefreshHeaderState;
 import io.github.xiewinson.smoothrefreshlayout.library.listener.OnContentViewScrollListener;
@@ -326,10 +325,10 @@ public class SmoothRefreshLayout extends FrameLayout {
     }
 
     private void onExpandAnimatorEnd() {
-        animatorRunning = false;
-        refreshing = true;
         moveViews(refreshingHeaderY, true);
 
+        animatorRunning = false;
+        refreshing = true;
         if (onRefreshListener != null) {
             onRefreshListener.onRefresh();
         }
@@ -366,7 +365,6 @@ public class SmoothRefreshLayout extends FrameLayout {
     }
 
     private void onCollapseAnimatorEnd() {
-
         contentWrapper.handleOnCollapseAnimartorEnd();
         moveViews(minRefreshHeaderY, true);
 
