@@ -3,11 +3,17 @@ package io.github.xiewinson.smoothrefreshlayout.library;
 import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.support.annotation.IntDef;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.FrameLayout;
+
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.reflect.Field;
 
 import io.github.xiewinson.smoothrefreshlayout.library.annotation.RefreshHeaderState;
 import io.github.xiewinson.smoothrefreshlayout.library.listener.OnContentViewScrollListener;
@@ -149,14 +155,14 @@ public class SmoothRefreshLayout extends FrameLayout {
                             && refreshHeaderView.getY() != maxRefreshHeaderY
                             && contentView.getPaddingTop() != maxRefreshHeaderY + refreshHeaderHeight) {
                         contentView.setOverScrollMode(OVER_SCROLL_NEVER);
-                        moveRefreshHeader(dy);
+                        handleTouchActionMove(dy);
                     }
                 }
                 //上拉
                 else {
                     if (contentView.getPaddingTop() != refreshingHeaderY
                             || refreshHeaderView.getY() != minRefreshHeaderY) {
-                        moveRefreshHeader(dy);
+                        handleTouchActionMove(dy);
 
                     }
                 }
@@ -191,9 +197,9 @@ public class SmoothRefreshLayout extends FrameLayout {
         if (currentY >= refreshingHeaderY || currentRefreshState == RefreshHeaderState.RELEASE_TO_REFRESH) {
             expandRefreshHeader();
             return true;
-        } else if (currentY < refreshingHeaderY && currentY >= minRefreshHeaderY) {
+        } else if (currentY < refreshingHeaderY && currentY > minRefreshHeaderY) {
             setState(RefreshHeaderState.PULL_TO_REFRESH);
-            collaspRefreshHeader();
+            collapseRefreshHeader();
         }
         return false;
     }
@@ -202,7 +208,7 @@ public class SmoothRefreshLayout extends FrameLayout {
         return contentView != null && contentView.canScrollVertically(-1);
     }
 
-    private void moveRefreshHeader(float dy) {
+    private void handleTouchActionMove(float dy) {
         if (dy > 0) {
             dy *= 0.3f;
         }
@@ -229,19 +235,20 @@ public class SmoothRefreshLayout extends FrameLayout {
         }
 
         if (refreshHeaderView.getY() != result) {
-            moveViews(result);
+            moveViews(result, true);
             contentView.scrollBy(0, (int) dy);
         }
 
     }
 
-    private float moveViews(int value) {
+    private float moveViews(int value, boolean isChangePadding) {
         refreshHeaderView.setY(value);
-        contentView.setPadding(contentView.getPaddingLeft(),
-                value + refreshHeaderHeight,
-                contentView.getPaddingRight(),
-                contentView.getPaddingBottom());
-
+        if (isChangePadding) {
+            contentView.setPadding(contentView.getPaddingLeft(),
+                    value + refreshHeaderHeight,
+                    contentView.getPaddingRight(),
+                    contentView.getPaddingBottom());
+        }
         float ratio = (Math.abs(value - minRefreshHeaderY)) / (float) (refreshingHeaderY - minRefreshHeaderY);
         ratio = ratio < 0 ? 0 : ratio;
         ratio = ratio > 1 ? 1 : ratio;
@@ -275,9 +282,9 @@ public class SmoothRefreshLayout extends FrameLayout {
                 public void run() {
                     SmoothRefreshLayout.this.refreshing = false;
                     if (contentWrapper.topChildIsFirstItem()) {
-                        collaspRefreshHeader();
+                        collapseRefreshHeader();
                     } else {
-                        onCollaspAnimatorEnd();
+                        onCollapseAnimatorEnd();
                     }
                 }
             }, DEFAULT_ANIMATOR_DURATION);
@@ -293,7 +300,7 @@ public class SmoothRefreshLayout extends FrameLayout {
         }
         setState(RefreshHeaderState.REFRESHING);
 
-        refreshHeaderAnimator = getRefreshHeaderAnimator((int) refreshHeaderView.getY(), refreshingHeaderY);
+        refreshHeaderAnimator = getRefreshHeaderAnimator(ANIMATOR_EXPAND, (int) refreshHeaderView.getY(), refreshingHeaderY);
 
         refreshHeaderAnimator.addListener(new Animator.AnimatorListener() {
             @Override
@@ -321,21 +328,20 @@ public class SmoothRefreshLayout extends FrameLayout {
     private void onExpandAnimatorEnd() {
         animatorRunning = false;
         refreshing = true;
-        moveViews(refreshingHeaderY);
+        moveViews(refreshingHeaderY, true);
 
         if (onRefreshListener != null) {
             onRefreshListener.onRefresh();
         }
-        currentRefreshState = RefreshHeaderState.NONE;
     }
 
     //松手时返回顶部的动画
-    private void collaspRefreshHeader() {
+    private void collapseRefreshHeader() {
         animatorRunning = true;
         if (refreshHeaderAnimator != null) {
             refreshHeaderAnimator.cancel();
         }
-        refreshHeaderAnimator = getRefreshHeaderAnimator((int) refreshHeaderView.getY(), minRefreshHeaderY);
+        refreshHeaderAnimator = getRefreshHeaderAnimator(ANIMATOR_COLLAPSE, (int) refreshHeaderView.getY(), minRefreshHeaderY);
         refreshHeaderAnimator.addListener(new Animator.AnimatorListener() {
             @Override
             public void onAnimationStart(Animator animation) {
@@ -343,12 +349,12 @@ public class SmoothRefreshLayout extends FrameLayout {
 
             @Override
             public void onAnimationEnd(Animator animation) {
-                onCollaspAnimatorEnd();
+                onCollapseAnimatorEnd();
             }
 
             @Override
             public void onAnimationCancel(Animator animation) {
-                onCollaspAnimatorEnd();
+                onCollapseAnimatorEnd();
             }
 
             @Override
@@ -359,34 +365,45 @@ public class SmoothRefreshLayout extends FrameLayout {
         refreshHeaderAnimator.start();
     }
 
-    private void onCollaspAnimatorEnd() {
-        moveViews(minRefreshHeaderY);
+    private void onCollapseAnimatorEnd() {
+
+        contentWrapper.handleOnCollapseAnimartorEnd();
+        moveViews(minRefreshHeaderY, true);
+
         animatorRunning = false;
         refreshing = false;
         refreshHeaderView.setVisibility(INVISIBLE);
-        currentRefreshState = -1;
+        currentRefreshState = RefreshHeaderState.NONE;
 
     }
 
-    private ValueAnimator getRefreshHeaderAnimator(int startValue, int endValue) {
+    private static final int ANIMATOR_EXPAND = 0;
+    private static final int ANIMATOR_COLLAPSE = 1;
+
+    @Documented
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(value = {ANIMATOR_EXPAND, ANIMATOR_COLLAPSE})
+    private @interface ANIMATOR_TYPE {
+    }
+
+    private ValueAnimator getRefreshHeaderAnimator(@ANIMATOR_TYPE final int type, int startValue, int endValue) {
         ValueAnimator valueAnimator = ValueAnimator.ofInt(startValue, endValue);
 
         valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
-                int newValue = (int) animation.getAnimatedValue();
-                int oldValue = (int) refreshHeaderView.getY();
-                moveViews(newValue);
-                contentWrapper.scrollBy(0, oldValue - newValue);
+                final int newValue = (int) animation.getAnimatedValue();
+                final int oldValue = (int) refreshHeaderView.getY();
+                if (type == ANIMATOR_EXPAND) {
+                    moveViews(newValue, true);
+                    contentWrapper.scrollByWhenRefreshHeaderExpand(0, oldValue - newValue);
+                } else if (type == ANIMATOR_COLLAPSE) {
+                    moveViews(newValue, false);
+                    contentView.scrollBy(0, oldValue - newValue);
+                }
             }
         });
 
-//        if ((startValue < refreshingHeaderY && startValue > minRefreshHeaderY)
-//                || (startValue > refreshingHeaderY && startValue < refreshingHeaderY + refreshHeaderHeight)) {
-//            valueAnimator.setDuration(100);
-//        } else {
-//            valueAnimator.setDuration(DEFAULT_ANIMATOR_DURATION);
-//        }
         int duration;
         if (startValue < endValue) {
             duration = DEFAULT_ANIMATOR_DURATION;
@@ -398,7 +415,6 @@ public class SmoothRefreshLayout extends FrameLayout {
         valueAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
         return valueAnimator;
     }
-
 
     public boolean isRefreshing() {
         return refreshing;

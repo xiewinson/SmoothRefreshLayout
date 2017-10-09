@@ -2,8 +2,13 @@ package io.github.xiewinson.smoothrefreshlayout;
 
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.v4.widget.NestedScrollView;
+import android.util.Log;
+import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import java.lang.reflect.Field;
 
 import io.github.xiewinson.smoothrefreshlayout.library.ScreenUtil;
 import io.github.xiewinson.smoothrefreshlayout.library.SmoothRefreshLayout;
@@ -14,6 +19,7 @@ public class NestedScrollViewActivity extends BaseActivity {
 
     private LinearLayout linearLayout;
     private SmoothRefreshLayout refreshLayout;
+    private NestedScrollView nestedScrollView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,8 +27,9 @@ public class NestedScrollViewActivity extends BaseActivity {
         setContentView(R.layout.activity_nestedscroll_view);
         initActionBar("NestedScrollView");
         linearLayout = (LinearLayout) findViewById(R.id.container);
+        nestedScrollView = (NestedScrollView) findViewById(R.id.scrollView);
         refreshLayout = (SmoothRefreshLayout) findViewById(R.id.refreshLayout);
-
+        nestedScrollView.setFillViewport(true);
 
         for (int i = 0; i < 30; i++) {
             TextView tv = new TextView(this);
@@ -46,8 +53,6 @@ public class NestedScrollViewActivity extends BaseActivity {
                 }, 1000);
             }
         });
-        refreshLayout.setRefreshing(true);
-
     }
 
 }

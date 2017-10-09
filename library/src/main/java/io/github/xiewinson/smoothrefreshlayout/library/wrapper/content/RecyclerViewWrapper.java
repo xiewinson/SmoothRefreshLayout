@@ -57,4 +57,10 @@ public class RecyclerViewWrapper extends ContentViewWrapper {
         recyclerView.smoothScrollToPosition(0);
     }
 
+
+    @Override
+    public void scrollByWhenRefreshHeaderExpand(int dx, int dy) {
+        recyclerView.scrollBy(dx, dy);
+    }
+
 }

@@ -43,8 +43,11 @@ public abstract class ContentViewWrapper implements IContentViewWrapper {
     }
 
     @Override
-    public void scrollBy(int dx, int dy) {
-        viewGroup.scrollBy(dx, dy);
+    public void scrollByWhenRefreshHeaderExpand(int dx, int dy) {
     }
 
+    @Override
+    public void handleOnCollapseAnimartorEnd() {
+
+    }
 }

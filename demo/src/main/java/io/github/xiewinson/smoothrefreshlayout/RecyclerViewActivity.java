@@ -68,7 +68,7 @@ public class RecyclerViewActivity extends BaseActivity {
             }
         });
         refreshLayout.setRefreshHeader(new DefaultRefreshHeaderWrapper(this));
-
+        refreshLayout.setRefreshing(true);
     }
 
     private static class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {

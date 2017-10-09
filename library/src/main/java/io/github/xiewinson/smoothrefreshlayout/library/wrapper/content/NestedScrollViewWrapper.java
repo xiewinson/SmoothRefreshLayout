@@ -1,8 +1,6 @@
 package io.github.xiewinson.smoothrefreshlayout.library.wrapper.content;
 
 import android.support.v4.widget.NestedScrollView;
-import android.view.View;
-import android.view.ViewGroup;
 
 import io.github.xiewinson.smoothrefreshlayout.library.listener.OnContentViewScrollListener;
 
@@ -39,28 +37,23 @@ public class NestedScrollViewWrapper extends ContentViewWrapper {
 
     @Override
     public boolean topChildIsFirstItem() {
-        View parent = scrollView.getChildAt(0);
-        if (parent instanceof ViewGroup) {
-            View child = ((ViewGroup) parent).getChildAt(0);
-            return child != null && scrollView.getScrollY() < child.getHeight();
-
-        }
-        return false;
-    }
-
-    /**
-     * 在NestedScrollView上进行收缩动画时使用scrollBy会错位
-     *
-     * @param dx
-     * @param dy
-     */
-    @Override
-    public final void scrollBy(int dx, int dy) {
-
+        return true;
     }
 
     @Override
     public void scrollToTop() {
         scrollView.smoothScrollTo(0, 0);
+    }
+
+    @Override
+    public void handleOnCollapseAnimartorEnd() {
+//        try {
+//            Field field = View.class.getDeclaredField("mScrollY");
+//            field.setAccessible(true);
+//            field.setInt(scrollView, 0);
+//        } catch (NoSuchFieldException | IllegalAccessException e) {
+//            e.printStackTrace();
+//        }
+        scrollView.scrollTo(0, 0);
     }
 }
