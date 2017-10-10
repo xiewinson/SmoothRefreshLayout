@@ -19,8 +19,8 @@ public class RecyclerViewWrapper extends ContentViewWrapper {
     }
 
     @Override
-    public void setViewGroupScrollListener(final OnContentViewScrollListener onViewGroupScrollListener) {
-        super.setViewGroupScrollListener(onViewGroupScrollListener);
+    public void setContentViewScrollListener(final OnContentViewScrollListener onViewGroupScrollListener) {
+        super.setContentViewScrollListener(onViewGroupScrollListener);
         onScrollListener = new RecyclerView.OnScrollListener() {
 
             @Override
@@ -51,5 +51,4 @@ public class RecyclerViewWrapper extends ContentViewWrapper {
         View child = recyclerView.getChildAt(0);
         return child != null && recyclerView.getChildAdapterPosition(child) == 0;
     }
-
 }

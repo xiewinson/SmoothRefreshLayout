@@ -3,6 +3,7 @@ package io.github.xiewinson.smoothrefreshlayout.library.wrapper.content;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ListView;
 
 import io.github.xiewinson.smoothrefreshlayout.library.listener.OnContentViewScrollListener;
 
@@ -20,7 +21,7 @@ public abstract class ContentViewWrapper implements IContentViewWrapper {
     }
 
     @Override
-    public void setViewGroupScrollListener(OnContentViewScrollListener onViewGroupScrollListener) {
+    public void setContentViewScrollListener(OnContentViewScrollListener onViewGroupScrollListener) {
         this.onViewGroupScrollListener = onViewGroupScrollListener;
     }
 
@@ -33,8 +34,19 @@ public abstract class ContentViewWrapper implements IContentViewWrapper {
         public static IContentViewWrapper getInstance(View viewGroup) {
             if (viewGroup instanceof RecyclerView) {
                 return new RecyclerViewWrapper((RecyclerView) viewGroup);
+            } else if (viewGroup instanceof ListView) {
+                return new ListViewWrapper((ListView) viewGroup);
             }
             return null;
         }
+    }
+
+    @Override
+    public void scrollVerticalBy(int dy) {
+        viewGroup.scrollBy(0, dy);
+    }
+
+    @Override
+    public void smoothScrollVerticalToTop() {
     }
 }

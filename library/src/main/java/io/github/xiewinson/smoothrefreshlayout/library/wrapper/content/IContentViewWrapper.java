@@ -8,10 +8,13 @@ import io.github.xiewinson.smoothrefreshlayout.library.listener.OnContentViewScr
 
 public interface IContentViewWrapper {
 
-    void setViewGroupScrollListener(OnContentViewScrollListener onViewGroupScrollListener);
+    void setContentViewScrollListener(OnContentViewScrollListener onViewGroupScrollListener);
 
     void removeContentViewScrollListener();
 
     boolean topChildIsFirstItem();
 
+    void scrollVerticalBy(int dy);
+
+    void smoothScrollVerticalToTop();
 }

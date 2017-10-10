@@ -81,7 +81,7 @@ public class SmoothRefreshLayout extends FrameLayout {
             throw new NullPointerException("you must put a contentView");
         }
         contentWrapper = ContentViewWrapper.Factory.getInstance(contentView);
-        contentWrapper.setViewGroupScrollListener(new OnContentViewScrollListener() {
+        contentWrapper.setContentViewScrollListener(new OnContentViewScrollListener() {
             @Override
             public void onFirstItemScroll(int firstItemY) {
                 if (refreshHeaderView != null && refreshing) {
@@ -191,7 +191,7 @@ public class SmoothRefreshLayout extends FrameLayout {
         float currentY = refreshHeaderView.getY();
         if (currentY >= refreshingHeaderY || currentRefreshState == RefreshHeaderState.RELEASE_TO_REFRESH) {
             isEnterRefresh = true;
-            expandRefreshHeader();
+            expandRefreshHeader(true);
             return true;
         } else if (currentY < refreshingHeaderY && currentY > minRefreshHeaderY) {
             isEnterRefresh = true;
@@ -235,7 +235,7 @@ public class SmoothRefreshLayout extends FrameLayout {
 
         if (refreshHeaderView.getY() != result) {
             moveViews(result);
-            contentView.scrollBy(0, (int) dy);
+            contentWrapper.scrollVerticalBy((int) dy);
         }
 
     }
@@ -268,7 +268,7 @@ public class SmoothRefreshLayout extends FrameLayout {
             post(new Runnable() {
                 @Override
                 public void run() {
-                    expandRefreshHeader();
+                    expandRefreshHeader(false);
                 }
             });
         } else {
@@ -288,7 +288,7 @@ public class SmoothRefreshLayout extends FrameLayout {
     }
 
     //展开刷新header的动画
-    private void expandRefreshHeader() {
+    private void expandRefreshHeader(final boolean isTouchTrigger) {
         animatorRunning = true;
         refreshHeaderView.setVisibility(VISIBLE);
         if (refreshHeaderAnimator != null) {
@@ -305,12 +305,12 @@ public class SmoothRefreshLayout extends FrameLayout {
 
             @Override
             public void onAnimationEnd(Animator animation) {
-                onExpandAnimatorEnd();
+                onExpandAnimatorEnd(isTouchTrigger);
             }
 
             @Override
             public void onAnimationCancel(Animator animation) {
-                onExpandAnimatorEnd();
+                onExpandAnimatorEnd(isTouchTrigger);
             }
 
             @Override
@@ -321,13 +321,15 @@ public class SmoothRefreshLayout extends FrameLayout {
         refreshHeaderAnimator.start();
     }
 
-    private void onExpandAnimatorEnd() {
+    private void onExpandAnimatorEnd(boolean isTouchTrigger) {
         moveViews(refreshingHeaderY);
-
         animatorRunning = false;
         refreshing = true;
         if (onRefreshListener != null) {
             onRefreshListener.onRefresh();
+        }
+        if (!isTouchTrigger) {
+            contentWrapper.smoothScrollVerticalToTop();
         }
     }
 
@@ -382,7 +384,8 @@ public class SmoothRefreshLayout extends FrameLayout {
                 final int newValue = (int) animation.getAnimatedValue();
                 final int oldValue = (int) refreshHeaderView.getY();
                 moveViews(newValue);
-                contentView.scrollBy(0, oldValue - newValue);
+                refreshHeaderView.setY(newValue);
+                contentWrapper.scrollVerticalBy(oldValue - newValue);
             }
         });
 

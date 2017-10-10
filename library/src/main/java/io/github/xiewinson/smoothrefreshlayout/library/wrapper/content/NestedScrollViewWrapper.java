@@ -20,8 +20,8 @@ public class NestedScrollViewWrapper extends ContentViewWrapper {
     }
 
     @Override
-    public void setViewGroupScrollListener(final OnContentViewScrollListener onViewGroupScrollListener) {
-        super.setViewGroupScrollListener(onViewGroupScrollListener);
+    public void setContentViewScrollListener(final OnContentViewScrollListener onViewGroupScrollListener) {
+        super.setContentViewScrollListener(onViewGroupScrollListener);
         scrollView.setOnScrollChangeListener(new NestedScrollView.OnScrollChangeListener() {
             @Override
             public void onScrollChange(NestedScrollView v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
@@ -40,6 +40,11 @@ public class NestedScrollViewWrapper extends ContentViewWrapper {
     @Override
     public boolean topChildIsFirstItem() {
         return true;
+    }
+
+    @Override
+    public void scrollVerticalBy(int dy) {
+
     }
 
 }
