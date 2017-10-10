@@ -51,7 +51,7 @@ public class SmoothRefreshLayout extends FrameLayout {
     private int minRefreshPadding;
     private int maxRefreshPading;
     private int correctOverScrollMode;
-    private boolean isEnterRefresh;
+    private boolean enterPullRefreshHeader;
 
     private float lastRefreshHeaderY = -1;
     private int currentRefreshState = RefreshHeaderState.NONE;
@@ -149,7 +149,7 @@ public class SmoothRefreshLayout extends FrameLayout {
                 float dy = currentY - lastRefreshHeaderY;
                 //下拉
                 if (dy > 0) {
-                    if (isEnterRefresh || (!canChildScrollUp()
+                    if (enterPullRefreshHeader || (!canChildScrollUp()
                             && refreshHeaderView.getY() != maxRefreshPading
                             && contentView.getPaddingTop() != maxRefreshPading + refreshHeaderHeight)) {
                         contentView.setOverScrollMode(OVER_SCROLL_NEVER);
@@ -157,7 +157,7 @@ public class SmoothRefreshLayout extends FrameLayout {
                     }
                 }
                 //上滑
-                else if (isEnterRefresh && dy < 0) {
+                else if (enterPullRefreshHeader && dy < 0) {
                     if (contentView.getPaddingTop() != refreshingPadding
                             || refreshHeaderView.getY() != minRefreshPadding) {
                         handleTouchActionMove(dy);
@@ -178,7 +178,7 @@ public class SmoothRefreshLayout extends FrameLayout {
                 }
                 contentView.setOverScrollMode(correctOverScrollMode);
                 lastRefreshHeaderY = -1;
-                isEnterRefresh = false;
+                enterPullRefreshHeader = false;
 
                 break;
         }
@@ -199,7 +199,7 @@ public class SmoothRefreshLayout extends FrameLayout {
     }
 
     private void handleTouchActionMove(float dy) {
-        isEnterRefresh = true;
+        enterPullRefreshHeader = true;
         if (dy > 0) {
             dy *= 0.3f;
         }
