@@ -65,7 +65,7 @@ public class RecyclerViewActivity extends BaseActivity {
                         Collections.shuffle(data);
                         listAdapter.setItems(data);
                     }
-                }, 10);
+                }, 1000);
             }
         });
         refreshLayout.setRefreshHeader(new DefaultRefreshHeaderWrapper(this));
@@ -99,7 +99,7 @@ public class RecyclerViewActivity extends BaseActivity {
 
         @Override
         public void onBindViewHolder(ListAdapter.ViewHolder holder, int position) {
-            holder.bindData("item" + data.get(position));
+            holder.bindData("RecyclerView Item" + data.get(position));
         }
 
         @Override

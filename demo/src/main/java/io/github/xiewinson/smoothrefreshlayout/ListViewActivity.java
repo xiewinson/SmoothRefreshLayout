@@ -5,6 +5,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import io.github.xiewinson.smoothrefreshlayout.library.SmoothRefreshLayout;
@@ -23,11 +24,11 @@ public class ListViewActivity extends BaseActivity {
         listView = (ListView) findViewById(R.id.listView);
         refreshLayout = (SmoothRefreshLayout) findViewById(R.id.refreshLayout);
 
-        List<String> data = new ArrayList<>();
+        final List<String> data = new ArrayList<>();
         for (int i = 0; i < 100; i++) {
-            data.add("listView item" + i);
+            data.add("ListView Item" + i);
         }
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.item, R.id.tv, data);
+        final ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.item, R.id.tv, data);
         listView.setAdapter(adapter);
 
         refreshLayout.setRefreshHeader(new DefaultRefreshHeaderWrapper(this));
@@ -38,6 +39,8 @@ public class ListViewActivity extends BaseActivity {
                     @Override
                     public void run() {
                         refreshLayout.setRefreshing(false);
+                        Collections.shuffle(data);
+                        adapter.notifyDataSetChanged();
                     }
                 }, 1000);
             }
