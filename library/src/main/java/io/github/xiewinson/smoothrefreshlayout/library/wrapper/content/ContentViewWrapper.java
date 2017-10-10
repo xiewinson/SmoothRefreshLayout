@@ -17,6 +17,7 @@ public abstract class ContentViewWrapper implements IContentViewWrapper {
 
     public ContentViewWrapper(ViewGroup viewGroup) {
         this.viewGroup = viewGroup;
+        viewGroup.setMotionEventSplittingEnabled(false);
         viewGroup.setClipToPadding(false);
     }
 

@@ -3,6 +3,8 @@ package io.github.xiewinson.smoothrefreshlayout.library;
 import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.support.v4.util.ArrayMap;
+import android.support.v4.view.MotionEventCompat;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -129,20 +131,22 @@ public class SmoothRefreshLayout extends FrameLayout {
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
 
+        float currentY = ev.getY();
+
+
         if (!isEnabled() || refreshing || animatorRunning || (ev.getAction() != MotionEvent.ACTION_DOWN && lastRefreshHeaderY < 0)) {
             return super.dispatchTouchEvent(ev);
         }
-
-
-        switch (ev.getAction()) {
+        int event = MotionEventCompat.getActionMasked(ev);
+        switch (event) {
             case MotionEvent.ACTION_DOWN:
-                lastRefreshHeaderY = ev.getY();
+                lastRefreshHeaderY = currentY;
                 correctOverScrollMode = contentView.getOverScrollMode();
                 initRefreshHeaderParams();
                 break;
 
+
             case MotionEvent.ACTION_MOVE:
-                float currentY = ev.getY();
                 float dy = currentY - lastRefreshHeaderY;
                 //下拉
                 if (dy > 0) {
@@ -153,8 +157,8 @@ public class SmoothRefreshLayout extends FrameLayout {
                         handleTouchActionMove(dy);
                     }
                 }
-                //上拉
-                else {
+                //上滑
+                else if (dy < 0) {
                     if (contentView.getPaddingTop() != refreshingHeaderY
                             || refreshHeaderView.getY() != minRefreshHeaderY) {
                         handleTouchActionMove(dy);
@@ -162,6 +166,11 @@ public class SmoothRefreshLayout extends FrameLayout {
                     }
                 }
                 lastRefreshHeaderY = currentY;
+                lastRefreshHeaderY = currentY;
+                break;
+            case MotionEvent.ACTION_POINTER_DOWN:
+                break;
+            case MotionEvent.ACTION_POINTER_UP:
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
