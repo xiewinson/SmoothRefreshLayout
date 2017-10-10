@@ -25,6 +25,7 @@ public class RecyclerViewActivity extends BaseActivity {
 
     private RecyclerView recyclerView;
     private SmoothRefreshLayout refreshLayout;
+    private int i;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,10 +50,10 @@ public class RecyclerViewActivity extends BaseActivity {
         final ListAdapter listAdapter = new ListAdapter();
         recyclerView.setAdapter(listAdapter);
         final List<String> data = new ArrayList<>();
-        for (int i = 0; i < 50; i++) {
+        for (int i = 0; i < 100; i++) {
             data.add(String.valueOf(i));
         }
-        listAdapter.addItems(data);
+        listAdapter.setItems(data);
 
         refreshLayout.setOnRefreshListener(new OnRefreshListener() {
             @Override
@@ -64,7 +65,7 @@ public class RecyclerViewActivity extends BaseActivity {
                         Collections.shuffle(data);
                         listAdapter.setItems(data);
                     }
-                }, 1000);
+                }, 10);
             }
         });
         refreshLayout.setRefreshHeader(new DefaultRefreshHeaderWrapper(this));
@@ -78,13 +79,15 @@ public class RecyclerViewActivity extends BaseActivity {
         }
 
 
-        private void addItems(List<String> list) {
-            data.addAll(list);
-            notifyDataSetChanged();
+        private void addItems(String item) {
+            data.add(item);
+            notifyItemRangeInserted(0, 1);
         }
 
         private void setItems(List<String> list) {
-            data.clear();
+            if(data.size() > 0) {
+                data.clear();
+            }
             data.addAll(list);
             notifyDataSetChanged();
         }
@@ -122,4 +125,6 @@ public class RecyclerViewActivity extends BaseActivity {
             }
         }
     }
+
+
 }

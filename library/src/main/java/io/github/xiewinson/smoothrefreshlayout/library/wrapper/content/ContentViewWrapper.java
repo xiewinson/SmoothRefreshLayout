@@ -1,6 +1,5 @@
 package io.github.xiewinson.smoothrefreshlayout.library.wrapper.content;
 
-import android.support.v4.widget.NestedScrollView;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,19 +34,7 @@ public abstract class ContentViewWrapper implements IContentViewWrapper {
             if (viewGroup instanceof RecyclerView) {
                 return new RecyclerViewWrapper((RecyclerView) viewGroup);
             }
-            else if (viewGroup instanceof NestedScrollView) {
-                return new NestedScrollViewWrapper((NestedScrollView) viewGroup);
-            }
             return null;
         }
-    }
-
-    @Override
-    public void scrollByWhenRefreshHeaderExpand(int dx, int dy) {
-    }
-
-    @Override
-    public void handleOnCollapseAnimartorEnd() {
-
     }
 }

@@ -14,9 +14,4 @@ public interface IContentViewWrapper {
 
     boolean topChildIsFirstItem();
 
-    void scrollByWhenRefreshHeaderExpand(int dx, int dy);
-
-    void scrollToTop();
-
-    void handleOnCollapseAnimartorEnd();
 }

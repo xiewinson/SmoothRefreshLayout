@@ -6,6 +6,8 @@ import io.github.xiewinson.smoothrefreshlayout.library.listener.OnContentViewScr
 
 /**
  * Created by winson on 2017/10/7.
+ * 更改paddingTop的方式在ScrollView上会有跳动，不适合
+ * @hide
  */
 
 public class NestedScrollViewWrapper extends ContentViewWrapper {
@@ -24,7 +26,7 @@ public class NestedScrollViewWrapper extends ContentViewWrapper {
             @Override
             public void onScrollChange(NestedScrollView v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
                 if (onViewGroupScrollListener != null) {
-                    onViewGroupScrollListener.onScrollRelative(oldScrollY - scrollY);
+                    onViewGroupScrollListener.onScroll(-scrollY);
                 }
             }
         });
@@ -40,20 +42,4 @@ public class NestedScrollViewWrapper extends ContentViewWrapper {
         return true;
     }
 
-    @Override
-    public void scrollToTop() {
-        scrollView.smoothScrollTo(0, 0);
-    }
-
-    @Override
-    public void handleOnCollapseAnimartorEnd() {
-//        try {
-//            Field field = View.class.getDeclaredField("mScrollY");
-//            field.setAccessible(true);
-//            field.setInt(scrollView, 0);
-//        } catch (NoSuchFieldException | IllegalAccessException e) {
-//            e.printStackTrace();
-//        }
-        scrollView.scrollTo(0, 0);
-    }
 }

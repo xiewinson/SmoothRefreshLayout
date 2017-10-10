@@ -5,7 +5,8 @@ package io.github.xiewinson.smoothrefreshlayout.library.listener;
  */
 
 public interface OnContentViewScrollListener {
-    void onScrollAbsolute(int firstItemY);
 
-    void onScrollRelative(int dy);
+    void onFirstItemScroll(int firstItemY);
+
+    void onScroll(int offset);
 }
