@@ -130,18 +130,17 @@ public class SmoothRefreshLayout extends FrameLayout {
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
 
+        int action = MotionEventCompat.getActionMasked(ev);
         float currentY = ev.getY();
 
-
-        if (!isEnabled() || refreshing || animatorRunning || (ev.getAction() != MotionEvent.ACTION_DOWN && lastRefreshHeaderY < 0)) {
+        if (!isEnabled() || refreshing || animatorRunning) {
             return super.dispatchTouchEvent(ev);
         }
-        int event = MotionEventCompat.getActionMasked(ev);
-        switch (event) {
+        switch (action) {
             case MotionEvent.ACTION_DOWN:
                 lastRefreshHeaderY = currentY;
                 correctOverScrollMode = contentView.getOverScrollMode();
-                initRefreshHeaderParams();
+//                initRefreshHeaderParams();
                 break;
 
 
@@ -245,12 +244,10 @@ public class SmoothRefreshLayout extends FrameLayout {
     }
 
     private float changeContentPaddingTop(int paddingTop) {
-        if (paddingTop != contentView.getPaddingTop()) {
-            contentView.setPadding(contentView.getPaddingLeft(),
-                    paddingTop,
-                    contentView.getPaddingRight(),
-                    contentView.getPaddingBottom());
-        }
+        contentView.setPadding(contentView.getPaddingLeft(),
+                paddingTop,
+                contentView.getPaddingRight(),
+                contentView.getPaddingBottom());
         float ratio = (Math.abs(paddingTop - minRefreshPadding)) / (float) (refreshingPadding - minRefreshPadding);
         ratio = ratio < 0 ? 0 : ratio;
         ratio = ratio > 1 ? 1 : ratio;
