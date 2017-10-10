@@ -3,7 +3,6 @@ package io.github.xiewinson.smoothrefreshlayout.library;
 import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.content.Context;
-import android.support.v4.util.ArrayMap;
 import android.support.v4.view.MotionEventCompat;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
@@ -48,9 +47,9 @@ public class SmoothRefreshLayout extends FrameLayout {
     private View refreshHeaderView;
     private View contentView;
     private int refreshHeaderHeight;
-    private int refreshingHeaderY;
-    private int minRefreshHeaderY;
-    private int maxRefreshHeaderY;
+    private int refreshingPadding;
+    private int minRefreshPadding;
+    private int maxRefreshPading;
     private int correctOverScrollMode;
     private boolean isEnterRefresh;
 
@@ -86,7 +85,7 @@ public class SmoothRefreshLayout extends FrameLayout {
         contentWrapper.setContentViewScrollListener(new OnContentViewScrollListener() {
             @Override
             public void onFirstItemScroll(int firstItemY) {
-                if (refreshHeaderView != null && refreshing) {
+                if (refreshHeaderView != null) {
                     refreshHeaderView.setY(firstItemY - refreshHeaderHeight);
                 }
             }
@@ -122,10 +121,10 @@ public class SmoothRefreshLayout extends FrameLayout {
             throw new IllegalArgumentException("please use setRefreshHeader before initRefreshHeaderParams");
         }
         refreshHeaderHeight = refreshHeaderView.getMeasuredHeight();
-        refreshingHeaderY = contentView.getPaddingTop();
-        minRefreshHeaderY = refreshingHeaderY - refreshHeaderHeight;
-        maxRefreshHeaderY = refreshingHeaderY + refreshHeaderHeight * 3;
-        refreshHeaderView.setY(minRefreshHeaderY);
+        minRefreshPadding = contentView.getPaddingTop();
+        refreshingPadding = contentView.getPaddingTop() + refreshHeaderHeight;
+        maxRefreshPading = refreshingPadding + refreshHeaderHeight * 3;
+        refreshHeaderView.setY(minRefreshPadding - refreshHeaderHeight);
     }
 
     @Override
@@ -151,16 +150,16 @@ public class SmoothRefreshLayout extends FrameLayout {
                 //下拉
                 if (dy > 0) {
                     if (!canChildScrollUp()
-                            && refreshHeaderView.getY() != maxRefreshHeaderY
-                            && contentView.getPaddingTop() != maxRefreshHeaderY + refreshHeaderHeight) {
+                            && refreshHeaderView.getY() != maxRefreshPading
+                            && contentView.getPaddingTop() != maxRefreshPading + refreshHeaderHeight) {
                         contentView.setOverScrollMode(OVER_SCROLL_NEVER);
                         handleTouchActionMove(dy);
                     }
                 }
                 //上滑
                 else if (dy < 0) {
-                    if (contentView.getPaddingTop() != refreshingHeaderY
-                            || refreshHeaderView.getY() != minRefreshHeaderY) {
+                    if (contentView.getPaddingTop() != refreshingPadding
+                            || refreshHeaderView.getY() != minRefreshPadding) {
                         handleTouchActionMove(dy);
 
                     }
@@ -193,24 +192,6 @@ public class SmoothRefreshLayout extends FrameLayout {
         return super.onInterceptTouchEvent(ev);
     }
 
-    /**
-     * @return 若返回true，则将变为刷新状态
-     */
-    private boolean handleTouchActionUp() {
-        float currentY = refreshHeaderView.getY();
-        if (currentY >= refreshingHeaderY || currentRefreshState == RefreshHeaderState.RELEASE_TO_REFRESH) {
-            isEnterRefresh = true;
-            expandRefreshHeader(true);
-            return true;
-        } else if (currentY < refreshingHeaderY && currentY > minRefreshHeaderY) {
-            isEnterRefresh = true;
-            setState(RefreshHeaderState.PULL_TO_REFRESH);
-            collapseRefreshHeader();
-        }
-        isEnterRefresh = false;
-        return false;
-    }
-
     private boolean canChildScrollUp() {
         return contentView != null && contentView.canScrollVertically(-1);
     }
@@ -225,37 +206,54 @@ public class SmoothRefreshLayout extends FrameLayout {
         } else if (dy > -1 && dy < 0) {
             dy = -1;
         }
-        int result = (int) (refreshHeaderView.getY() + dy);
+        int result = (int) (contentView.getPaddingTop() + dy);
 
-        if (result <= minRefreshHeaderY) {
+        if (result <= minRefreshPadding) {
             refreshHeaderView.setVisibility(INVISIBLE);
-            result = minRefreshHeaderY;
+            result = minRefreshPadding;
         } else {
             refreshHeaderView.setVisibility(VISIBLE);
         }
 
-        result = Math.min(result, maxRefreshHeaderY);
+        result = Math.min(result, maxRefreshPading);
 
-        if (result >= refreshingHeaderY) {
+        if (result >= refreshingPadding) {
             setState(RefreshHeaderState.RELEASE_TO_REFRESH);
         } else {
             setState(RefreshHeaderState.PULL_TO_REFRESH);
         }
 
         if (refreshHeaderView.getY() != result) {
-            moveViews(result);
+            changeContentPaddingTop(result);
             contentWrapper.scrollVerticalBy((int) dy);
         }
 
     }
 
-    private float moveViews(int value) {
-        refreshHeaderView.setY(value);
+    /**
+     * @return 若返回true，则将变为刷新状态
+     */
+    private boolean handleTouchActionUp() {
+        float currentY = refreshHeaderView.getY();
+        if (currentY >= refreshingPadding - refreshHeaderHeight || currentRefreshState == RefreshHeaderState.RELEASE_TO_REFRESH) {
+            isEnterRefresh = true;
+            expandRefreshHeader(true);
+            return true;
+        } else if (currentY < refreshingPadding - refreshHeaderHeight && currentY > minRefreshPadding - refreshHeaderHeight) {
+            isEnterRefresh = true;
+            setState(RefreshHeaderState.PULL_TO_REFRESH);
+            collapseRefreshHeader();
+        }
+        isEnterRefresh = false;
+        return false;
+    }
+
+    private float changeContentPaddingTop(int paddingTop) {
         contentView.setPadding(contentView.getPaddingLeft(),
-                value + refreshHeaderHeight,
+                paddingTop,
                 contentView.getPaddingRight(),
                 contentView.getPaddingBottom());
-        float ratio = (Math.abs(value - minRefreshHeaderY)) / (float) (refreshingHeaderY - minRefreshHeaderY);
+        float ratio = (Math.abs(paddingTop - minRefreshPadding)) / (float) (refreshingPadding - minRefreshPadding);
         ratio = ratio < 0 ? 0 : ratio;
         ratio = ratio > 1 ? 1 : ratio;
         refreshHeaderWrapper.onPullRefreshHeader(ratio);
@@ -305,7 +303,7 @@ public class SmoothRefreshLayout extends FrameLayout {
         }
         setState(RefreshHeaderState.REFRESHING);
 
-        refreshHeaderAnimator = getRefreshHeaderAnimator((int) refreshHeaderView.getY(), refreshingHeaderY);
+        refreshHeaderAnimator = getRefreshHeaderAnimator(contentView.getPaddingTop(), refreshingPadding);
 
         refreshHeaderAnimator.addListener(new Animator.AnimatorListener() {
             @Override
@@ -331,7 +329,7 @@ public class SmoothRefreshLayout extends FrameLayout {
     }
 
     private void onExpandAnimatorEnd(boolean isTouchTrigger) {
-        moveViews(refreshingHeaderY);
+        changeContentPaddingTop(refreshingPadding);
         animatorRunning = false;
         refreshing = true;
         if (onRefreshListener != null) {
@@ -348,7 +346,7 @@ public class SmoothRefreshLayout extends FrameLayout {
         if (refreshHeaderAnimator != null) {
             refreshHeaderAnimator.cancel();
         }
-        refreshHeaderAnimator = getRefreshHeaderAnimator((int) refreshHeaderView.getY(), minRefreshHeaderY);
+        refreshHeaderAnimator = getRefreshHeaderAnimator(contentView.getPaddingTop(), minRefreshPadding);
         refreshHeaderAnimator.addListener(new Animator.AnimatorListener() {
             @Override
             public void onAnimationStart(Animator animation) {
@@ -373,7 +371,7 @@ public class SmoothRefreshLayout extends FrameLayout {
     }
 
     private void onCollapseAnimatorEnd() {
-        moveViews(minRefreshHeaderY);
+        changeContentPaddingTop(minRefreshPadding);
         animatorRunning = false;
         refreshing = false;
         refreshHeaderView.setVisibility(INVISIBLE);
@@ -381,19 +379,14 @@ public class SmoothRefreshLayout extends FrameLayout {
 
     }
 
-    private static final int ANIMATOR_EXPAND = 0;
-    private static final int ANIMATOR_COLLAPSE = 1;
-
-
     private ValueAnimator getRefreshHeaderAnimator(final int startValue, int endValue) {
         ValueAnimator valueAnimator = ValueAnimator.ofInt(startValue, endValue);
         valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
                 final int newValue = (int) animation.getAnimatedValue();
-                final int oldValue = (int) refreshHeaderView.getY();
-                moveViews(newValue);
-                refreshHeaderView.setY(newValue);
+                final int oldValue = contentView.getPaddingTop();
+                changeContentPaddingTop(newValue);
                 contentWrapper.scrollVerticalBy(oldValue - newValue);
             }
         });
@@ -402,7 +395,7 @@ public class SmoothRefreshLayout extends FrameLayout {
         if (startValue < endValue) {
             duration = DEFAULT_ANIMATOR_DURATION;
         } else {
-            duration = Math.min((int) (((float) startValue - minRefreshHeaderY) / refreshHeaderHeight * DEFAULT_ANIMATOR_DURATION),
+            duration = Math.min((int) (((float) startValue - minRefreshPadding) / refreshHeaderHeight * DEFAULT_ANIMATOR_DURATION),
                     DEFAULT_ANIMATOR_DURATION);
         }
         valueAnimator.setDuration(duration);
