@@ -25,7 +25,6 @@ public class RecyclerViewActivity extends BaseActivity {
 
     private RecyclerView recyclerView;
     private SmoothRefreshLayout refreshLayout;
-    private int i;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
