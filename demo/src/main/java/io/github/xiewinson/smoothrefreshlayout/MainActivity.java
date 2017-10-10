@@ -20,7 +20,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        findViewById(R.id.btn_nested_scroll_view).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.btn_list_view).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(v.getContext(), ListViewActivity.class));
