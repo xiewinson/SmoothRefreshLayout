@@ -374,7 +374,7 @@ public class SmoothRefreshLayout extends FrameLayout {
 
     }
 
-    private ValueAnimator getRefreshHeaderAnimator(final int startValue, int endValue) {
+    private ValueAnimator getRefreshHeaderAnimator(final int startValue, final int endValue) {
         ValueAnimator valueAnimator = ValueAnimator.ofInt(startValue, endValue);
         valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
@@ -382,7 +382,9 @@ public class SmoothRefreshLayout extends FrameLayout {
                 final int newValue = (int) animation.getAnimatedValue();
                 final int oldValue = contentView.getPaddingTop();
                 changeContentPaddingTop(newValue);
-                contentWrapper.scrollVerticalBy(oldValue - newValue);
+                if (endValue > startValue || refreshHeaderView.getY() >= newValue - refreshHeaderHeight) {
+                    contentWrapper.scrollVerticalBy(oldValue - newValue);
+                }
             }
         });
 

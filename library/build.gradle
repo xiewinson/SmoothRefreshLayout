@@ -1,4 +1,5 @@
 apply plugin: 'com.android.library'
+apply plugin: 'com.novoda.bintray-release'
 
 android {
     compileSdkVersion compile_sdk_version
@@ -7,8 +8,8 @@ android {
     defaultConfig {
         minSdkVersion min_sdk_version
         targetSdkVersion target_sdk_version
-        versionCode 1
-        versionName "alpha"
+        versionCode version_code
+        versionName version_name
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
@@ -19,6 +20,18 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+}
+
+def localPropertiesFile = rootProject.file("local.properties")
+def localProperties = new Properties()
+localProperties.load(new FileInputStream(localPropertiesFile))
+
+publish {
+    groupId = 'io.github.xiewinson.smoothrefreshlayout.library'
+    artifactId = 'SmoothRefreshLayout'
+    publishVersion = version_name
+    bintrayUser localProperties['bintrayUser']
+    bintrayKey localProperties['bintrayKey']
 }
 
 dependencies {
