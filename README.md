@@ -6,7 +6,7 @@
 
 ![RecyclerView](https://github.com/xiewinson/SmoothRefreshLayout/blob/master/screenshots/recyclerview.gif)
 ### 使用方式
-* 在 xml 中包裹 RecyclerView/ListView 
+* 目前只支持 RecyclerView 和 ListView，在 xml 中包裹 RecyclerView/ListView 
 ```java
 <io.github.xiewinson.smoothrefreshlayout.library.SmoothRefreshLayout
     android:id="@+id/refreshLayout"
