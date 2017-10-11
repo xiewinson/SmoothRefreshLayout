@@ -25,8 +25,8 @@ task clean(type: Delete) {
 
 ext {
 
-    version_code = 2
-    version_name = "beta1"
+    version_code = 3
+    version_name = "0.1"
 
     compile_sdk_version = 25
     min_sdk_version = 21
