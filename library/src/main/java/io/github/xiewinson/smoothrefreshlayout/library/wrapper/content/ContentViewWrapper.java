@@ -38,7 +38,7 @@ public abstract class ContentViewWrapper implements IContentViewWrapper {
             } else if (viewGroup instanceof ListView) {
                 return new ListViewWrapper((ListView) viewGroup);
             }
-            return null;
+            throw new IllegalArgumentException("view must be recyclerView or listView");
         }
     }
 
