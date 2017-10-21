@@ -27,9 +27,9 @@ public class NestedScrollViewActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_nestedscroll_view);
         initActionBar("NestedScrollView");
-        linearLayout = (LinearLayout) findViewById(R.id.container);
-        nestedScrollView = (NestedScrollView) findViewById(R.id.scrollView);
-        refreshLayout = (SmoothRefreshLayout) findViewById(R.id.refreshLayout);
+        linearLayout = findViewById(R.id.container);
+        nestedScrollView = findViewById(R.id.scrollView);
+        refreshLayout = findViewById(R.id.refreshLayout);
         nestedScrollView.setFillViewport(true);
         for (int i = 0; i < 30; i++) {
             addItem();

@@ -31,8 +31,8 @@ public class RecyclerViewActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recycler_view);
         initActionBar("RecyclerView");
-        refreshLayout = (SmoothRefreshLayout) findViewById(R.id.refreshLayout);
-        recyclerView = (RecyclerView) findViewById(R.id.recyclerview);
+        refreshLayout = findViewById(R.id.refreshLayout);
+        recyclerView = findViewById(R.id.recyclerview);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
@@ -84,7 +84,7 @@ public class RecyclerViewActivity extends BaseActivity {
         }
 
         private void setItems(List<String> list) {
-            if(data.size() > 0) {
+            if (data.size() > 0) {
                 data.clear();
             }
             data.addAll(list);
@@ -111,7 +111,7 @@ public class RecyclerViewActivity extends BaseActivity {
 
             public ViewHolder(View itemView) {
                 super(itemView);
-                tv = (TextView) itemView.findViewById(R.id.tv);
+                tv = itemView.findViewById(R.id.tv);
                 tv.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
