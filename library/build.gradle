@@ -27,7 +27,7 @@ def localProperties = new Properties()
 localProperties.load(new FileInputStream(localPropertiesFile))
 
 publish {
-    groupId = 'io.github.xiewinson.smoothrefreshlayout.library'
+    groupId = 'io.github.xiewinson.library'
     artifactId = 'SmoothRefreshLayout'
     publishVersion = version_name
     bintrayUser localProperties['bintrayUser']
