@@ -5,6 +5,7 @@ import android.animation.ValueAnimator;
 import android.content.Context;
 import android.support.v4.view.MotionEventCompat;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
@@ -52,7 +53,7 @@ public class SmoothRefreshLayout extends FrameLayout {
     private int maxRefreshPading;
     private int correctOverScrollMode;
     private boolean enterPullRefreshHeader;
-    private int currentRefreshHeaderTop;
+    private int currentRefreshHeaderTop = -1;
 
     private float lastRefreshHeaderY = -1;
     private int currentRefreshState = RefreshHeaderState.NONE;
@@ -130,6 +131,9 @@ public class SmoothRefreshLayout extends FrameLayout {
     }
 
     private void layoutRefreshHeaderView(int top) {
+//        if(top == -1) {
+//            top = contentView.getPaddingTop() - refreshHeaderView.getMeasuredHeight();
+//        }
         this.currentRefreshHeaderTop = top;
         refreshHeaderView.layout(refreshHeaderView.getLeft(),
                 top,
@@ -138,9 +142,16 @@ public class SmoothRefreshLayout extends FrameLayout {
     }
 
     @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+    }
+
+    @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
-        layoutRefreshHeaderView(currentRefreshHeaderTop);
+        if (currentRefreshHeaderTop != -1) {
+            layoutRefreshHeaderView(currentRefreshHeaderTop);
+        }
     }
 
     @Override

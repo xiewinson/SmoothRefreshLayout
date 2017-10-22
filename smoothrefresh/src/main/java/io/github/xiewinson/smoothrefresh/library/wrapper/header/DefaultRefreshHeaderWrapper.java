@@ -7,8 +7,8 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import io.github.xiewinson.smoothrefreshlayout.library.R;
 import io.github.xiewinson.smoothrefresh.library.annotation.RefreshHeaderState;
+import io.github.xiewinson.smoothrefreshlayout.library.R;
 
 /**
  * Created by winson on 2017/10/3.
@@ -26,8 +26,8 @@ public class DefaultRefreshHeaderWrapper extends RefreshHeaderWrapper {
     @Override
     public View initRefreshHeaderView() {
         View view = LayoutInflater.from(context).inflate(R.layout.header_default_refresh, null, false);
-        titleTv = (TextView) view.findViewById(R.id.title_tv);
-        iconIv = (ImageView) view.findViewById(R.id.icon_iv);
+        titleTv = view.findViewById(R.id.title_tv);
+        iconIv = view.findViewById(R.id.icon_iv);
         return view;
     }
 
