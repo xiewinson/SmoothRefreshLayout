@@ -16,10 +16,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import io.github.xiewinson.smoothrefreshlayout.library.ScreenUtil;
-import io.github.xiewinson.smoothrefreshlayout.library.SmoothRefreshLayout;
-import io.github.xiewinson.smoothrefreshlayout.library.listener.OnRefreshListener;
-import io.github.xiewinson.smoothrefreshlayout.library.wrapper.header.DefaultRefreshHeaderWrapper;
+import io.github.xiewinson.smoothrefresh.library.ScreenUtil;
+import io.github.xiewinson.smoothrefresh.library.SmoothRefreshLayout;
+import io.github.xiewinson.smoothrefresh.library.listener.OnRefreshListener;
+import io.github.xiewinson.smoothrefresh.library.wrapper.header.DefaultRefreshHeaderWrapper;
 
 public class RecyclerViewActivity extends BaseActivity {
 

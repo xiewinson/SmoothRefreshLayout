@@ -8,9 +8,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import io.github.xiewinson.smoothrefreshlayout.library.SmoothRefreshLayout;
-import io.github.xiewinson.smoothrefreshlayout.library.listener.OnRefreshListener;
-import io.github.xiewinson.smoothrefreshlayout.library.wrapper.header.DefaultRefreshHeaderWrapper;
+import io.github.xiewinson.smoothrefresh.library.SmoothRefreshLayout;
+import io.github.xiewinson.smoothrefresh.library.listener.OnRefreshListener;
+import io.github.xiewinson.smoothrefresh.library.wrapper.header.DefaultRefreshHeaderWrapper;
+
 
 public class ListViewActivity extends BaseActivity {
     private ListView listView;
@@ -21,8 +22,8 @@ public class ListViewActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list_view);
         initActionBar("ListView");
-        listView = (ListView) findViewById(R.id.listView);
-        refreshLayout = (SmoothRefreshLayout) findViewById(R.id.refreshLayout);
+        listView = findViewById(R.id.listView);
+        refreshLayout = findViewById(R.id.refreshLayout);
 
         final List<String> data = new ArrayList<>();
         for (int i = 0; i < 100; i++) {

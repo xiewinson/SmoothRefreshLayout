@@ -1,6 +1,6 @@
-package io.github.xiewinson.smoothrefreshlayout.library.wrapper.content;
+package io.github.xiewinson.smoothrefresh.library.wrapper.content;
 
-import io.github.xiewinson.smoothrefreshlayout.library.listener.OnContentViewScrollListener;
+import io.github.xiewinson.smoothrefresh.library.listener.OnContentViewScrollListener;
 
 /**
  * Created by winson on 2017/10/3.

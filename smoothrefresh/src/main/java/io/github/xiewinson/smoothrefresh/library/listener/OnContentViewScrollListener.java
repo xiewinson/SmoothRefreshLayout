@@ -1,4 +1,4 @@
-package io.github.xiewinson.smoothrefreshlayout.library.listener;
+package io.github.xiewinson.smoothrefresh.library.listener;
 
 /**
  * Created by winson on 2017/10/3.

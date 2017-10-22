@@ -8,7 +8,7 @@
 
     <include layout="@layout/toolbar" />
 
-    <io.github.xiewinson.smoothrefreshlayout.library.SmoothRefreshLayout
+    <io.github.xiewinson.smoothrefresh.library.SmoothRefreshLayout
         android:id="@+id/refreshLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -20,6 +20,6 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:padding="16dp" />
-    </io.github.xiewinson.smoothrefreshlayout.library.SmoothRefreshLayout>
+    </io.github.xiewinson.smoothrefresh.library.SmoothRefreshLayout>
 
 </LinearLayout>

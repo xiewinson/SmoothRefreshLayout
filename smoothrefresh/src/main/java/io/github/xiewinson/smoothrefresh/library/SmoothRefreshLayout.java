@@ -1,4 +1,4 @@
-package io.github.xiewinson.smoothrefreshlayout.library;
+package io.github.xiewinson.smoothrefresh.library;
 
 import android.animation.Animator;
 import android.animation.ValueAnimator;
@@ -10,13 +10,13 @@ import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.FrameLayout;
 
-import io.github.xiewinson.smoothrefreshlayout.library.annotation.RefreshHeaderState;
-import io.github.xiewinson.smoothrefreshlayout.library.listener.OnContentViewScrollListener;
-import io.github.xiewinson.smoothrefreshlayout.library.listener.OnRefreshListener;
-import io.github.xiewinson.smoothrefreshlayout.library.wrapper.content.ContentViewWrapper;
-import io.github.xiewinson.smoothrefreshlayout.library.wrapper.content.IContentViewWrapper;
-import io.github.xiewinson.smoothrefreshlayout.library.wrapper.header.IRefreshHeaderWrapper;
-import io.github.xiewinson.smoothrefreshlayout.library.wrapper.header.RefreshHeaderWrapper;
+import io.github.xiewinson.smoothrefresh.library.annotation.RefreshHeaderState;
+import io.github.xiewinson.smoothrefresh.library.listener.OnRefreshListener;
+import io.github.xiewinson.smoothrefresh.library.wrapper.content.IContentViewWrapper;
+import io.github.xiewinson.smoothrefresh.library.wrapper.header.IRefreshHeaderWrapper;
+import io.github.xiewinson.smoothrefresh.library.listener.OnContentViewScrollListener;
+import io.github.xiewinson.smoothrefresh.library.wrapper.content.ContentViewWrapper;
+import io.github.xiewinson.smoothrefresh.library.wrapper.header.RefreshHeaderWrapper;
 
 /**
  * Created by winson on 2017/10/3.

@@ -1,4 +1,4 @@
-package io.github.xiewinson.smoothrefreshlayout.library.wrapper.header;
+package io.github.xiewinson.smoothrefresh.library.wrapper.header;
 
 import android.content.Context;
 import android.support.annotation.FloatRange;
@@ -8,7 +8,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import io.github.xiewinson.smoothrefreshlayout.library.R;
-import io.github.xiewinson.smoothrefreshlayout.library.annotation.RefreshHeaderState;
+import io.github.xiewinson.smoothrefresh.library.annotation.RefreshHeaderState;
 
 /**
  * Created by winson on 2017/10/3.

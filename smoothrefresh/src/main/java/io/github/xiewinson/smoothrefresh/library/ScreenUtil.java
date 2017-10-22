@@ -1,5 +1,5 @@
 
-package io.github.xiewinson.smoothrefreshlayout.library;
+package io.github.xiewinson.smoothrefresh.library;
 
 
 import android.content.Context;
