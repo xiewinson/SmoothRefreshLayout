@@ -11,11 +11,11 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.FrameLayout;
 
 import io.github.xiewinson.smoothrefresh.library.annotation.RefreshHeaderState;
+import io.github.xiewinson.smoothrefresh.library.listener.OnContentViewScrollListener;
 import io.github.xiewinson.smoothrefresh.library.listener.OnRefreshListener;
+import io.github.xiewinson.smoothrefresh.library.wrapper.content.ContentViewWrapper;
 import io.github.xiewinson.smoothrefresh.library.wrapper.content.IContentViewWrapper;
 import io.github.xiewinson.smoothrefresh.library.wrapper.header.IRefreshHeaderWrapper;
-import io.github.xiewinson.smoothrefresh.library.listener.OnContentViewScrollListener;
-import io.github.xiewinson.smoothrefresh.library.wrapper.content.ContentViewWrapper;
 import io.github.xiewinson.smoothrefresh.library.wrapper.header.RefreshHeaderWrapper;
 
 /**
@@ -52,6 +52,7 @@ public class SmoothRefreshLayout extends FrameLayout {
     private int maxRefreshPading;
     private int correctOverScrollMode;
     private boolean enterPullRefreshHeader;
+    private int currentRefreshHeaderTop;
 
     private float lastRefreshHeaderY = -1;
     private int currentRefreshState = RefreshHeaderState.NONE;
@@ -86,14 +87,14 @@ public class SmoothRefreshLayout extends FrameLayout {
             @Override
             public void onFirstItemScroll(int firstItemY) {
                 if (refreshHeaderView != null) {
-                    refreshHeaderView.setY(firstItemY - refreshHeaderHeight);
+                    layoutRefreshHeaderView(firstItemY - refreshHeaderHeight);
                 }
             }
 
             @Override
             public void onScroll(int offset) {
                 if (refreshHeaderView != null && refreshing) {
-                    refreshHeaderView.setY(offset);
+                    refreshHeaderView.offsetTopAndBottom(offset);
                 }
             }
         });
@@ -124,7 +125,22 @@ public class SmoothRefreshLayout extends FrameLayout {
         minRefreshPadding = contentView.getPaddingTop();
         refreshingPadding = contentView.getPaddingTop() + refreshHeaderHeight;
         maxRefreshPading = refreshingPadding + refreshHeaderHeight * 3;
-        refreshHeaderView.setY(minRefreshPadding - refreshHeaderHeight);
+        layoutRefreshHeaderView(minRefreshPadding - refreshHeaderHeight);
+
+    }
+
+    private void layoutRefreshHeaderView(int top) {
+        this.currentRefreshHeaderTop = top;
+        refreshHeaderView.layout(refreshHeaderView.getLeft(),
+                top,
+                refreshHeaderView.getRight(),
+                top + refreshHeaderHeight);
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+        layoutRefreshHeaderView(currentRefreshHeaderTop);
     }
 
     @Override
@@ -149,7 +165,7 @@ public class SmoothRefreshLayout extends FrameLayout {
                 //下拉
                 if (dy > 0) {
                     if (enterPullRefreshHeader || (!canChildScrollUp()
-                            && refreshHeaderView.getY() != maxRefreshPading
+                            && refreshHeaderView.getTop() != maxRefreshPading
                             && contentView.getPaddingTop() != maxRefreshPading + refreshHeaderHeight)) {
                         contentView.setOverScrollMode(OVER_SCROLL_NEVER);
                         handleTouchActionMove(dy);
@@ -158,7 +174,7 @@ public class SmoothRefreshLayout extends FrameLayout {
                 //上滑
                 else if (enterPullRefreshHeader && dy < 0) {
                     if (contentView.getPaddingTop() != refreshingPadding
-                            || refreshHeaderView.getY() != minRefreshPadding) {
+                            || refreshHeaderView.getTop() != minRefreshPadding) {
                         handleTouchActionMove(dy);
 
                     }
@@ -232,7 +248,7 @@ public class SmoothRefreshLayout extends FrameLayout {
      * @return 若返回true，则将变为刷新状态
      */
     private boolean handleTouchActionUp() {
-        float currentY = refreshHeaderView.getY();
+        float currentY = refreshHeaderView.getTop();
         if (currentY >= refreshingPadding - refreshHeaderHeight || currentRefreshState == RefreshHeaderState.RELEASE_TO_REFRESH) {
             expandRefreshHeader(true);
             return true;
@@ -382,7 +398,7 @@ public class SmoothRefreshLayout extends FrameLayout {
                 final int newValue = (int) animation.getAnimatedValue();
                 final int oldValue = contentView.getPaddingTop();
                 changeContentPaddingTop(newValue);
-                if (endValue > startValue || refreshHeaderView.getY() >= newValue - refreshHeaderHeight) {
+                if (endValue > startValue || refreshHeaderView.getTop() >= newValue - refreshHeaderHeight) {
                     contentWrapper.scrollVerticalBy(oldValue - newValue);
                 }
             }
@@ -422,4 +438,8 @@ public class SmoothRefreshLayout extends FrameLayout {
             contentWrapper.removeContentViewScrollListener();
         }
     }
+
+//    @Override
+//    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+//    }
 }
