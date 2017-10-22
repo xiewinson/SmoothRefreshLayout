@@ -32,4 +32,5 @@ dependencies {
     testCompile 'junit:junit:4.12'
 }
 
-apply from: './bintray_config.gradle'
+def bintrayConfig = './bintray_config.gradle'
+if(file(bintrayConfig).exists()) apply from: bintrayConfig
