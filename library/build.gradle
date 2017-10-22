@@ -33,4 +33,4 @@ dependencies {
 }
 
 def bintrayConfig = './bintray_config.gradle'
-if(file(bintrayConfig).exists()) apply from: bintrayConfig
+if (file(bintrayConfig).exists()) apply from: bintrayConfig
