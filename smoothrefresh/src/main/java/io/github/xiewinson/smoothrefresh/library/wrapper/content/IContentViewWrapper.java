@@ -12,9 +12,12 @@ public interface IContentViewWrapper {
 
     boolean isSupportNestedScroll();
 
+    boolean isList();
+
     void layout(int top);
 
     int getTopOffset();
 
     void recycle();
+
 }

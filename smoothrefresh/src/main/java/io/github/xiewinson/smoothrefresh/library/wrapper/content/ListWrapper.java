@@ -43,6 +43,11 @@ public class ListWrapper extends ContentViewWrapper implements IListWrapper {
     }
 
     @Override
+    public boolean isList() {
+        return true;
+    }
+
+    @Override
     public void recycle() {
         this.onViewGroupScrollListener = null;
     }

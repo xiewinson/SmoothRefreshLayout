@@ -13,7 +13,7 @@ import io.github.xiewinson.smoothrefresh.library.listener.OnContentViewScrollLis
  * Created by winson on 2017/10/3.
  */
 
-public abstract class ContentViewWrapper implements IContentViewWrapper {
+public class ContentViewWrapper implements IContentViewWrapper {
     private ViewGroup viewGroup;
     private OnContentViewScrollListener onViewGroupScrollListener;
 
@@ -28,7 +28,7 @@ public abstract class ContentViewWrapper implements IContentViewWrapper {
             } else if (viewGroup instanceof ListView) {
                 return new ListViewWrapper((ListView) viewGroup);
             } else if (viewGroup instanceof NestedScrollView) {
-                return new NestedScrollViewWrapper((NestedScrollView) viewGroup);
+                return new ContentViewWrapper((ViewGroup) viewGroup);
             }
             throw new IllegalArgumentException("view not be supported");
         }
@@ -61,5 +61,10 @@ public abstract class ContentViewWrapper implements IContentViewWrapper {
     @Override
     public void recycle() {
 
+    }
+
+    @Override
+    public boolean isList() {
+        return false;
     }
 }
