@@ -8,5 +8,4 @@ public interface OnContentViewScrollListener {
 
     void onFirstItemScroll(int firstItemY);
 
-    void onScroll(int offset);
 }

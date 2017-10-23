@@ -7,6 +7,7 @@ import io.github.xiewinson.smoothrefresh.library.listener.OnContentViewScrollLis
 /**
  * Created by winson on 2017/10/7.
  * 更改paddingTop的方式在ScrollView上会有跳动，不适合
+ *
  * @hide
  */
 
@@ -20,24 +21,6 @@ public class NestedScrollViewWrapper extends ContentViewWrapper {
     }
 
     @Override
-    public void setContentViewScrollListener(final OnContentViewScrollListener onViewGroupScrollListener) {
-        super.setContentViewScrollListener(onViewGroupScrollListener);
-        scrollView.setOnScrollChangeListener(new NestedScrollView.OnScrollChangeListener() {
-            @Override
-            public void onScrollChange(NestedScrollView v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
-                if (onViewGroupScrollListener != null) {
-                    onViewGroupScrollListener.onScroll(-scrollY);
-                }
-            }
-        });
-    }
-
-    @Override
-    public void removeContentViewScrollListener() {
-        super.removeContentViewScrollListener();
-    }
-
-    @Override
     public boolean topChildIsFirstItem() {
         return true;
     }
@@ -46,5 +29,4 @@ public class NestedScrollViewWrapper extends ContentViewWrapper {
     public void scrollVerticalBy(int dy) {
 
     }
-
 }

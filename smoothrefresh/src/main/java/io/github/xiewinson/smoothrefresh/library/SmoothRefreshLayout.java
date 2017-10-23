@@ -4,7 +4,6 @@ import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.support.annotation.NonNull;
-import android.support.v4.view.MotionEventCompat;
 import android.support.v4.view.NestedScrollingParent;
 import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
@@ -18,6 +17,7 @@ import io.github.xiewinson.smoothrefresh.library.listener.OnContentViewScrollLis
 import io.github.xiewinson.smoothrefresh.library.listener.OnRefreshListener;
 import io.github.xiewinson.smoothrefresh.library.wrapper.content.ContentViewWrapper;
 import io.github.xiewinson.smoothrefresh.library.wrapper.content.IContentViewWrapper;
+import io.github.xiewinson.smoothrefresh.library.wrapper.content.ListWrapper;
 import io.github.xiewinson.smoothrefresh.library.wrapper.header.IRefreshHeaderWrapper;
 import io.github.xiewinson.smoothrefresh.library.wrapper.header.RefreshHeaderWrapper;
 
@@ -54,7 +54,9 @@ public class SmoothRefreshLayout extends FrameLayout implements NestedScrollingP
     private int minRefreshContentTop;
     private int maxRefreshContentTop;
     private boolean enterPullRefreshHeader;
+
     private int currentRefreshHeaderTop = -1;
+    private int currentContentTop = -1;
 
     private int correctOverScrollMode;
     private float lastRefreshHeaderY = -1;
@@ -86,21 +88,16 @@ public class SmoothRefreshLayout extends FrameLayout implements NestedScrollingP
             throw new NullPointerException("you must put a contentView");
         }
         contentWrapper = ContentViewWrapper.Factory.getInstance(contentView);
-        contentWrapper.setContentViewScrollListener(new OnContentViewScrollListener() {
-            @Override
-            public void onFirstItemScroll(int firstItemY) {
-                if (refreshHeaderView != null) {
-                    layoutRefreshHeaderView(firstItemY - refreshHeaderHeight);
+        if (contentWrapper instanceof ListWrapper) {
+            ((ListWrapper) contentWrapper).setContentViewScrollListener(new OnContentViewScrollListener() {
+                @Override
+                public void onFirstItemScroll(int firstItemY) {
+                    if (refreshHeaderView != null) {
+                        layoutRefreshHeaderView(firstItemY - refreshHeaderHeight);
+                    }
                 }
-            }
-
-            @Override
-            public void onScroll(int offset) {
-                if (refreshHeaderView != null && refreshing) {
-                    refreshHeaderView.offsetTopAndBottom(offset);
-                }
-            }
-        });
+            });
+        }
     }
 
     public void setRefreshHeader(RefreshHeaderWrapper headerWrapper) {
@@ -125,22 +122,11 @@ public class SmoothRefreshLayout extends FrameLayout implements NestedScrollingP
             throw new IllegalArgumentException("please use setRefreshHeader before initRefreshHeaderParams");
         }
         refreshHeaderHeight = refreshHeaderView.getMeasuredHeight();
-        minRefreshContentTop = contentView.getPaddingTop();
-        refreshingContentTop = contentView.getPaddingTop() + refreshHeaderHeight;
+        minRefreshContentTop = contentWrapper.getTopOffset();
+        refreshingContentTop = contentWrapper.getTopOffset() + refreshHeaderHeight;
         maxRefreshContentTop = refreshingContentTop + refreshHeaderHeight * 3;
         layoutRefreshHeaderView(minRefreshContentTop - refreshHeaderHeight);
 
-    }
-
-    private void layoutRefreshHeaderView(int top) {
-//        if(top == -1) {
-//            top = contentView.getPaddingTop() - refreshHeaderView.getMeasuredHeight();
-//        }
-        this.currentRefreshHeaderTop = top;
-        refreshHeaderView.layout(refreshHeaderView.getLeft(),
-                top,
-                refreshHeaderView.getRight(),
-                top + refreshHeaderHeight);
     }
 
     @Override
@@ -154,6 +140,9 @@ public class SmoothRefreshLayout extends FrameLayout implements NestedScrollingP
         if (currentRefreshHeaderTop != -1) {
             layoutRefreshHeaderView(currentRefreshHeaderTop);
         }
+        if (!(contentWrapper instanceof ListWrapper)) {
+            contentWrapper.layout(currentContentTop);
+        }
     }
 
     @Override
@@ -162,7 +151,7 @@ public class SmoothRefreshLayout extends FrameLayout implements NestedScrollingP
             return super.dispatchTouchEvent(ev);
         }
 
-        int action = MotionEventCompat.getActionMasked(ev);
+        int action = ev.getAction();
         float currentY = ev.getY();
 
         if (!isEnabled() || refreshing || animatorRunning) {
@@ -182,14 +171,14 @@ public class SmoothRefreshLayout extends FrameLayout implements NestedScrollingP
                 if (dy > 0) {
                     if (enterPullRefreshHeader || (!canChildScrollUp()
                             && refreshHeaderView.getTop() != maxRefreshContentTop
-                            && contentView.getPaddingTop() != maxRefreshContentTop + refreshHeaderHeight)) {
+                            && contentWrapper.getTopOffset() != maxRefreshContentTop + refreshHeaderHeight)) {
                         contentView.setOverScrollMode(OVER_SCROLL_NEVER);
                         handleTouchActionMove(dy);
                     }
                 }
                 //上滑
                 else if (enterPullRefreshHeader && dy < 0) {
-                    if (contentView.getPaddingTop() != refreshingContentTop
+                    if (contentWrapper.getTopOffset() != refreshingContentTop
                             || refreshHeaderView.getTop() != minRefreshContentTop) {
                         handleTouchActionMove(dy);
 
@@ -239,8 +228,7 @@ public class SmoothRefreshLayout extends FrameLayout implements NestedScrollingP
         } else if (dy > -1 && dy < 0) {
             dy = -1;
         }
-        int result = (int) (contentView.getPaddingTop() + dy);
-
+        int result = (int) (dy + contentWrapper.getTopOffset());
         if (result <= minRefreshContentTop) {
             refreshHeaderView.setVisibility(INVISIBLE);
             result = minRefreshContentTop;
@@ -256,7 +244,7 @@ public class SmoothRefreshLayout extends FrameLayout implements NestedScrollingP
             setState(RefreshHeaderState.PULL_TO_REFRESH);
         }
 
-        changeContentPaddingTop(result);
+        layoutContentView(result);
 
     }
 
@@ -268,22 +256,33 @@ public class SmoothRefreshLayout extends FrameLayout implements NestedScrollingP
         if (currentY >= refreshingContentTop - refreshHeaderHeight || currentRefreshState == RefreshHeaderState.RELEASE_TO_REFRESH) {
             expandRefreshHeader(true);
             return true;
-        } else if (currentY < refreshingContentTop - refreshHeaderHeight && currentY > minRefreshContentTop - refreshHeaderHeight) {
+        } else if (currentY < refreshingContentTop - refreshHeaderHeight
+//                && currentY > minRefreshContentTop - refreshHeaderHeight
+                ) {
             setState(RefreshHeaderState.PULL_TO_REFRESH);
             collapseRefreshHeader();
+        } else if (currentY < minRefreshContentTop - refreshHeaderHeight) {
+            onCollapseAnimatorEnd();
         }
         return false;
     }
 
-    private float changeContentPaddingTop(int paddingTop) {
-        contentView.setPadding(contentView.getPaddingLeft(),
-                paddingTop,
-                contentView.getPaddingRight(),
-                contentView.getPaddingBottom());
-        float ratio = (Math.abs(paddingTop - minRefreshContentTop)) / (float) (refreshingContentTop - minRefreshContentTop);
+    private void layoutRefreshHeaderView(int top) {
+        this.currentRefreshHeaderTop = top;
+        refreshHeaderView.layout(refreshHeaderView.getLeft(),
+                top,
+                refreshHeaderView.getRight(),
+                top + refreshHeaderHeight);
+    }
+
+    private float layoutContentView(int top) {
+        this.currentContentTop = top;
+        contentWrapper.layout(top);
+        float ratio = (Math.abs(top - minRefreshContentTop)) / (float) (refreshingContentTop - minRefreshContentTop);
         ratio = ratio < 0 ? 0 : ratio;
         ratio = ratio > 1 ? 1 : ratio;
         refreshHeaderWrapper.onPullRefreshHeader(ratio);
+        layoutRefreshHeaderView(top - refreshHeaderHeight);
         return ratio;
     }
 
@@ -330,7 +329,7 @@ public class SmoothRefreshLayout extends FrameLayout implements NestedScrollingP
         }
         setState(RefreshHeaderState.REFRESHING);
 
-        refreshHeaderAnimator = getRefreshHeaderAnimator(contentView.getPaddingTop(), refreshingContentTop);
+        refreshHeaderAnimator = getRefreshHeaderAnimator(contentWrapper.getTopOffset(), refreshingContentTop);
 
         refreshHeaderAnimator.addListener(new Animator.AnimatorListener() {
             @Override
@@ -356,7 +355,7 @@ public class SmoothRefreshLayout extends FrameLayout implements NestedScrollingP
     }
 
     private void onExpandAnimatorEnd(boolean isTouchTrigger) {
-        changeContentPaddingTop(refreshingContentTop);
+        layoutContentView(refreshingContentTop);
         animatorRunning = false;
         refreshing = true;
         if (onRefreshListener != null) {
@@ -373,7 +372,7 @@ public class SmoothRefreshLayout extends FrameLayout implements NestedScrollingP
         if (refreshHeaderAnimator != null) {
             refreshHeaderAnimator.cancel();
         }
-        refreshHeaderAnimator = getRefreshHeaderAnimator(contentView.getPaddingTop(), minRefreshContentTop);
+        refreshHeaderAnimator = getRefreshHeaderAnimator(contentWrapper.getTopOffset(), minRefreshContentTop);
         refreshHeaderAnimator.addListener(new Animator.AnimatorListener() {
             @Override
             public void onAnimationStart(Animator animation) {
@@ -398,7 +397,7 @@ public class SmoothRefreshLayout extends FrameLayout implements NestedScrollingP
     }
 
     private void onCollapseAnimatorEnd() {
-        changeContentPaddingTop(minRefreshContentTop);
+        layoutContentView(minRefreshContentTop);
         animatorRunning = false;
         refreshing = false;
         refreshHeaderView.setVisibility(INVISIBLE);
@@ -412,8 +411,8 @@ public class SmoothRefreshLayout extends FrameLayout implements NestedScrollingP
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
                 final int newValue = (int) animation.getAnimatedValue();
-                final int oldValue = contentView.getPaddingTop();
-                changeContentPaddingTop(newValue);
+                final int oldValue = contentWrapper.getTopOffset();
+                layoutContentView(newValue);
                 if (endValue > startValue || refreshHeaderView.getTop() >= newValue - refreshHeaderHeight) {
                     contentWrapper.scrollVerticalBy(oldValue - newValue);
                 }
@@ -451,7 +450,7 @@ public class SmoothRefreshLayout extends FrameLayout implements NestedScrollingP
         }
         onRefreshListener = null;
         if (contentWrapper != null) {
-            contentWrapper.removeContentViewScrollListener();
+            contentWrapper.recycle();
         }
     }
 
@@ -459,7 +458,6 @@ public class SmoothRefreshLayout extends FrameLayout implements NestedScrollingP
     public boolean onStartNestedScroll(@NonNull View child, @NonNull View target, @ViewCompat.ScrollAxis int axes) {
         if (target == contentView
                 && axes == ViewCompat.SCROLL_AXIS_VERTICAL
-                && !canChildScrollUp()
                 && isEnabled()
                 && !refreshing
                 && !animatorRunning) {
@@ -471,7 +469,18 @@ public class SmoothRefreshLayout extends FrameLayout implements NestedScrollingP
     @Override
     public void onNestedPreScroll(View target, int dx, int dy, int[] consumed) {
         super.onNestedPreScroll(target, dx, dy, consumed);
-        handleTouchActionMove(-dy);
+        if (dy < 0 && !canChildScrollUp()) {
+            handleTouchActionMove(-dy);
+            enterPullRefreshHeader = true;
+        } else if (dy > 0 && enterPullRefreshHeader) {
+            handleTouchActionMove(-dy);
+        }
+
+
+        if (dy > 0 && refreshHeaderView.getTop() > minRefreshContentTop - refreshHeaderHeight) {
+            consumed[1] = dy;
+        }
+
     }
 
     @Override
@@ -487,13 +496,14 @@ public class SmoothRefreshLayout extends FrameLayout implements NestedScrollingP
     @Override
     public void onNestedScrollAccepted(View child, View target, int axes) {
         super.onNestedScrollAccepted(child, target, axes);
-        enterPullRefreshHeader = true;
     }
 
     @Override
     public void onStopNestedScroll(View child) {
         super.onStopNestedScroll(child);
+        if (enterPullRefreshHeader) {
+            handleTouchActionUp();
+        }
         enterPullRefreshHeader = false;
-        handleTouchActionUp();
     }
 }

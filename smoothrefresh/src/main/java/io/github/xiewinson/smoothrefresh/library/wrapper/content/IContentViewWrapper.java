@@ -1,16 +1,10 @@
 package io.github.xiewinson.smoothrefresh.library.wrapper.content;
 
-import io.github.xiewinson.smoothrefresh.library.listener.OnContentViewScrollListener;
-
 /**
  * Created by winson on 2017/10/3.
  */
 
 public interface IContentViewWrapper {
-
-    void setContentViewScrollListener(OnContentViewScrollListener onViewGroupScrollListener);
-
-    void removeContentViewScrollListener();
 
     boolean topChildIsFirstItem();
 
@@ -19,4 +13,10 @@ public interface IContentViewWrapper {
     void smoothScrollVerticalToTop();
 
     boolean isSupportNestedScroll();
+
+    void layout(int top);
+
+    int getTopOffset();
+
+    void recycle();
 }

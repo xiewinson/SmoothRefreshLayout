@@ -43,9 +43,9 @@ public class NestedScrollViewActivity extends BaseActivity {
                     @Override
                     public void run() {
                         refreshLayout.setRefreshing(false);
-                        addItem();
+//                        addItem();
                     }
-                }, 1000);
+                }, 5000);
             }
         });
     }

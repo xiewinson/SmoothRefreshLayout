@@ -1,6 +1,7 @@
 package io.github.xiewinson.smoothrefresh.library.wrapper.content;
 
 import android.support.v4.view.NestedScrollingChild;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,24 +21,16 @@ public abstract class ContentViewWrapper implements IContentViewWrapper {
         this.viewGroup = viewGroup;
     }
 
-    @Override
-    public void setContentViewScrollListener(OnContentViewScrollListener onViewGroupScrollListener) {
-        this.onViewGroupScrollListener = onViewGroupScrollListener;
-    }
-
-    @Override
-    public void removeContentViewScrollListener() {
-        this.onViewGroupScrollListener = null;
-    }
-
     public static class Factory {
         public static IContentViewWrapper getInstance(View viewGroup) {
             if (viewGroup instanceof RecyclerView) {
                 return new RecyclerViewWrapper((RecyclerView) viewGroup);
             } else if (viewGroup instanceof ListView) {
                 return new ListViewWrapper((ListView) viewGroup);
+            } else if (viewGroup instanceof NestedScrollView) {
+                return new NestedScrollViewWrapper((NestedScrollView) viewGroup);
             }
-            throw new IllegalArgumentException("view must be recyclerView or listView");
+            throw new IllegalArgumentException("view not be supported");
         }
     }
 
@@ -53,5 +46,20 @@ public abstract class ContentViewWrapper implements IContentViewWrapper {
     @Override
     public boolean isSupportNestedScroll() {
         return this.viewGroup instanceof NestedScrollingChild;
+    }
+
+    @Override
+    public void layout(int top) {
+        viewGroup.layout(viewGroup.getLeft(), top, viewGroup.getRight(), viewGroup.getBottom());
+    }
+
+    @Override
+    public int getTopOffset() {
+        return viewGroup.getTop();
+    }
+
+    @Override
+    public void recycle() {
+
     }
 }

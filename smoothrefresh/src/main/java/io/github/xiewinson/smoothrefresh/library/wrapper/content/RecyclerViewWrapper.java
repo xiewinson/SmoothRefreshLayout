@@ -41,8 +41,8 @@ public class RecyclerViewWrapper extends ListWrapper {
     }
 
     @Override
-    public void removeContentViewScrollListener() {
-        super.removeContentViewScrollListener();
+    public void recycle() {
+        super.recycle();
         recyclerView.removeOnScrollListener(onScrollListener);
     }
 
