@@ -36,7 +36,7 @@ public abstract class ContentViewWrapper implements IContentViewWrapper {
 
     @Override
     public void scrollVerticalBy(int dy) {
-        viewGroup.scrollBy(0, dy);
+//        viewGroup.scrollBy(0, dy);
     }
 
     @Override
