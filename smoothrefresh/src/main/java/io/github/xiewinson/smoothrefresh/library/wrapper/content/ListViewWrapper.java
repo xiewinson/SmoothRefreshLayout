@@ -10,7 +10,8 @@ import io.github.xiewinson.smoothrefresh.library.listener.OnContentViewScrollLis
  * Created by winson on 2017/10/10.
  */
 
-public class ListViewWrapper extends ContentViewWrapper {
+public class ListViewWrapper extends ListWrapper {
+
     private ListView listView;
 
     public ListViewWrapper(ListView listView) {

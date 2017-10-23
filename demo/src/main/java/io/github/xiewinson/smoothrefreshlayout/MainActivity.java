@@ -26,6 +26,13 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(new Intent(v.getContext(), ListViewActivity.class));
             }
         });
+
+        findViewById(R.id.nested_scroll_view).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(v.getContext(), NestedScrollViewActivity.class));
+            }
+        });
     }
 
 }

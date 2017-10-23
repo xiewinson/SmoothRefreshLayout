@@ -9,7 +9,7 @@ import io.github.xiewinson.smoothrefresh.library.listener.OnContentViewScrollLis
  * Created by winson on 2017/10/3.
  */
 
-public class RecyclerViewWrapper extends ContentViewWrapper {
+public class RecyclerViewWrapper extends ListWrapper {
     private RecyclerView recyclerView;
     private RecyclerView.OnScrollListener onScrollListener;
 
