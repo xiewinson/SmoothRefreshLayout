@@ -1,5 +1,6 @@
 package io.github.xiewinson.smoothrefresh.library.wrapper.content;
 
+import android.support.v4.widget.ListViewCompat;
 import android.widget.AbsListView;
 import android.widget.ListView;
 
@@ -49,6 +50,7 @@ public class ListViewWrapper extends ContentViewWrapper {
 
     @Override
     public void scrollVerticalBy(int dy) {
+        ListViewCompat.scrollListBy(listView, dy);
     }
 
     @Override

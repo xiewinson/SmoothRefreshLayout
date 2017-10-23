@@ -17,4 +17,6 @@ public interface IContentViewWrapper {
     void scrollVerticalBy(int dy);
 
     void smoothScrollVerticalToTop();
+
+    boolean isSupportNestedScroll();
 }

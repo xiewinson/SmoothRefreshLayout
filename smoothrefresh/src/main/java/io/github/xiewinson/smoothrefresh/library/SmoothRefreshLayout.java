@@ -3,9 +3,11 @@ package io.github.xiewinson.smoothrefresh.library;
 import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.v4.view.MotionEventCompat;
+import android.support.v4.view.NestedScrollingParent;
+import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
@@ -23,7 +25,7 @@ import io.github.xiewinson.smoothrefresh.library.wrapper.header.RefreshHeaderWra
  * Created by winson on 2017/10/3.
  */
 
-public class SmoothRefreshLayout extends FrameLayout {
+public class SmoothRefreshLayout extends FrameLayout implements NestedScrollingParent {
 
     public SmoothRefreshLayout(Context context) {
         this(context, null);
@@ -156,6 +158,9 @@ public class SmoothRefreshLayout extends FrameLayout {
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
+        if (contentWrapper.isSupportNestedScroll()) {
+            return super.dispatchTouchEvent(ev);
+        }
 
         int action = MotionEventCompat.getActionMasked(ev);
         float currentY = ev.getY();
@@ -450,7 +455,45 @@ public class SmoothRefreshLayout extends FrameLayout {
         }
     }
 
-//    @Override
-//    protected void onLayout(boolean changed, int l, int t, int r, int b) {
-//    }
+    @Override
+    public boolean onStartNestedScroll(@NonNull View child, @NonNull View target, @ViewCompat.ScrollAxis int axes) {
+        if (target == contentView
+                && axes == ViewCompat.SCROLL_AXIS_VERTICAL
+                && !canChildScrollUp()
+                && isEnabled()
+                && !refreshing
+                && !animatorRunning) {
+            return true;
+        }
+        return super.onStartNestedScroll(child, target, axes);
+    }
+
+    @Override
+    public void onNestedPreScroll(View target, int dx, int dy, int[] consumed) {
+        super.onNestedPreScroll(target, dx, dy, consumed);
+        handleTouchActionMove(-dy);
+    }
+
+    @Override
+    public void onNestedScroll(View target, int dxConsumed, int dyConsumed, int dxUnconsumed, int dyUnconsumed) {
+        super.onNestedScroll(target, dxConsumed, dyConsumed, dxUnconsumed, dyUnconsumed);
+    }
+
+    @Override
+    public boolean onNestedPreFling(View target, float velocityX, float velocityY) {
+        if(refreshHeaderView.getTop() > minRefreshPadding - refreshHeaderHeight) return true;
+        return false;
+    }
+
+    @Override
+    public void onNestedScrollAccepted(View child, View target, int axes) {
+        super.onNestedScrollAccepted(child, target, axes);
+    }
+
+    @Override
+    public void onStopNestedScroll(View child) {
+        super.onStopNestedScroll(child);
+
+        handleTouchActionUp();
+    }
 }

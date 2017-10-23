@@ -1,5 +1,6 @@
 package io.github.xiewinson.smoothrefresh.library.wrapper.content;
 
+import android.support.v4.view.NestedScrollingChild;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
@@ -49,5 +50,10 @@ public abstract class ContentViewWrapper implements IContentViewWrapper {
 
     @Override
     public void smoothScrollVerticalToTop() {
+    }
+
+    @Override
+    public boolean isSupportNestedScroll() {
+        return this.viewGroup instanceof NestedScrollingChild;
     }
 }

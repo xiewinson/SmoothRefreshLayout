@@ -65,7 +65,7 @@ public class RecyclerViewActivity extends BaseActivity {
                         Collections.shuffle(data);
                         listAdapter.setItems(data);
                     }
-                }, 1000);
+                }, 5000);
             }
         });
 //        refreshLayout.setRefreshing(true);
