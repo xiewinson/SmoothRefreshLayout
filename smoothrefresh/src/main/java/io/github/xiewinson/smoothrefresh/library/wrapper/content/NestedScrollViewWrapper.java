@@ -20,13 +20,4 @@ public class NestedScrollViewWrapper extends ContentViewWrapper {
         this.scrollView = scrollView;
     }
 
-    @Override
-    public boolean topChildIsFirstItem() {
-        return true;
-    }
-
-    @Override
-    public void scrollVerticalBy(int dy) {
-
-    }
 }

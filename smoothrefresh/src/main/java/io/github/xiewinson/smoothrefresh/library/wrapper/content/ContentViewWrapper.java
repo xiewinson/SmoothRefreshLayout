@@ -35,11 +35,6 @@ public abstract class ContentViewWrapper implements IContentViewWrapper {
     }
 
     @Override
-    public void scrollVerticalBy(int dy) {
-//        viewGroup.scrollBy(0, dy);
-    }
-
-    @Override
     public void smoothScrollVerticalToTop() {
     }
 
@@ -56,6 +51,11 @@ public abstract class ContentViewWrapper implements IContentViewWrapper {
     @Override
     public int getTopOffset() {
         return viewGroup.getTop();
+    }
+
+    @Override
+    public boolean topChildIsFirstItem() {
+        return true;
     }
 
     @Override

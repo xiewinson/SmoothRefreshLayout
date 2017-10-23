@@ -8,8 +8,6 @@ public interface IContentViewWrapper {
 
     boolean topChildIsFirstItem();
 
-    void scrollVerticalBy(int dy);
-
     void smoothScrollVerticalToTop();
 
     boolean isSupportNestedScroll();
