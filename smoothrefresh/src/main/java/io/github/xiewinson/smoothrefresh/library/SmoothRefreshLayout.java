@@ -116,7 +116,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
 
     private void initRefreshHeaderView() {
         refreshHeaderView.setVisibility(INVISIBLE);
-        addView(refreshHeaderView, 0, new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+        addView(refreshHeaderView,  new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
         post(new Runnable() {
             @Override
             public void run() {
@@ -130,22 +130,27 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
             throw new IllegalArgumentException("please use setRefreshHeader before initRefreshHeaderParams");
         }
         refreshHeaderHeight = refreshHeaderView.getMeasuredHeight();
+
         contentMinTop = contentWrapper.getTopOffset();
         contentRefreshingTop = contentWrapper.getTopOffset() + refreshHeaderHeight;
         contentMaxTop = contentRefreshingTop + refreshHeaderHeight * 3;
 
-        headerMinTop = contentMinTop - refreshHeaderHeight;
-        headerMaxTop = contentMaxTop - refreshHeaderHeight;
-        headerRefreshingTop = contentRefreshingTop - refreshHeaderHeight;
+        headerMinTop = contentView.getTop() - refreshHeaderHeight;
+        headerRefreshingTop = headerMinTop + refreshHeaderHeight;
+
+//        headerMinTop = contentMinTop - refreshHeaderHeight;
+//        headerRefreshingTop = contentRefreshingTop - refreshHeaderHeight;
+
+        headerMaxTop = computeRefreshHeaderTopByContentTop(contentMaxTop);
 
         layoutRefreshHeaderView(headerMinTop);
 
     }
 
     private int computeRefreshHeaderTopByContentTop(int top) {
-        return top - refreshHeaderHeight;
+        return top - contentMinTop + headerMinTop;
     }
-    
+
     private boolean isRefreshHeaderVisible() {
         return refreshHeaderView.getTop() > headerMinTop;
     }
@@ -214,16 +219,14 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
                 //下拉
                 if (dy > 0) {
                     if (enterPullRefreshHeader || (!canChildScrollUp()
-                            && refreshHeaderView.getTop() != contentMaxTop
-                            && contentWrapper.getTopOffset() != contentMaxTop + refreshHeaderHeight)) {
+                            && refreshHeaderView.getTop() != contentMaxTop)) {
                         contentView.setOverScrollMode(OVER_SCROLL_NEVER);
                         handleTouchActionMove(dy);
                     }
                 }
                 //上滑
                 else if (enterPullRefreshHeader && dy < 0) {
-                    if (contentWrapper.getTopOffset() != contentRefreshingTop
-                            || refreshHeaderView.getTop() != contentMinTop) {
+                    if (refreshHeaderView.getTop() != contentMinTop) {
                         handleTouchActionMove(dy);
 
                     }
