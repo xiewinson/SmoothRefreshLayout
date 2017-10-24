@@ -162,7 +162,7 @@ public class SmoothRefreshLayout extends FrameLayout implements NestedScrollingP
             layoutRefreshHeaderView(currentRefreshHeaderTop);
         }
         if (!(contentWrapper instanceof ListWrapper)) {
-            contentWrapper.layout(currentContentTop);
+            contentWrapper.layoutContentView(currentContentTop);
         }
     }
 
@@ -296,7 +296,7 @@ public class SmoothRefreshLayout extends FrameLayout implements NestedScrollingP
 
     private float layoutContentView(int top, boolean triggerCallback) {
         this.currentContentTop = top;
-        contentWrapper.layout(top);
+        contentWrapper.layoutContentView(top);
 
         float ratio = (Math.abs(top - minRefreshContentTop)) / (float) (refreshingContentTop - minRefreshContentTop);
         ratio = ratio < 0 ? 0 : ratio;

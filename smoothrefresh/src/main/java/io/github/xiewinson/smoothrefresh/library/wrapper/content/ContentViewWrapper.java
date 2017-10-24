@@ -7,15 +7,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
-import io.github.xiewinson.smoothrefresh.library.listener.OnContentViewScrollListener;
-
 /**
  * Created by winson on 2017/10/3.
  */
 
 public class ContentViewWrapper implements IContentViewWrapper {
     private ViewGroup viewGroup;
-    private OnContentViewScrollListener onViewGroupScrollListener;
 
     public ContentViewWrapper(ViewGroup viewGroup) {
         this.viewGroup = viewGroup;
@@ -44,7 +41,7 @@ public class ContentViewWrapper implements IContentViewWrapper {
     }
 
     @Override
-    public void layout(int top) {
+    public void layoutContentView(int top) {
         viewGroup.layout(viewGroup.getLeft(), top, viewGroup.getRight(), viewGroup.getBottom());
     }
 
