@@ -1,6 +1,7 @@
 package io.github.xiewinson.smoothrefresh.library.wrapper.header;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.support.annotation.FloatRange;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,6 +18,7 @@ import io.github.xiewinson.smoothrefreshlayout.library.R;
 public class DefaultRefreshHeaderWrapper extends RefreshHeaderWrapper {
     private TextView titleTv;
     private ImageView iconIv;
+    private View view;
 
     public DefaultRefreshHeaderWrapper(Context context) {
         super(context);
@@ -25,7 +27,7 @@ public class DefaultRefreshHeaderWrapper extends RefreshHeaderWrapper {
 
     @Override
     public View initRefreshHeaderView() {
-        View view = LayoutInflater.from(context).inflate(R.layout.header_default_refresh, null, false);
+        view = LayoutInflater.from(context).inflate(R.layout.header_default_refresh, null, false);
         titleTv = view.findViewById(R.id.title_tv);
         iconIv = view.findViewById(R.id.icon_iv);
         return view;
@@ -52,7 +54,5 @@ public class DefaultRefreshHeaderWrapper extends RefreshHeaderWrapper {
     @Override
     public void onPullRefreshHeader(@FloatRange(from = 0, to = 1.0f) float offset) {
         iconIv.setRotation(offset * 180);
-        getRefreshHeaderView().setAlpha(offset);
-
     }
 }

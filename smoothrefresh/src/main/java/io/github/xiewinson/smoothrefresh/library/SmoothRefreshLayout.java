@@ -362,7 +362,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
         }
         setState(RefreshHeaderState.REFRESHING);
 
-        refreshHeaderAnimator = getRefreshHeaderAnimator(true, contentWrapper.getTopOffset(), refreshingContentTop);
+        refreshHeaderAnimator = getRefreshHeaderAnimator(contentWrapper.getTopOffset(), refreshingContentTop);
 
         refreshHeaderAnimator.addListener(new Animator.AnimatorListener() {
             @Override
@@ -406,7 +406,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
         if (refreshHeaderAnimator != null) {
             refreshHeaderAnimator.cancel();
         }
-        refreshHeaderAnimator = getRefreshHeaderAnimator(false, contentWrapper.getTopOffset(), minRefreshContentTop);
+        refreshHeaderAnimator = getRefreshHeaderAnimator(contentWrapper.getTopOffset(), minRefreshContentTop);
         refreshHeaderAnimator.addListener(new Animator.AnimatorListener() {
             @Override
             public void onAnimationStart(Animator animation) {
@@ -441,19 +441,20 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
 
     }
 
-    private ValueAnimator getRefreshHeaderAnimator(final boolean isExpandAnimator, final int startValue, final int endValue) {
+    private ValueAnimator getRefreshHeaderAnimator(final int startValue, final int endValue) {
         ValueAnimator valueAnimator = ValueAnimator.ofInt(startValue, endValue);
         valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
-                final int newValue = (int) animation.getAnimatedValue();
+                int newContentValue = (int) animation.getAnimatedValue();
+                int newHeaderValue = newContentValue - refreshHeaderHeight;
 //                final int oldValue = contentWrapper.getTopOffset();
-                layoutContentView(newValue);
-                if (isExpandAnimator || refreshHeaderView.getTop() > newValue - refreshHeaderHeight) {
-                    layoutRefreshHeaderView(newValue - refreshHeaderHeight);
+                layoutContentView(newContentValue);
+                if (refreshHeaderView.getTop() > newHeaderValue) {
+                    layoutRefreshHeaderView(newHeaderValue);
                 }
-//                if (endValue > startValue || refreshHeaderView.getTop() >= newValue - refreshHeaderHeight) {
-//                    contentWrapper.scrollVerticalBy(oldValue - newValue);
+//                if (endValue > startValue || refreshHeaderView.getTop() >= newContentValue - refreshHeaderHeight) {
+//                    contentWrapper.scrollVerticalBy(oldValue - newContentValue);
 //                }
             }
         });
