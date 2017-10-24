@@ -7,6 +7,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
+import io.github.xiewinson.smoothrefresh.library.LayoutUtil;
+
 /**
  * Created by winson on 2017/10/3.
  */
@@ -42,10 +44,7 @@ public class ContentViewWrapper implements IContentViewWrapper {
 
     @Override
     public void layoutContentView(int top) {
-        viewGroup.layout(viewGroup.getPaddingLeft(),
-                top,
-                viewGroup.getPaddingLeft() + viewGroup.getMeasuredWidth(),
-                viewGroup.getPaddingTop() + viewGroup.getMeasuredHeight());
+        LayoutUtil.layoutView(viewGroup, top);
     }
 
     @Override

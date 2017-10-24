@@ -296,10 +296,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
 
     private void layoutRefreshHeaderView(int top) {
         this.currentRefreshHeaderTop = top;
-        refreshHeaderView.layout(refreshHeaderView.getPaddingLeft(),
-                top,
-                refreshHeaderView.getPaddingLeft() + refreshHeaderView.getMeasuredWidth(),
-                top + refreshHeaderHeight);
+        LayoutUtil.layoutView(refreshHeaderView, top);
     }
 
     private float layoutContentView(int top, boolean triggerCallback) {
