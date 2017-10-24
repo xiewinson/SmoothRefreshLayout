@@ -9,6 +9,7 @@ import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.FrameLayout;
 
@@ -25,7 +26,7 @@ import io.github.xiewinson.smoothrefresh.library.wrapper.header.RefreshHeaderWra
  * Created by winson on 2017/10/3.
  */
 
-public class SmoothRefreshLayout extends FrameLayout implements NestedScrollingParent {
+public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingParent {
 
     public SmoothRefreshLayout(Context context) {
         this(context, null);
@@ -153,16 +154,23 @@ public class SmoothRefreshLayout extends FrameLayout implements NestedScrollingP
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        int childCount = getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            measureChild(getChildAt(i), widthMeasureSpec, heightMeasureSpec);
+        }
     }
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        super.onLayout(changed, left, top, right, bottom);
         if (currentRefreshHeaderTop != -1) {
             layoutRefreshHeaderView(currentRefreshHeaderTop);
         }
         if (!(contentWrapper instanceof ListWrapper)) {
             contentWrapper.layoutContentView(currentContentTop);
+        } else {
+            contentView.layout(getPaddingLeft(), getPaddingTop(),
+                    getPaddingLeft() + contentView.getMeasuredWidth(),
+                    getPaddingTop() + contentView.getMeasuredHeight());
         }
     }
 
@@ -288,9 +296,9 @@ public class SmoothRefreshLayout extends FrameLayout implements NestedScrollingP
 
     private void layoutRefreshHeaderView(int top) {
         this.currentRefreshHeaderTop = top;
-        refreshHeaderView.layout(refreshHeaderView.getLeft(),
+        refreshHeaderView.layout(refreshHeaderView.getPaddingLeft(),
                 top,
-                refreshHeaderView.getRight(),
+                refreshHeaderView.getPaddingLeft() + refreshHeaderView.getMeasuredWidth(),
                 top + refreshHeaderHeight);
     }
 

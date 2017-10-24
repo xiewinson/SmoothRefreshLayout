@@ -42,7 +42,10 @@ public class ContentViewWrapper implements IContentViewWrapper {
 
     @Override
     public void layoutContentView(int top) {
-        viewGroup.layout(viewGroup.getLeft(), top, viewGroup.getRight(), viewGroup.getBottom());
+        viewGroup.layout(viewGroup.getPaddingLeft(),
+                top,
+                viewGroup.getPaddingLeft() + viewGroup.getMeasuredWidth(),
+                viewGroup.getPaddingTop() + viewGroup.getMeasuredHeight());
     }
 
     @Override
