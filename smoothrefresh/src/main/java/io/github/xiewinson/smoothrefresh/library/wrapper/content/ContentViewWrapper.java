@@ -1,13 +1,11 @@
 package io.github.xiewinson.smoothrefresh.library.wrapper.content;
 
 import android.support.v4.view.NestedScrollingChild;
-import android.support.v4.widget.NestedScrollView;
+import android.support.v4.view.NestedScrollingParent;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
-
-import io.github.xiewinson.smoothrefresh.library.LayoutUtil;
 
 /**
  * Created by winson on 2017/10/3.
@@ -26,10 +24,10 @@ public class ContentViewWrapper implements IContentViewWrapper {
                 return new RecyclerViewWrapper((RecyclerView) viewGroup);
             } else if (viewGroup instanceof ListView) {
                 return new ListViewWrapper((ListView) viewGroup);
-            } else if (viewGroup instanceof NestedScrollView) {
+            } else if (viewGroup instanceof NestedScrollingParent) {
                 return new ContentViewWrapper((ViewGroup) viewGroup);
             }
-            throw new IllegalArgumentException("view not be supported");
+            throw new IllegalArgumentException("only support nestedScrollParent and listView");
         }
     }
 
@@ -43,8 +41,8 @@ public class ContentViewWrapper implements IContentViewWrapper {
     }
 
     @Override
-    public void layoutContentView(int top) {
-        LayoutUtil.layoutView(viewGroup, top);
+    public void moveContentView(int top) {
+        viewGroup.offsetTopAndBottom(-viewGroup.getTop() + top);
     }
 
     @Override

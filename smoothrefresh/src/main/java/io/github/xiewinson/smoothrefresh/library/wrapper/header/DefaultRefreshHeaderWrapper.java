@@ -1,6 +1,7 @@
 package io.github.xiewinson.smoothrefresh.library.wrapper.header;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.support.annotation.FloatRange;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,6 +28,7 @@ public class DefaultRefreshHeaderWrapper extends RefreshHeaderWrapper {
     @Override
     public View initRefreshHeaderView() {
         view = LayoutInflater.from(context).inflate(R.layout.header_default_refresh, null, false);
+        view.setBackgroundColor(Color.MAGENTA);
         titleTv = view.findViewById(R.id.title_tv);
         iconIv = view.findViewById(R.id.icon_iv);
         return view;

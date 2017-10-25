@@ -25,7 +25,7 @@ public class ListWrapper extends ContentViewWrapper implements IListWrapper {
     }
 
     @Override
-    public void layoutContentView(int top) {
+    public void moveContentView(int top) {
         viewGroup.setPadding(viewGroup.getPaddingLeft(),
                 top,
                 viewGroup.getPaddingRight(),

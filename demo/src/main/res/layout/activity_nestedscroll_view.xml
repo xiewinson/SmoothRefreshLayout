@@ -10,6 +10,7 @@
 
     <io.github.xiewinson.smoothrefresh.library.SmoothRefreshLayout
         android:id="@+id/refreshLayout"
+        android:paddingTop="200dp"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 

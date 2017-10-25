@@ -14,7 +14,7 @@ public interface IContentViewWrapper {
 
     boolean isList();
 
-    void layoutContentView(int top);
+    void moveContentView(int top);
 
     int getTopOffset();
 
