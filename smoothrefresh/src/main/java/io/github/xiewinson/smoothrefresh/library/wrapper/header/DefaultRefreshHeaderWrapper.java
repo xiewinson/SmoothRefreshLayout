@@ -1,7 +1,6 @@
 package io.github.xiewinson.smoothrefresh.library.wrapper.header;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.support.annotation.FloatRange;
 import android.view.LayoutInflater;
 import android.view.View;

@@ -5,6 +5,7 @@ import android.animation.ValueAnimator;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v4.view.NestedScrollingParent;
+import android.support.v4.view.NestedScrollingParentHelper;
 import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
@@ -28,6 +29,8 @@ import io.github.xiewinson.smoothrefresh.library.wrapper.header.RefreshHeaderWra
 
 public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingParent {
 
+    private NestedScrollingParentHelper parentHelper;
+
     public SmoothRefreshLayout(Context context) {
         this(context, null);
     }
@@ -38,6 +41,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
 
     public SmoothRefreshLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        parentHelper = new NestedScrollingParentHelper(this);
     }
 
     @Override
@@ -116,7 +120,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
 
     private void initRefreshHeaderView() {
         refreshHeaderView.setVisibility(INVISIBLE);
-        addView(refreshHeaderView,  new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+        addView(refreshHeaderView, new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
         post(new Runnable() {
             @Override
             public void run() {
@@ -519,7 +523,6 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
 
     @Override
     public void onNestedPreScroll(View target, int dx, int dy, int[] consumed) {
-        super.onNestedPreScroll(target, dx, dy, consumed);
         if (!refreshing && !animatorRunning) {
             if (dy < 0 && !canChildScrollUp()) {
                 handleTouchActionMove(-dy);
@@ -550,9 +553,9 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
 
     }
 
+
     @Override
     public void onNestedScroll(View target, int dxConsumed, int dyConsumed, int dxUnconsumed, int dyUnconsumed) {
-        super.onNestedScroll(target, dxConsumed, dyConsumed, dxUnconsumed, dyUnconsumed);
     }
 
     @Override
@@ -564,13 +567,18 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
     }
 
     @Override
+    public boolean onNestedFling(View target, float velocityX, float velocityY, boolean consumed) {
+        return false;
+    }
+
+    @Override
     public void onNestedScrollAccepted(View child, View target, int axes) {
-        super.onNestedScrollAccepted(child, target, axes);
+        parentHelper.onNestedScrollAccepted(child, target, axes);
     }
 
     @Override
     public void onStopNestedScroll(View child) {
-        super.onStopNestedScroll(child);
+        parentHelper.onStopNestedScroll(child);
         if (enterPullRefreshHeader) {
             handleTouchActionUp();
         }
