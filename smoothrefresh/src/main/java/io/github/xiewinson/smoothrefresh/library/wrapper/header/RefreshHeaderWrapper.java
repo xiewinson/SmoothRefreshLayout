@@ -1,10 +1,12 @@
 package io.github.xiewinson.smoothrefresh.library.wrapper.header;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.view.View;
 
 import io.github.xiewinson.smoothrefresh.library.annotation.RefreshHeaderState;
-import io.github.xiewinson.smoothrefresh.library.wrapper.config.IRefreshHeaderPosConfig;
+import io.github.xiewinson.smoothrefresh.library.wrapper.header.calculator.DefaultRefreshHeaderPosCalculator;
+import io.github.xiewinson.smoothrefresh.library.wrapper.header.calculator.IRefreshHeaderPosCalculator;
 
 /**
  * Created by winson on 2017/10/6.
@@ -13,19 +15,20 @@ import io.github.xiewinson.smoothrefresh.library.wrapper.config.IRefreshHeaderPo
 public abstract class RefreshHeaderWrapper implements IRefreshHeaderWrapper {
     private View headerView;
     protected Context context;
-    private IRefreshHeaderPosConfig refreshHeaderPosConfig;
-
-    public RefreshHeaderWrapper(Context context, IRefreshHeaderPosConfig refreshHeaderPosConfig) {
-        this.context = context;
-        this.refreshHeaderPosConfig = refreshHeaderPosConfig;
-    }
+    private IRefreshHeaderPosCalculator refreshHeaderPosCalculator;
 
     public RefreshHeaderWrapper(Context context) {
         this.context = context;
     }
 
+    public void setRefreshHeaderPosCalculator(IRefreshHeaderPosCalculator refreshHeaderPosCalculator) {
+        this.refreshHeaderPosCalculator = refreshHeaderPosCalculator;
+    }
+
+    @NonNull
     public abstract View initRefreshHeaderView();
 
+    @NonNull
     @Override
     public final View getRefreshHeaderView() {
         if (headerView == null) {
@@ -36,9 +39,12 @@ public abstract class RefreshHeaderWrapper implements IRefreshHeaderWrapper {
         return headerView;
     }
 
+    @NonNull
     @Override
-    public IRefreshHeaderPosConfig getRefreshHeaderPosConfig() {
-        return refreshHeaderPosConfig;
+    public IRefreshHeaderPosCalculator getRefreshHeaderPosCalculator() {
+        if (refreshHeaderPosCalculator == null) {
+            refreshHeaderPosCalculator = new DefaultRefreshHeaderPosCalculator();
+        }
+        return refreshHeaderPosCalculator;
     }
-
 }

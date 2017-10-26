@@ -1,20 +1,23 @@
 package io.github.xiewinson.smoothrefresh.library.wrapper.header;
 
 import android.support.annotation.FloatRange;
+import android.support.annotation.NonNull;
 import android.view.View;
 
 import io.github.xiewinson.smoothrefresh.library.annotation.RefreshHeaderState;
-import io.github.xiewinson.smoothrefresh.library.wrapper.config.IRefreshHeaderPosConfig;
-import io.github.xiewinson.smoothrefresh.library.wrapper.content.IContentViewWrapper;
+import io.github.xiewinson.smoothrefresh.library.wrapper.header.calculator.IRefreshHeaderPosCalculator;
 
 /**
  * Created by winson on 2017/10/3.
  */
 
 public interface IRefreshHeaderWrapper {
+
+    @NonNull
     View getRefreshHeaderView();
 
-    IRefreshHeaderPosConfig getRefreshHeaderPosConfig();
+    @NonNull
+    IRefreshHeaderPosCalculator getRefreshHeaderPosCalculator();
 
     void onStateChanged(@RefreshHeaderState int state);
 

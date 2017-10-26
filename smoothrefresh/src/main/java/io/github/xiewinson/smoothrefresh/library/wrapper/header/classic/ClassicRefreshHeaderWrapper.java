@@ -1,38 +1,34 @@
-package io.github.xiewinson.smoothrefresh.library.wrapper.header;
+package io.github.xiewinson.smoothrefresh.library.wrapper.header.classic;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.support.annotation.FloatRange;
+import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import io.github.xiewinson.smoothrefresh.library.annotation.RefreshHeaderState;
-import io.github.xiewinson.smoothrefresh.library.wrapper.config.IRefreshHeaderPosConfig;
+import io.github.xiewinson.smoothrefresh.library.wrapper.header.RefreshHeaderWrapper;
 import io.github.xiewinson.smoothrefreshlayout.library.R;
 
 /**
  * Created by winson on 2017/10/3.
  */
 
-public class DefaultRefreshHeaderWrapper extends RefreshHeaderWrapper {
+public class ClassicRefreshHeaderWrapper extends RefreshHeaderWrapper {
     private TextView titleTv;
     private ImageView iconIv;
     private View view;
 
-    public DefaultRefreshHeaderWrapper(Context context) {
+    public ClassicRefreshHeaderWrapper(Context context) {
         super(context);
     }
 
-    public DefaultRefreshHeaderWrapper(Context context, IRefreshHeaderPosConfig refreshHeaderPosConfig) {
-        super(context, refreshHeaderPosConfig);
-    }
-
+    @NonNull
     @Override
     public View initRefreshHeaderView() {
-        view = LayoutInflater.from(context).inflate(R.layout.header_default_refresh, null, false);
-        view.setBackgroundColor(Color.MAGENTA);
+        view = LayoutInflater.from(context).inflate(R.layout.header_refresh_classic, null);
         titleTv = view.findViewById(R.id.title_tv);
         iconIv = view.findViewById(R.id.icon_iv);
         return view;

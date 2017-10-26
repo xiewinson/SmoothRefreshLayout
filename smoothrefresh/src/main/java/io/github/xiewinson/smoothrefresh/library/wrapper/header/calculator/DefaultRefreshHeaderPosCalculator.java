@@ -1,4 +1,4 @@
-package io.github.xiewinson.smoothrefresh.library.wrapper.config;
+package io.github.xiewinson.smoothrefresh.library.wrapper.header.calculator;
 
 import android.support.annotation.NonNull;
 import android.view.View;
@@ -7,15 +7,15 @@ import android.view.View;
  * Created by winson on 2017/10/26.
  */
 
-public class DefaultRefreshHeaderPosConfig implements IRefreshHeaderPosConfig {
+public class DefaultRefreshHeaderPosCalculator implements IRefreshHeaderPosCalculator {
     private boolean closeToItems = false;
-    private boolean overPullEnable = false;
+    private boolean overPullEnable = true;
 
-    public DefaultRefreshHeaderPosConfig(boolean overPullEnable) {
+    public DefaultRefreshHeaderPosCalculator(boolean overPullEnable) {
         this.overPullEnable = overPullEnable;
     }
 
-    public DefaultRefreshHeaderPosConfig() {
+    public DefaultRefreshHeaderPosCalculator() {
     }
 
     public boolean isOverPullEnable() {
@@ -41,8 +41,7 @@ public class DefaultRefreshHeaderPosConfig implements IRefreshHeaderPosConfig {
         int headerHeight = refreshHeaderView.getMeasuredHeight();
 
         if (closeToItems) {
-            params[0] = contentViewTop - headerHeight;
-            params[0] += contentViewPaddingTop;
+            params[0] = contentViewTop - headerHeight + contentViewPaddingTop;
         } else {
             params[0] = contentViewTop - headerHeight;
         }
@@ -54,4 +53,6 @@ public class DefaultRefreshHeaderPosConfig implements IRefreshHeaderPosConfig {
         }
         return params;
     }
+
+
 }

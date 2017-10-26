@@ -17,8 +17,8 @@ import android.widget.FrameLayout;
 import io.github.xiewinson.smoothrefresh.library.annotation.RefreshHeaderState;
 import io.github.xiewinson.smoothrefresh.library.listener.OnContentViewScrollListener;
 import io.github.xiewinson.smoothrefresh.library.listener.OnRefreshListener;
-import io.github.xiewinson.smoothrefresh.library.wrapper.config.DefaultRefreshHeaderPosConfig;
-import io.github.xiewinson.smoothrefresh.library.wrapper.config.IRefreshHeaderPosConfig;
+import io.github.xiewinson.smoothrefresh.library.wrapper.header.calculator.DefaultRefreshHeaderPosCalculator;
+import io.github.xiewinson.smoothrefresh.library.wrapper.header.calculator.IRefreshHeaderPosCalculator;
 import io.github.xiewinson.smoothrefresh.library.wrapper.content.ContentViewWrapper;
 import io.github.xiewinson.smoothrefresh.library.wrapper.content.IContentViewWrapper;
 import io.github.xiewinson.smoothrefresh.library.wrapper.content.ListWrapper;
@@ -56,8 +56,6 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
     private IRefreshHeaderWrapper refreshHeaderWrapper;
     private View refreshHeaderView;
     private View contentView;
-
-    private IRefreshHeaderPosConfig refreshHeaderPosConfig;
 
     private int contentRefreshingTop;
     private int contentMinTop;
@@ -136,11 +134,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
         if (refreshHeaderView == null) {
             throw new IllegalArgumentException("please use setRefreshHeader before initRefreshHeaderParams");
         }
-        refreshHeaderPosConfig = refreshHeaderWrapper.getRefreshHeaderPosConfig();
-        if (refreshHeaderPosConfig == null) {
-            refreshHeaderPosConfig = new DefaultRefreshHeaderPosConfig();
-        }
-        int[] params = this.refreshHeaderPosConfig.getRefreshHeaderPosition(refreshHeaderView,
+        int[] params = refreshHeaderWrapper.getRefreshHeaderPosCalculator().getRefreshHeaderPosition(refreshHeaderView,
                 contentView.getTop(),
                 contentView.getPaddingTop());
 

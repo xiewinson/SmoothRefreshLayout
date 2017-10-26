@@ -10,7 +10,7 @@ import java.util.List;
 
 import io.github.xiewinson.smoothrefresh.library.SmoothRefreshLayout;
 import io.github.xiewinson.smoothrefresh.library.listener.OnRefreshListener;
-import io.github.xiewinson.smoothrefresh.library.wrapper.header.DefaultRefreshHeaderWrapper;
+import io.github.xiewinson.smoothrefresh.library.wrapper.header.classic.ClassicRefreshHeaderWrapper;
 
 
 public class ListViewActivity extends BaseActivity {
@@ -32,7 +32,7 @@ public class ListViewActivity extends BaseActivity {
         final ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.item, R.id.tv, data);
         listView.setAdapter(adapter);
 
-        refreshLayout.setRefreshHeader(new DefaultRefreshHeaderWrapper(this));
+        refreshLayout.setRefreshHeader(new ClassicRefreshHeaderWrapper(this));
         refreshLayout.setOnRefreshListener(new OnRefreshListener() {
             @Override
             public void onRefresh() {
