@@ -15,14 +15,15 @@
 
         <android.support.v4.widget.NestedScrollView
             android:id="@+id/scrollView"
+            android:paddingTop="50dp"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
             <LinearLayout
                 android:id="@+id/container"
-                android:animateLayoutChanges="true"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:animateLayoutChanges="true"
                 android:orientation="vertical">
 
             </LinearLayout>

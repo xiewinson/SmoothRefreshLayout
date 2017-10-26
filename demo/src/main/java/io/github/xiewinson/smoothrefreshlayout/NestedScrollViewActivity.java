@@ -9,10 +9,10 @@ import android.widget.TextView;
 import io.github.xiewinson.smoothrefresh.library.ScreenUtil;
 import io.github.xiewinson.smoothrefresh.library.SmoothRefreshLayout;
 import io.github.xiewinson.smoothrefresh.library.listener.OnRefreshListener;
+import io.github.xiewinson.smoothrefresh.library.wrapper.config.DefaultRefreshHeaderPosConfig;
 import io.github.xiewinson.smoothrefresh.library.wrapper.header.DefaultRefreshHeaderWrapper;
 
 /**
- *
  * 更改paddingTop的方式在ScrollView上会有跳动，不适合
  */
 public class NestedScrollViewActivity extends BaseActivity {
@@ -35,7 +35,7 @@ public class NestedScrollViewActivity extends BaseActivity {
             addItem();
         }
 
-        refreshLayout.setRefreshHeader(new DefaultRefreshHeaderWrapper(this));
+        refreshLayout.setRefreshHeader(new DefaultRefreshHeaderWrapper(this, new DefaultRefreshHeaderPosConfig(true)));
         refreshLayout.setOnRefreshListener(new OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -43,7 +43,6 @@ public class NestedScrollViewActivity extends BaseActivity {
                     @Override
                     public void run() {
                         refreshLayout.setRefreshing(false);
-//                        addItem();
                     }
                 }, 5000);
             }

@@ -9,6 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import io.github.xiewinson.smoothrefresh.library.annotation.RefreshHeaderState;
+import io.github.xiewinson.smoothrefresh.library.wrapper.config.IRefreshHeaderPosConfig;
 import io.github.xiewinson.smoothrefreshlayout.library.R;
 
 /**
@@ -24,6 +25,9 @@ public class DefaultRefreshHeaderWrapper extends RefreshHeaderWrapper {
         super(context);
     }
 
+    public DefaultRefreshHeaderWrapper(Context context, IRefreshHeaderPosConfig refreshHeaderPosConfig) {
+        super(context, refreshHeaderPosConfig);
+    }
 
     @Override
     public View initRefreshHeaderView() {
@@ -33,6 +37,7 @@ public class DefaultRefreshHeaderWrapper extends RefreshHeaderWrapper {
         iconIv = view.findViewById(R.id.icon_iv);
         return view;
     }
+
 
     @Override
     public void onStateChanged(@RefreshHeaderState int state) {

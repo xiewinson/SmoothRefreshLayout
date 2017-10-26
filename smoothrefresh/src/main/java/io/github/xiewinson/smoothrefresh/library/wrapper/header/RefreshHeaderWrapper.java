@@ -4,6 +4,7 @@ import android.content.Context;
 import android.view.View;
 
 import io.github.xiewinson.smoothrefresh.library.annotation.RefreshHeaderState;
+import io.github.xiewinson.smoothrefresh.library.wrapper.config.IRefreshHeaderPosConfig;
 
 /**
  * Created by winson on 2017/10/6.
@@ -12,6 +13,12 @@ import io.github.xiewinson.smoothrefresh.library.annotation.RefreshHeaderState;
 public abstract class RefreshHeaderWrapper implements IRefreshHeaderWrapper {
     private View headerView;
     protected Context context;
+    private IRefreshHeaderPosConfig refreshHeaderPosConfig;
+
+    public RefreshHeaderWrapper(Context context, IRefreshHeaderPosConfig refreshHeaderPosConfig) {
+        this.context = context;
+        this.refreshHeaderPosConfig = refreshHeaderPosConfig;
+    }
 
     public RefreshHeaderWrapper(Context context) {
         this.context = context;
@@ -29,5 +36,9 @@ public abstract class RefreshHeaderWrapper implements IRefreshHeaderWrapper {
         return headerView;
     }
 
+    @Override
+    public IRefreshHeaderPosConfig getRefreshHeaderPosConfig() {
+        return refreshHeaderPosConfig;
+    }
 
 }

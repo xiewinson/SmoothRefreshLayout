@@ -17,6 +17,8 @@ import android.widget.FrameLayout;
 import io.github.xiewinson.smoothrefresh.library.annotation.RefreshHeaderState;
 import io.github.xiewinson.smoothrefresh.library.listener.OnContentViewScrollListener;
 import io.github.xiewinson.smoothrefresh.library.listener.OnRefreshListener;
+import io.github.xiewinson.smoothrefresh.library.wrapper.config.DefaultRefreshHeaderPosConfig;
+import io.github.xiewinson.smoothrefresh.library.wrapper.config.IRefreshHeaderPosConfig;
 import io.github.xiewinson.smoothrefresh.library.wrapper.content.ContentViewWrapper;
 import io.github.xiewinson.smoothrefresh.library.wrapper.content.IContentViewWrapper;
 import io.github.xiewinson.smoothrefresh.library.wrapper.content.ListWrapper;
@@ -55,7 +57,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
     private View refreshHeaderView;
     private View contentView;
 
-    private int refreshHeaderHeight;
+    private IRefreshHeaderPosConfig refreshHeaderPosConfig;
 
     private int contentRefreshingTop;
     private int contentMinTop;
@@ -129,30 +131,37 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
         });
     }
 
+
     private void initRefreshHeaderParams() {
         if (refreshHeaderView == null) {
             throw new IllegalArgumentException("please use setRefreshHeader before initRefreshHeaderParams");
         }
-        refreshHeaderHeight = refreshHeaderView.getMeasuredHeight();
+        refreshHeaderPosConfig = refreshHeaderWrapper.getRefreshHeaderPosConfig();
+        if (refreshHeaderPosConfig == null) {
+            refreshHeaderPosConfig = new DefaultRefreshHeaderPosConfig();
+        }
+        int[] params = this.refreshHeaderPosConfig.getRefreshHeaderPosition(refreshHeaderView,
+                contentView.getTop(),
+                contentView.getPaddingTop());
+
+        headerMinTop = params[0];
+        headerRefreshingTop = params[1];
+        headerMaxTop = params[2];
 
         contentMinTop = contentWrapper.getTopOffset();
-        contentRefreshingTop = contentWrapper.getTopOffset() + refreshHeaderHeight;
-        contentMaxTop = contentRefreshingTop + refreshHeaderHeight * 3;
-
-        headerMinTop = contentView.getTop() - refreshHeaderHeight;
-        headerRefreshingTop = headerMinTop + refreshHeaderHeight;
-
-//        headerMinTop = contentMinTop - refreshHeaderHeight;
-//        headerRefreshingTop = contentRefreshingTop - refreshHeaderHeight;
-
-        headerMaxTop = computeRefreshHeaderTopByContentTop(contentMaxTop);
+        contentRefreshingTop = contentWrapper.getTopOffset() + (headerRefreshingTop - headerMinTop);
+        contentMaxTop = computeContentTopByRefreshHeaderTop(headerMaxTop);
 
         moveRefreshHeaderView(headerMinTop);
 
     }
 
-    private int computeRefreshHeaderTopByContentTop(int top) {
-        return top - contentMinTop + headerMinTop;
+    private int computeRefreshHeaderTopByContentTop(int currentContentTop) {
+        return currentContentTop - contentMinTop + headerMinTop;
+    }
+
+    private int computeContentTopByRefreshHeaderTop(int currentRefreshHeaderTop) {
+        return currentRefreshHeaderTop - headerMinTop + contentMinTop;
     }
 
     private boolean isRefreshHeaderVisible() {
@@ -294,13 +303,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
             dy = -1;
         }
         int result = (int) (dy + contentWrapper.getTopOffset());
-        if (result <= contentMinTop) {
-            refreshHeaderView.setVisibility(INVISIBLE);
-            result = contentMinTop;
-        } else {
-            refreshHeaderView.setVisibility(VISIBLE);
-        }
-
+        result = Math.max(result, contentMinTop);
         result = Math.min(result, contentMaxTop);
 
         if (result >= contentRefreshingTop) {
@@ -333,6 +336,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
     private void moveRefreshHeaderView(int top) {
         this.currentRefreshHeaderTop = top;
         refreshHeaderView.offsetTopAndBottom(-refreshHeaderView.getTop() + top);
+        refreshHeaderView.setVisibility(refreshHeaderView.getTop() <= headerMinTop ? INVISIBLE : VISIBLE);
     }
 
     private float moveContentView(int top, boolean triggerCallback) {
@@ -481,14 +485,10 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
             public void onAnimationUpdate(ValueAnimator animation) {
                 int newContentValue = (int) animation.getAnimatedValue();
                 int newHeaderValue = computeRefreshHeaderTopByContentTop(newContentValue);
-                final int oldValue = contentWrapper.getTopOffset();
                 moveContentView(newContentValue);
                 if (refreshHeaderView.getTop() > newHeaderValue) {
                     moveRefreshHeaderView(newHeaderValue);
                 }
-//                if (endValue > startValue || refreshHeaderView.getTop() >= newContentValue - refreshHeaderHeight) {
-//                    contentWrapper.scrollVerticalBy(oldValue - newContentValue);
-//                }
             }
         });
 
@@ -496,7 +496,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
         if (startValue < endValue) {
             duration = DEFAULT_ANIMATOR_DURATION;
         } else {
-            duration = Math.min((int) (((float) startValue - contentMinTop) / refreshHeaderHeight * DEFAULT_ANIMATOR_DURATION),
+            duration = Math.min((int) (((float) startValue - contentMinTop) / (headerRefreshingTop - headerMinTop) * DEFAULT_ANIMATOR_DURATION),
                     DEFAULT_ANIMATOR_DURATION);
         }
         valueAnimator.setDuration(duration);

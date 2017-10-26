@@ -16,6 +16,7 @@ public class ContentViewWrapper implements IContentViewWrapper {
 
     public ContentViewWrapper(ViewGroup viewGroup) {
         this.viewGroup = viewGroup;
+        this.viewGroup.setClipToPadding(false);
     }
 
     public static class Factory {
