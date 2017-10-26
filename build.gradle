@@ -7,7 +7,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.0.0-rc2'
+        classpath 'com.android.tools.build:gradle:3.0.0'
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.3'
         classpath 'com.github.dcendents:android-maven-gradle-plugin:2.0'
         // NOTE: Do not place your application dependencies here; they belong
@@ -19,9 +19,9 @@ allprojects {
     repositories {
         google()
         jcenter()
-        maven {
-            url  "https://dl.bintray.com/winson1992/maven"
-        }
+//        maven {
+//            url  "https://dl.bintray.com/winson1992/maven"
+//        }
     }
 }
 
@@ -38,6 +38,6 @@ ext {
     min_sdk_version = 14
     target_sdk_version = 26
 
-    build_tools_version = "26.0.2"
-    support_version = '26.1.0'
+    build_tools_version = "27.0.0"
+    support_version = '27.0.0'
 }
