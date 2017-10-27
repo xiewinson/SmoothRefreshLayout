@@ -9,6 +9,7 @@ import android.support.v4.view.NestedScrollingParentHelper;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -115,13 +116,14 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
 
     public void setRefreshHeader(RefreshHeaderWrapper headerWrapper) {
         this.refreshHeaderWrapper = headerWrapper;
+        this.refreshHeaderWrapper.setContainer(this);
         this.refreshHeaderView = headerWrapper.getRefreshHeaderView();
         initRefreshHeaderView();
     }
 
     private void initRefreshHeaderView() {
         refreshHeaderView.setVisibility(INVISIBLE);
-        addView(refreshHeaderView, new ViewGroup.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+        addView(refreshHeaderView);
         post(new Runnable() {
             @Override
             public void run() {
@@ -199,7 +201,6 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-
         refreshHeaderView.layout(getPaddingLeft(),
                 currentRefreshHeaderTop,
                 getPaddingLeft() + refreshHeaderView.getMeasuredWidth(),

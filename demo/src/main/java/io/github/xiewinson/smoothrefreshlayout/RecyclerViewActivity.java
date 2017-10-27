@@ -20,6 +20,7 @@ import io.github.xiewinson.smoothrefresh.library.ScreenUtil;
 import io.github.xiewinson.smoothrefresh.library.SmoothRefreshLayout;
 import io.github.xiewinson.smoothrefresh.library.listener.OnRefreshListener;
 import io.github.xiewinson.smoothrefresh.library.wrapper.header.classic.Classic1RefreshHeaderWrapper;
+import io.github.xiewinson.smoothrefresh.library.wrapper.header.classic.ClassicRefreshHeaderWrapper;
 
 public class RecyclerViewActivity extends BaseActivity {
 
@@ -54,7 +55,7 @@ public class RecyclerViewActivity extends BaseActivity {
         }
         listAdapter.setItems(data);
 
-        refreshLayout.setRefreshHeader(new Classic1RefreshHeaderWrapper(this));
+        refreshLayout.setRefreshHeader(new ClassicRefreshHeaderWrapper(this));
         refreshLayout.setOnRefreshListener(new OnRefreshListener() {
             @Override
             public void onRefresh() {

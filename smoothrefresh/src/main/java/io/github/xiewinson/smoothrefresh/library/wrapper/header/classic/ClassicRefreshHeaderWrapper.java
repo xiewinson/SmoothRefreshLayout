@@ -5,6 +5,7 @@ import android.support.annotation.FloatRange;
 import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -27,8 +28,8 @@ public class ClassicRefreshHeaderWrapper extends RefreshHeaderWrapper {
 
     @NonNull
     @Override
-    public View initRefreshHeaderView() {
-        view = LayoutInflater.from(context).inflate(R.layout.header_refresh_classic, null);
+    public View initRefreshHeaderView(ViewGroup container) {
+        view = LayoutInflater.from(context).inflate(R.layout.header_refresh_classic, container, false);
         titleTv = view.findViewById(R.id.title_tv);
         iconIv = view.findViewById(R.id.icon_iv);
         return view;

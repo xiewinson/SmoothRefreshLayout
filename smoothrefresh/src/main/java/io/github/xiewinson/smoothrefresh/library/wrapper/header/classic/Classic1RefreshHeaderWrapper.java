@@ -31,8 +31,8 @@ public class Classic1RefreshHeaderWrapper extends RefreshHeaderPartlyVisibleWrap
 
     @NonNull
     @Override
-    public View initRefreshHeaderView() {
-        view = LayoutInflater.from(context).inflate(R.layout.header_refresh_classic1, null);
+    public View initRefreshHeaderView(ViewGroup container) {
+        view = LayoutInflater.from(context).inflate(R.layout.header_refresh_classic1, container, false);
         titleTv = view.findViewById(R.id.title_tv);
         iconIv = view.findViewById(R.id.icon_iv);
         return view;
@@ -63,7 +63,7 @@ public class Classic1RefreshHeaderWrapper extends RefreshHeaderPartlyVisibleWrap
 
     @Override
     protected int getRefreshingHeight(View refreshHeaderView) {
-        return ((ViewGroup)refreshHeaderView).getChildAt(0).getMeasuredHeight();
+        return ((ViewGroup) refreshHeaderView).getChildAt(0).getMeasuredHeight();
     }
 
 }
