@@ -5,6 +5,7 @@ import android.support.annotation.FloatRange;
 import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -62,7 +63,7 @@ public class Classic1RefreshHeaderWrapper extends RefreshHeaderPartlyVisibleWrap
 
     @Override
     protected int getRefreshingHeight(View refreshHeaderView) {
-        return refreshHeaderView.getMeasuredHeight() - refreshHeaderView.getPaddingTop();
+        return ((ViewGroup)refreshHeaderView).getChildAt(0).getMeasuredHeight();
     }
 
 }

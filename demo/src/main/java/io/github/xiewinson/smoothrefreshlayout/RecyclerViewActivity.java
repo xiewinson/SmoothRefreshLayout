@@ -68,7 +68,7 @@ public class RecyclerViewActivity extends BaseActivity {
                 }, 1000);
             }
         });
-//        refreshLayout.setRefreshing(true);
+        refreshLayout.setRefreshing(true);
 
     }
 

@@ -7,18 +7,16 @@ import android.support.annotation.NonNull;
 import android.support.v4.view.NestedScrollingParent;
 import android.support.v4.view.NestedScrollingParentHelper;
 import android.support.v4.view.ViewCompat;
+import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
-import android.widget.FrameLayout;
 
 import io.github.xiewinson.smoothrefresh.library.annotation.RefreshHeaderState;
 import io.github.xiewinson.smoothrefresh.library.listener.OnContentViewScrollListener;
 import io.github.xiewinson.smoothrefresh.library.listener.OnRefreshListener;
-import io.github.xiewinson.smoothrefresh.library.wrapper.header.calculator.DefaultRefreshHeaderPosCalculator;
-import io.github.xiewinson.smoothrefresh.library.wrapper.header.calculator.IRefreshHeaderPosCalculator;
 import io.github.xiewinson.smoothrefresh.library.wrapper.content.ContentViewWrapper;
 import io.github.xiewinson.smoothrefresh.library.wrapper.content.IContentViewWrapper;
 import io.github.xiewinson.smoothrefresh.library.wrapper.content.ListWrapper;
@@ -85,6 +83,8 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
 
     public static final int DEFAULT_ANIMATOR_DURATION = 300;
 
+    private boolean isRecyclerView = false;
+
     public OnRefreshListener getOnRefreshListener() {
         return onRefreshListener;
     }
@@ -96,6 +96,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
     private void init() {
 
         contentView = getChildAt(0);
+        isRecyclerView = contentView instanceof RecyclerView;
         if (contentView == null) {
             throw new NullPointerException("you must put a contentView");
         }
@@ -104,7 +105,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
             ((ListWrapper) contentWrapper).setContentViewScrollListener(new OnContentViewScrollListener() {
                 @Override
                 public void onFirstItemScroll(int firstItemY) {
-                    if (refreshHeaderView != null) {
+                    if (refreshHeaderView != null && refreshing) {
                         moveRefreshHeaderView(computeRefreshHeaderTopByContentTop(firstItemY));
                     }
                 }
@@ -120,7 +121,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
 
     private void initRefreshHeaderView() {
         refreshHeaderView.setVisibility(INVISIBLE);
-        addView(refreshHeaderView, new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+        addView(refreshHeaderView, new ViewGroup.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
         post(new Runnable() {
             @Override
             public void run() {
@@ -168,10 +169,14 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
                 && top <= headerRefreshingTop;
     }
 
-    private boolean isRefreshHeaderFullVisible() {
+    private boolean isRefreshHeaderOverPull() {
         int top = refreshHeaderView.getTop();
         return top > headerRefreshingTop
                 && top <= headerMaxTop;
+    }
+
+    private boolean isRefreshHeaderFullVisible() {
+        return refreshHeaderView.getTop() == headerRefreshingTop;
     }
 
     private boolean isRefreshHeaderInVisible() {
@@ -189,6 +194,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
         for (int i = 0; i < childCount; i++) {
             measureChild(getChildAt(i), widthMeasureSpec, heightMeasureSpec);
         }
+
     }
 
     @Override
@@ -213,6 +219,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
                     getPaddingLeft() + contentView.getMeasuredWidth(),
                     getPaddingTop() + contentView.getMeasuredHeight());
         }
+
     }
 
     @Override
@@ -315,7 +322,10 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
      * @return 若返回true，则将变为刷新状态
      */
     private boolean handleTouchActionUp() {
-        if (isRefreshHeaderFullVisible() || currentRefreshState == RefreshHeaderState.RELEASE_TO_REFRESH) {
+        if (isRefreshHeaderFullVisible()) {
+            onExpandAnimatorEnd(true);
+            return true;
+        } else if (isRefreshHeaderOverPull()) {
             expandRefreshHeader(true);
             return true;
         } else if (isRefreshHeaderPartVisible()) {
@@ -478,10 +488,14 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
                 int newContentValue = (int) animation.getAnimatedValue();
+                int oldHeaderValue = refreshHeaderView.getTop();
                 int newHeaderValue = computeRefreshHeaderTopByContentTop(newContentValue);
                 moveContentView(newContentValue);
                 if (refreshHeaderView.getTop() > newHeaderValue) {
                     moveRefreshHeaderView(newHeaderValue);
+                }
+                if (isRecyclerView && startValue < endValue) {
+                    contentView.scrollBy(0, oldHeaderValue - newContentValue);
                 }
             }
         });
