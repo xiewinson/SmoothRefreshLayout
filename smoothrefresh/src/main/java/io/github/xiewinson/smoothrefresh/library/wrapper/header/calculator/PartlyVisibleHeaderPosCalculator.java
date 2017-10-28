@@ -7,7 +7,7 @@ import android.view.View;
  * Created by winson on 2017/10/26.
  */
 
-public abstract class RefreshHeaderPartlyVisiblePosCalculator implements IRefreshHeaderPosCalculator {
+public abstract class PartlyVisibleHeaderPosCalculator implements IHeaderPosCalculator {
     @NonNull
     @Override
     public int[] getRefreshHeaderPosition(View refreshHeaderView, int contentViewTop, int contentViewPaddingTop) {

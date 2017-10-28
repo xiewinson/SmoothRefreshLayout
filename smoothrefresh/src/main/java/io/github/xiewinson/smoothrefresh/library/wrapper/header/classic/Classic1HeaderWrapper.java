@@ -10,7 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import io.github.xiewinson.smoothrefresh.library.annotation.RefreshHeaderState;
-import io.github.xiewinson.smoothrefresh.library.wrapper.header.RefreshHeaderPartlyVisibleWrapper;
+import io.github.xiewinson.smoothrefresh.library.wrapper.header.PartlyVisibleHeaderWrapper;
 import io.github.xiewinson.smoothrefreshlayout.library.R;
 
 
@@ -18,20 +18,20 @@ import io.github.xiewinson.smoothrefreshlayout.library.R;
  * Created by winson on 2017/10/26.
  */
 
-public class Classic1RefreshHeaderWrapper extends RefreshHeaderPartlyVisibleWrapper {
+public class Classic1HeaderWrapper extends PartlyVisibleHeaderWrapper {
     private Context context;
     private View view;
     private TextView titleTv;
     private ImageView iconIv;
 
-    public Classic1RefreshHeaderWrapper(Context context) {
+    public Classic1HeaderWrapper(Context context) {
         super(context);
         this.context = context;
     }
 
     @NonNull
     @Override
-    public View initRefreshHeaderView(ViewGroup container) {
+    public View onCreateView(ViewGroup container) {
         view = LayoutInflater.from(context).inflate(R.layout.header_refresh_classic1, container, false);
         titleTv = view.findViewById(R.id.title_tv);
         iconIv = view.findViewById(R.id.icon_iv);

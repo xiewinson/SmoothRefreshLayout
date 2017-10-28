@@ -7,15 +7,15 @@ import android.view.View;
  * Created by winson on 2017/10/26.
  */
 
-public class DefaultRefreshHeaderPosCalculator implements IRefreshHeaderPosCalculator {
+public class DefaultHeaderPosCalculator implements IHeaderPosCalculator {
     private boolean closeToItems = false;
     private boolean overPullEnable = true;
 
-    public DefaultRefreshHeaderPosCalculator(boolean overPullEnable) {
+    public DefaultHeaderPosCalculator(boolean overPullEnable) {
         this.overPullEnable = overPullEnable;
     }
 
-    public DefaultRefreshHeaderPosCalculator() {
+    public DefaultHeaderPosCalculator() {
     }
 
     public boolean isOverPullEnable() {

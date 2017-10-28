@@ -8,7 +8,7 @@ import android.view.View;
  * Created by winson on 2017/10/26.
  */
 
-public interface IRefreshHeaderPosCalculator {
+public interface IHeaderPosCalculator {
     @NonNull
     @Size(value = 3)
     int[] getRefreshHeaderPosition(View refreshHeaderView,

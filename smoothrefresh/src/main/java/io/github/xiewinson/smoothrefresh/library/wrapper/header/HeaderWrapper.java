@@ -6,35 +6,35 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import io.github.xiewinson.smoothrefresh.library.annotation.RefreshHeaderState;
-import io.github.xiewinson.smoothrefresh.library.wrapper.header.calculator.DefaultRefreshHeaderPosCalculator;
-import io.github.xiewinson.smoothrefresh.library.wrapper.header.calculator.IRefreshHeaderPosCalculator;
+import io.github.xiewinson.smoothrefresh.library.wrapper.header.calculator.DefaultHeaderPosCalculator;
+import io.github.xiewinson.smoothrefresh.library.wrapper.header.calculator.IHeaderPosCalculator;
 
 /**
  * Created by winson on 2017/10/6.
  */
 
-public abstract class RefreshHeaderWrapper implements IRefreshHeaderWrapper {
+public abstract class HeaderWrapper implements IHeaderWrapper {
     private ViewGroup container;
     private View headerView;
     protected Context context;
-    private IRefreshHeaderPosCalculator refreshHeaderPosCalculator;
+    private IHeaderPosCalculator refreshHeaderPosCalculator;
 
-    public RefreshHeaderWrapper(Context context) {
+    public HeaderWrapper(Context context) {
         this.context = context;
     }
 
-    public void setRefreshHeaderPosCalculator(IRefreshHeaderPosCalculator refreshHeaderPosCalculator) {
+    public void setRefreshHeaderPosCalculator(IHeaderPosCalculator refreshHeaderPosCalculator) {
         this.refreshHeaderPosCalculator = refreshHeaderPosCalculator;
     }
 
     @NonNull
-    public abstract View initRefreshHeaderView(ViewGroup container);
+    public abstract View onCreateView(ViewGroup container);
 
     @NonNull
     @Override
-    public final View getRefreshHeaderView() {
+    public final View getHeaderView() {
         if (headerView == null) {
-            headerView = initRefreshHeaderView(container);
+            headerView = onCreateView(container);
             //解决偶然的第一次下拉时View没显示出来该状态
             onStateChanged(RefreshHeaderState.PULL_TO_REFRESH);
         }
@@ -43,9 +43,9 @@ public abstract class RefreshHeaderWrapper implements IRefreshHeaderWrapper {
 
     @NonNull
     @Override
-    public  IRefreshHeaderPosCalculator getRefreshHeaderPosCalculator() {
+    public IHeaderPosCalculator getHeaderPosCalculator() {
         if (refreshHeaderPosCalculator == null) {
-            refreshHeaderPosCalculator = new DefaultRefreshHeaderPosCalculator();
+            refreshHeaderPosCalculator = new DefaultHeaderPosCalculator();
         }
         return refreshHeaderPosCalculator;
     }

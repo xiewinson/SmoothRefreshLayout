@@ -10,25 +10,25 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import io.github.xiewinson.smoothrefresh.library.annotation.RefreshHeaderState;
-import io.github.xiewinson.smoothrefresh.library.wrapper.header.RefreshHeaderWrapper;
+import io.github.xiewinson.smoothrefresh.library.wrapper.header.HeaderWrapper;
 import io.github.xiewinson.smoothrefreshlayout.library.R;
 
 /**
  * Created by winson on 2017/10/3.
  */
 
-public class ClassicRefreshHeaderWrapper extends RefreshHeaderWrapper {
+public class ClassicHeaderWrapper extends HeaderWrapper {
     private TextView titleTv;
     private ImageView iconIv;
     private View view;
 
-    public ClassicRefreshHeaderWrapper(Context context) {
+    public ClassicHeaderWrapper(Context context) {
         super(context);
     }
 
     @NonNull
     @Override
-    public View initRefreshHeaderView(ViewGroup container) {
+    public View onCreateView(ViewGroup container) {
         view = LayoutInflater.from(context).inflate(R.layout.header_refresh_classic, container, false);
         titleTv = view.findViewById(R.id.title_tv);
         iconIv = view.findViewById(R.id.icon_iv);

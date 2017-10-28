@@ -6,19 +6,19 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import io.github.xiewinson.smoothrefresh.library.annotation.RefreshHeaderState;
-import io.github.xiewinson.smoothrefresh.library.wrapper.header.calculator.IRefreshHeaderPosCalculator;
+import io.github.xiewinson.smoothrefresh.library.wrapper.header.calculator.IHeaderPosCalculator;
 
 /**
  * Created by winson on 2017/10/3.
  */
 
-public interface IRefreshHeaderWrapper {
+public interface IHeaderWrapper {
 
     @NonNull
-    View getRefreshHeaderView();
+    View getHeaderView();
 
     @NonNull
-    IRefreshHeaderPosCalculator getRefreshHeaderPosCalculator();
+    IHeaderPosCalculator getHeaderPosCalculator();
 
     void onStateChanged(@RefreshHeaderState int state);
 

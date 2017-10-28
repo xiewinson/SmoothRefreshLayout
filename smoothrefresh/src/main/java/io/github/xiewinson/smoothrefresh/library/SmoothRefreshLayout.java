@@ -20,8 +20,8 @@ import io.github.xiewinson.smoothrefresh.library.listener.OnRefreshListener;
 import io.github.xiewinson.smoothrefresh.library.wrapper.content.ContentViewWrapper;
 import io.github.xiewinson.smoothrefresh.library.wrapper.content.IContentViewWrapper;
 import io.github.xiewinson.smoothrefresh.library.wrapper.content.ListWrapper;
-import io.github.xiewinson.smoothrefresh.library.wrapper.header.IRefreshHeaderWrapper;
-import io.github.xiewinson.smoothrefresh.library.wrapper.header.RefreshHeaderWrapper;
+import io.github.xiewinson.smoothrefresh.library.wrapper.header.IHeaderWrapper;
+import io.github.xiewinson.smoothrefresh.library.wrapper.header.HeaderWrapper;
 
 /**
  * Created by winson on 2017/10/3.
@@ -51,8 +51,8 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
     }
 
     private IContentViewWrapper contentWrapper;
-    private IRefreshHeaderWrapper refreshHeaderWrapper;
-    private View refreshHeaderView;
+    private IHeaderWrapper headerWrapper;
+    private View headerView;
     private View contentView;
 
     private int contentRefreshingTop;
@@ -65,11 +65,11 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
 
     private boolean enterPullRefreshHeader;
 
-    private int currentRefreshHeaderTop = 0;
+    private int currentHeaderTop = 0;
     private int currentContentTop = 0;
 
     private int correctOverScrollMode;
-    private float lastRefreshHeaderY = -1;
+    private float lastHeaderY = -1;
     private int currentRefreshState = RefreshHeaderState.NONE;
 
     //是否处于刷新
@@ -77,7 +77,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
     //是否正在执行动画
     private boolean animatorRunning = false;
 
-    private ValueAnimator refreshHeaderAnimator;
+    private ValueAnimator headerAnimator;
 
     private OnRefreshListener onRefreshListener;
 
@@ -105,38 +105,38 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
             ((ListWrapper) contentWrapper).setContentViewScrollListener(new OnContentViewScrollListener() {
                 @Override
                 public void onFirstItemScroll(int firstItemY) {
-                    if (refreshHeaderView != null && refreshing) {
-                        moveRefreshHeaderView(computeRefreshHeaderTopByContentTop(firstItemY));
+                    if (headerView != null && refreshing) {
+                        moveHeaderView(computeHeaderTopByContentTop(firstItemY));
                     }
                 }
             });
         }
     }
 
-    public void setRefreshHeader(RefreshHeaderWrapper headerWrapper) {
-        this.refreshHeaderWrapper = headerWrapper;
-        this.refreshHeaderWrapper.setContainer(this);
-        this.refreshHeaderView = headerWrapper.getRefreshHeaderView();
-        initRefreshHeaderView();
+    public void setRefreshHeader(HeaderWrapper headerWrapper) {
+        this.headerWrapper = headerWrapper;
+        this.headerWrapper.setContainer(this);
+        this.headerView = headerWrapper.getHeaderView();
+        initHeaderView();
     }
 
-    private void initRefreshHeaderView() {
-        refreshHeaderView.setVisibility(INVISIBLE);
-        addView(refreshHeaderView);
+    private void initHeaderView() {
+        headerView.setVisibility(INVISIBLE);
+        addView(headerView);
         post(new Runnable() {
             @Override
             public void run() {
-                initRefreshHeaderParams();
+                initHeaderParams();
             }
         });
     }
 
 
-    private void initRefreshHeaderParams() {
-        if (refreshHeaderView == null) {
-            throw new IllegalArgumentException("please use setRefreshHeader before initRefreshHeaderParams");
+    private void initHeaderParams() {
+        if (headerView == null) {
+            throw new IllegalArgumentException("please use setRefreshHeader before initHeaderParams");
         }
-        int[] params = refreshHeaderWrapper.getRefreshHeaderPosCalculator().getRefreshHeaderPosition(refreshHeaderView,
+        int[] params = headerWrapper.getHeaderPosCalculator().getRefreshHeaderPosition(headerView,
                 contentView.getTop(),
                 contentView.getPaddingTop());
 
@@ -146,42 +146,42 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
 
         contentMinTop = contentWrapper.getTopOffset();
         contentRefreshingTop = contentWrapper.getTopOffset() + (headerRefreshingTop - headerMinTop);
-        contentMaxTop = computeContentTopByRefreshHeaderTop(headerMaxTop);
+        contentMaxTop = computeContentTopByHeaderTop(headerMaxTop);
 
-        moveRefreshHeaderView(headerMinTop);
+        moveHeaderView(headerMinTop);
 
     }
 
-    private int computeRefreshHeaderTopByContentTop(int currentContentTop) {
+    private int computeHeaderTopByContentTop(int currentContentTop) {
         return currentContentTop - contentMinTop + headerMinTop;
     }
 
-    private int computeContentTopByRefreshHeaderTop(int currentRefreshHeaderTop) {
+    private int computeContentTopByHeaderTop(int currentRefreshHeaderTop) {
         return currentRefreshHeaderTop - headerMinTop + contentMinTop;
     }
 
-    private boolean isRefreshHeaderVisible() {
-        return refreshHeaderView.getTop() > headerMinTop;
+    private boolean isHeaderVisible() {
+        return headerView.getTop() > headerMinTop;
     }
 
-    private boolean isRefreshHeaderPartVisible() {
-        int top = refreshHeaderView.getTop();
+    private boolean isHeaderPartVisible() {
+        int top = headerView.getTop();
         return top > headerMinTop
                 && top <= headerRefreshingTop;
     }
 
-    private boolean isRefreshHeaderOverPull() {
-        int top = refreshHeaderView.getTop();
+    private boolean isHeaderOverPull() {
+        int top = headerView.getTop();
         return top > headerRefreshingTop
                 && top <= headerMaxTop;
     }
 
-    private boolean isRefreshHeaderFullVisible() {
-        return refreshHeaderView.getTop() == headerRefreshingTop;
+    private boolean isHeaderFullVisible() {
+        return headerView.getTop() == headerRefreshingTop;
     }
 
-    private boolean isRefreshHeaderInVisible() {
-        return refreshHeaderView.getTop() <= headerMinTop;
+    private boolean isHeaderInVisible() {
+        return headerView.getTop() <= headerMinTop;
     }
 
 
@@ -200,10 +200,11 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        refreshHeaderView.layout(getPaddingLeft(),
-                currentRefreshHeaderTop,
-                getPaddingLeft() + refreshHeaderView.getMeasuredWidth(),
-                currentRefreshHeaderTop + refreshHeaderView.getMeasuredHeight());
+        headerView.layout(getPaddingLeft(),
+                currentHeaderTop,
+                getPaddingLeft() + headerView.getMeasuredWidth(),
+                currentHeaderTop + headerView.getMeasuredHeight());
+
         if (!contentWrapper.isList()) {
             int pd = currentContentTop;
             if (currentContentTop == 0) {
@@ -236,31 +237,31 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
         }
         switch (action) {
             case MotionEvent.ACTION_DOWN:
-                lastRefreshHeaderY = currentY;
+                lastHeaderY = currentY;
                 correctOverScrollMode = contentView.getOverScrollMode();
-//                initRefreshHeaderParams();
+//                initHeaderParams();
                 break;
 
 
             case MotionEvent.ACTION_MOVE:
-                float dy = currentY - lastRefreshHeaderY;
+                float dy = currentY - lastHeaderY;
                 //下拉
                 if (dy > 0) {
                     if (enterPullRefreshHeader || (!canChildScrollUp()
-                            && refreshHeaderView.getTop() != contentMaxTop)) {
+                            && headerView.getTop() != contentMaxTop)) {
                         contentView.setOverScrollMode(OVER_SCROLL_NEVER);
                         handleTouchActionMove(dy);
                     }
                 }
                 //上滑
                 else if (enterPullRefreshHeader && dy < 0) {
-                    if (refreshHeaderView.getTop() != contentMinTop) {
+                    if (headerView.getTop() != contentMinTop) {
                         handleTouchActionMove(dy);
 
                     }
                 }
-                lastRefreshHeaderY = currentY;
-                lastRefreshHeaderY = currentY;
+                lastHeaderY = currentY;
+                lastHeaderY = currentY;
                 break;
             case MotionEvent.ACTION_POINTER_DOWN:
                 break;
@@ -272,7 +273,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
                     ev.setAction(MotionEvent.ACTION_CANCEL);
                 }
                 contentView.setOverScrollMode(correctOverScrollMode);
-                lastRefreshHeaderY = -1;
+                lastHeaderY = -1;
                 enterPullRefreshHeader = false;
 
                 break;
@@ -314,7 +315,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
         }
 
         moveContentView(result);
-        moveRefreshHeaderView(computeRefreshHeaderTopByContentTop(result));
+        moveHeaderView(computeHeaderTopByContentTop(result));
 
     }
 
@@ -322,25 +323,25 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
      * @return 若返回true，则将变为刷新状态
      */
     private boolean handleTouchActionUp() {
-        if (isRefreshHeaderFullVisible()) {
-            onExpandAnimatorEnd(true);
+        if (isHeaderFullVisible()) {
+            onEnterRefreshAnimEnd(true);
             return true;
-        } else if (isRefreshHeaderOverPull()) {
-            expandRefreshHeader(true);
+        } else if (isHeaderOverPull()) {
+            showEnterRefreshAnim(true);
             return true;
-        } else if (isRefreshHeaderPartVisible()) {
+        } else if (isHeaderPartVisible()) {
             setState(RefreshHeaderState.PULL_TO_REFRESH);
-            collapseRefreshHeader();
-        } else if (isRefreshHeaderInVisible()) {
-            onCollapseAnimatorEnd();
+            showExitRefreshAnim();
+        } else if (isHeaderInVisible()) {
+            onExitRefreshAnimEnd();
         }
         return false;
     }
 
-    private void moveRefreshHeaderView(int top) {
-        this.currentRefreshHeaderTop = top;
-        refreshHeaderView.offsetTopAndBottom(-refreshHeaderView.getTop() + top);
-        refreshHeaderView.setVisibility(refreshHeaderView.getTop() <= headerMinTop ? INVISIBLE : VISIBLE);
+    private void moveHeaderView(int top) {
+        this.currentHeaderTop = top;
+        headerView.offsetTopAndBottom(-headerView.getTop() + top);
+        headerView.setVisibility(headerView.getTop() <= headerMinTop ? INVISIBLE : VISIBLE);
     }
 
     private float moveContentView(int top, boolean triggerCallback) {
@@ -351,7 +352,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
         ratio = ratio < 0 ? 0 : ratio;
         ratio = ratio > 1 ? 1 : ratio;
         if (triggerCallback) {
-            refreshHeaderWrapper.onPullRefreshHeader(ratio);
+            headerWrapper.onPullRefreshHeader(ratio);
         }
         return ratio;
     }
@@ -362,7 +363,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
 
     public void setRefreshing(boolean refreshing) {
 
-        if (refreshHeaderWrapper == null) {
+        if (headerWrapper == null) {
             throw new IllegalArgumentException("please use setRefreshHeader before setRefreshing");
         }
         //已经开始这个状态直接返回
@@ -375,7 +376,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
             post(new Runnable() {
                 @Override
                 public void run() {
-                    expandRefreshHeader(false);
+                    showEnterRefreshAnim(false);
                 }
             });
         } else {
@@ -385,9 +386,9 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
                 public void run() {
                     SmoothRefreshLayout.this.refreshing = false;
                     if (contentWrapper.topChildIsFirstItem()) {
-                        collapseRefreshHeader();
+                        showExitRefreshAnim();
                     } else {
-                        onCollapseAnimatorEnd();
+                        onExitRefreshAnimEnd();
                     }
                 }
             }, DEFAULT_ANIMATOR_DURATION);
@@ -395,29 +396,29 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
     }
 
     //展开刷新header的动画
-    private void expandRefreshHeader(final boolean isTouchTrigger) {
+    private void showEnterRefreshAnim(final boolean isTouchTrigger) {
         animatorRunning = true;
-        refreshHeaderView.setVisibility(VISIBLE);
-        if (refreshHeaderAnimator != null) {
-            refreshHeaderAnimator.cancel();
+        headerView.setVisibility(VISIBLE);
+        if (headerAnimator != null) {
+            headerAnimator.cancel();
         }
         setState(RefreshHeaderState.REFRESHING);
 
-        refreshHeaderAnimator = getRefreshHeaderAnimator(contentWrapper.getTopOffset(), contentRefreshingTop);
+        headerAnimator = headerAnimator(contentWrapper.getTopOffset(), contentRefreshingTop);
 
-        refreshHeaderAnimator.addListener(new Animator.AnimatorListener() {
+        headerAnimator.addListener(new Animator.AnimatorListener() {
             @Override
             public void onAnimationStart(Animator animation) {
             }
 
             @Override
             public void onAnimationEnd(Animator animation) {
-                onExpandAnimatorEnd(isTouchTrigger);
+                onEnterRefreshAnimEnd(isTouchTrigger);
             }
 
             @Override
             public void onAnimationCancel(Animator animation) {
-                onExpandAnimatorEnd(isTouchTrigger);
+                onEnterRefreshAnimEnd(isTouchTrigger);
             }
 
             @Override
@@ -425,12 +426,12 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
 
             }
         });
-        refreshHeaderAnimator.start();
+        headerAnimator.start();
     }
 
-    private void onExpandAnimatorEnd(boolean isTouchTrigger) {
+    private void onEnterRefreshAnimEnd(boolean isTouchTrigger) {
         moveContentView(contentRefreshingTop);
-        moveRefreshHeaderView(headerRefreshingTop);
+        moveHeaderView(headerRefreshingTop);
         animatorRunning = false;
         refreshing = true;
         if (onRefreshListener != null) {
@@ -442,25 +443,25 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
     }
 
     //松手时返回顶部的动画
-    private void collapseRefreshHeader() {
+    private void showExitRefreshAnim() {
         animatorRunning = true;
-        if (refreshHeaderAnimator != null) {
-            refreshHeaderAnimator.cancel();
+        if (headerAnimator != null) {
+            headerAnimator.cancel();
         }
-        refreshHeaderAnimator = getRefreshHeaderAnimator(contentWrapper.getTopOffset(), contentMinTop);
-        refreshHeaderAnimator.addListener(new Animator.AnimatorListener() {
+        headerAnimator = headerAnimator(contentWrapper.getTopOffset(), contentMinTop);
+        headerAnimator.addListener(new Animator.AnimatorListener() {
             @Override
             public void onAnimationStart(Animator animation) {
             }
 
             @Override
             public void onAnimationEnd(Animator animation) {
-                onCollapseAnimatorEnd();
+                onExitRefreshAnimEnd();
             }
 
             @Override
             public void onAnimationCancel(Animator animation) {
-                onCollapseAnimatorEnd();
+                onExitRefreshAnimEnd();
             }
 
             @Override
@@ -468,31 +469,31 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
 
             }
         });
-        refreshHeaderAnimator.start();
+        headerAnimator.start();
     }
 
-    private void onCollapseAnimatorEnd() {
+    private void onExitRefreshAnimEnd() {
         moveContentView(contentMinTop);
-        moveRefreshHeaderView(headerMinTop);
+        moveHeaderView(headerMinTop);
 
         animatorRunning = false;
         refreshing = false;
-        refreshHeaderView.setVisibility(INVISIBLE);
+        headerView.setVisibility(INVISIBLE);
         currentRefreshState = RefreshHeaderState.NONE;
 
     }
 
-    private ValueAnimator getRefreshHeaderAnimator(final int startValue, final int endValue) {
+    private ValueAnimator headerAnimator(final int startValue, final int endValue) {
         ValueAnimator valueAnimator = ValueAnimator.ofInt(startValue, endValue);
         valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
                 int newContentValue = (int) animation.getAnimatedValue();
-                int oldHeaderValue = refreshHeaderView.getTop();
-                int newHeaderValue = computeRefreshHeaderTopByContentTop(newContentValue);
+                int oldHeaderValue = headerView.getTop();
+                int newHeaderValue = computeHeaderTopByContentTop(newContentValue);
                 moveContentView(newContentValue);
-                if (refreshHeaderView.getTop() > newHeaderValue) {
-                    moveRefreshHeaderView(newHeaderValue);
+                if (headerView.getTop() > newHeaderValue) {
+                    moveHeaderView(newHeaderValue);
                 }
                 if (isRecyclerView && startValue < endValue) {
                     contentView.scrollBy(0, oldHeaderValue - newContentValue);
@@ -517,8 +518,8 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
     }
 
     private void setState(@RefreshHeaderState int state) {
-        if (state != this.currentRefreshState && refreshHeaderWrapper != null) {
-            refreshHeaderWrapper.onStateChanged(state);
+        if (state != this.currentRefreshState && headerWrapper != null) {
+            headerWrapper.onStateChanged(state);
         }
         this.currentRefreshState = state;
     }
@@ -526,8 +527,8 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        if (refreshHeaderAnimator != null && refreshHeaderAnimator.isRunning()) {
-            refreshHeaderAnimator.cancel();
+        if (headerAnimator != null && headerAnimator.isRunning()) {
+            headerAnimator.cancel();
         }
         onRefreshListener = null;
         if (contentWrapper != null) {
@@ -555,7 +556,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
         }
 
         if (!contentWrapper.isList()) {
-            if (!refreshing && dy > 0 && isRefreshHeaderVisible()) {
+            if (!refreshing && dy > 0 && isHeaderVisible()) {
                 consumed[1] = dy;
             }
 
@@ -565,9 +566,9 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
                 if (result < contentMinTop) result = contentMinTop;
                 if (dy > 0 || !canChildScrollUp()) {
                     moveContentView(result, false);
-                    moveRefreshHeaderView(computeRefreshHeaderTopByContentTop(result));
+                    moveHeaderView(computeHeaderTopByContentTop(result));
                 }
-                if (isRefreshHeaderVisible()) {
+                if (isHeaderVisible()) {
                     consumed[1] = dy;
                 }
             }
@@ -582,10 +583,10 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
 
     @Override
     public boolean onNestedPreFling(View target, float velocityX, float velocityY) {
-        if (!contentWrapper.isList() && isRefreshHeaderVisible()) {
+        if (!contentWrapper.isList() && isHeaderVisible()) {
             return true;
         }
-        return !refreshing && isRefreshHeaderVisible();
+        return !refreshing && isHeaderVisible();
     }
 
     @Override
