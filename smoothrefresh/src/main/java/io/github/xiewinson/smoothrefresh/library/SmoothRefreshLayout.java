@@ -9,7 +9,6 @@ import android.support.v4.view.NestedScrollingParentHelper;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -541,7 +540,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
         if (target == contentView && axes == ViewCompat.SCROLL_AXIS_VERTICAL && isEnabled()) {
             return true;
         }
-        return super.onStartNestedScroll(child, target, axes);
+        return false;
     }
 
     @Override
