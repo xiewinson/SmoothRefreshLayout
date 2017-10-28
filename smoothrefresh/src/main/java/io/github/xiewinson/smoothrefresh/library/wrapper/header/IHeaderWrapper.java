@@ -15,7 +15,7 @@ import io.github.xiewinson.smoothrefresh.library.wrapper.header.calculator.IHead
 public interface IHeaderWrapper {
 
     @NonNull
-    View getHeaderView(ViewGroup container);
+    View getView(ViewGroup container);
 
     @NonNull
     IHeaderPosCalculator getHeaderPosCalculator();
