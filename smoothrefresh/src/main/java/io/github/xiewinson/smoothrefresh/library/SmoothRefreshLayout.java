@@ -20,8 +20,8 @@ import io.github.xiewinson.smoothrefresh.library.listener.OnRefreshListener;
 import io.github.xiewinson.smoothrefresh.library.wrapper.content.ContentViewWrapper;
 import io.github.xiewinson.smoothrefresh.library.wrapper.content.IContentViewWrapper;
 import io.github.xiewinson.smoothrefresh.library.wrapper.content.ListWrapper;
-import io.github.xiewinson.smoothrefresh.library.wrapper.header.IHeaderWrapper;
 import io.github.xiewinson.smoothrefresh.library.wrapper.header.HeaderWrapper;
+import io.github.xiewinson.smoothrefresh.library.wrapper.header.IHeaderWrapper;
 
 /**
  * Created by winson on 2017/10/3.
