@@ -1,6 +1,5 @@
 package io.github.xiewinson.smoothrefresh.library.wrapper.header.classic;
 
-import android.content.Context;
 import android.support.annotation.FloatRange;
 import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
@@ -22,14 +21,10 @@ public class ClassicHeaderWrapper extends HeaderWrapper {
     private ImageView iconIv;
     private View view;
 
-    public ClassicHeaderWrapper(Context context) {
-        super(context);
-    }
-
     @NonNull
     @Override
     public View onCreateView(ViewGroup container) {
-        view = LayoutInflater.from(context).inflate(R.layout.header_refresh_classic, container, false);
+        view = LayoutInflater.from(container.getContext()).inflate(R.layout.header_refresh_classic, container, false);
         titleTv = view.findViewById(R.id.title_tv);
         iconIv = view.findViewById(R.id.icon_iv);
         return view;

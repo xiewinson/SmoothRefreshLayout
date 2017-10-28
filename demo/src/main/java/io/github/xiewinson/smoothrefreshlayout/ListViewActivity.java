@@ -32,7 +32,7 @@ public class ListViewActivity extends BaseActivity {
         final ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.item, R.id.tv, data);
         listView.setAdapter(adapter);
 
-        refreshLayout.setRefreshHeader(new Classic1HeaderWrapper(this));
+        refreshLayout.setRefreshHeader(new Classic1HeaderWrapper());
         refreshLayout.setOnRefreshListener(new OnRefreshListener() {
             @Override
             public void onRefresh() {

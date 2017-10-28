@@ -34,7 +34,7 @@ public class NestedScrollViewActivity extends BaseActivity {
             addItem();
         }
 
-        refreshLayout.setRefreshHeader(new Classic1HeaderWrapper(this));
+        refreshLayout.setRefreshHeader(new Classic1HeaderWrapper());
         refreshLayout.setOnRefreshListener(new OnRefreshListener() {
             @Override
             public void onRefresh() {

@@ -24,11 +24,6 @@ public class Classic1HeaderWrapper extends PartlyVisibleHeaderWrapper {
     private TextView titleTv;
     private ImageView iconIv;
 
-    public Classic1HeaderWrapper(Context context) {
-        super(context);
-        this.context = context;
-    }
-
     @NonNull
     @Override
     public View onCreateView(ViewGroup container) {

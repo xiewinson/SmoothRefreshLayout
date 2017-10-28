@@ -54,7 +54,7 @@ public class RecyclerViewActivity extends BaseActivity {
         }
         listAdapter.setItems(data);
 
-        refreshLayout.setRefreshHeader(new ClassicHeaderWrapper(this));
+        refreshLayout.setRefreshHeader(new ClassicHeaderWrapper());
         refreshLayout.setOnRefreshListener(new OnRefreshListener() {
             @Override
             public void onRefresh() {

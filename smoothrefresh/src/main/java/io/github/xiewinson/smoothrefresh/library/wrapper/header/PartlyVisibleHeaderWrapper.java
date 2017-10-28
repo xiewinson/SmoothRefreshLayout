@@ -1,6 +1,5 @@
 package io.github.xiewinson.smoothrefresh.library.wrapper.header;
 
-import android.content.Context;
 import android.support.annotation.NonNull;
 import android.view.View;
 
@@ -12,9 +11,6 @@ import io.github.xiewinson.smoothrefresh.library.wrapper.header.calculator.Partl
  */
 
 public abstract class PartlyVisibleHeaderWrapper extends HeaderWrapper {
-    public PartlyVisibleHeaderWrapper(Context context) {
-        super(context);
-    }
 
     @NonNull
     @Override

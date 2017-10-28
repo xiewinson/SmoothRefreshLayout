@@ -15,11 +15,9 @@ import io.github.xiewinson.smoothrefresh.library.wrapper.header.calculator.IHead
 
 public abstract class HeaderWrapper implements IHeaderWrapper {
     private View headerView;
-    protected Context context;
     private IHeaderPosCalculator headerPosCalculator;
 
-    public HeaderWrapper(Context context) {
-        this.context = context;
+    public HeaderWrapper() {
     }
 
     public void setHeaderPosCalculator(IHeaderPosCalculator headerPosCalculator) {
@@ -27,7 +25,7 @@ public abstract class HeaderWrapper implements IHeaderWrapper {
     }
 
     @NonNull
-    public abstract View onCreateView(ViewGroup container);
+    protected abstract View onCreateView(ViewGroup container);
 
     @NonNull
     @Override
