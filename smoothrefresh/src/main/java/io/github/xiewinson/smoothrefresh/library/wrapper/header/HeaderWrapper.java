@@ -14,7 +14,6 @@ import io.github.xiewinson.smoothrefresh.library.wrapper.header.calculator.IHead
  */
 
 public abstract class HeaderWrapper implements IHeaderWrapper {
-    private ViewGroup container;
     private View headerView;
     protected Context context;
     private IHeaderPosCalculator refreshHeaderPosCalculator;
@@ -32,7 +31,7 @@ public abstract class HeaderWrapper implements IHeaderWrapper {
 
     @NonNull
     @Override
-    public final View getHeaderView() {
+    public final View getHeaderView(ViewGroup container) {
         if (headerView == null) {
             headerView = onCreateView(container);
             //解决偶然的第一次下拉时View没显示出来该状态
@@ -48,10 +47,5 @@ public abstract class HeaderWrapper implements IHeaderWrapper {
             refreshHeaderPosCalculator = new DefaultHeaderPosCalculator();
         }
         return refreshHeaderPosCalculator;
-    }
-
-    @Override
-    public final void setContainer(ViewGroup container) {
-        this.container = container;
     }
 }

@@ -115,8 +115,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
 
     public void setRefreshHeader(HeaderWrapper headerWrapper) {
         this.headerWrapper = headerWrapper;
-        this.headerWrapper.setContainer(this);
-        this.headerView = headerWrapper.getHeaderView();
+        this.headerView = headerWrapper.getHeaderView(this);
         initHeaderView();
     }
 
