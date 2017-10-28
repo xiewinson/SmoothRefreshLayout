@@ -12,4 +12,5 @@ import io.github.xiewinson.smoothrefresh.library.annotation.PageState;
 public interface IPageWrapper {
 
     View getView(ViewGroup container, @PageState int state);
+
 }

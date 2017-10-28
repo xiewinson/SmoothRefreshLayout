@@ -17,7 +17,6 @@ import java.util.List;
 
 import io.github.xiewinson.smoothrefresh.library.ScreenUtil;
 import io.github.xiewinson.smoothrefresh.library.SmoothRefreshLayout;
-import io.github.xiewinson.smoothrefresh.library.annotation.PageState;
 import io.github.xiewinson.smoothrefresh.library.listener.OnRefreshListener;
 import io.github.xiewinson.smoothrefresh.library.wrapper.header.classic.ClassicHeaderWrapper;
 import io.github.xiewinson.smoothrefresh.library.wrapper.page.classic.ClassicPageWrapper;
@@ -67,6 +66,7 @@ public class RecyclerViewActivity extends BaseActivity {
                             first = false;
                             refreshLayout.showErrorPage();
                         } else {
+                            data.clear();
                             for (int i = 0; i < 10; i++) {
                                 data.add(String.valueOf(i));
                             }
@@ -80,16 +80,14 @@ public class RecyclerViewActivity extends BaseActivity {
         });
         refreshLayout.setPages(new ClassicPageWrapper() {
             @Override
-            protected View onCreateView(ViewGroup container, @PageState int state) {
-                View v = super.onCreateView(container, state);
-                if (state == PageState.ERROR) {
-                    v.findViewById(R.id.btn).setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            refreshLayout.setRefreshing(true);
-                        }
-                    });
-                }
+            protected View onCreateErrorView(ViewGroup container) {
+                View v = super.onCreateErrorView(container);
+                v.findViewById(R.id.btn).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        refreshLayout.setRefreshing(true);
+                    }
+                });
                 return v;
             }
         });

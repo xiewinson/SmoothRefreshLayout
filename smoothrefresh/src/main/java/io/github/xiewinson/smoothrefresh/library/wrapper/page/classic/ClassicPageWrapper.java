@@ -4,7 +4,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import io.github.xiewinson.smoothrefresh.library.annotation.PageState;
 import io.github.xiewinson.smoothrefresh.library.wrapper.page.PageWrapper;
 import io.github.xiewinson.smoothrefreshlayout.library.R;
 
@@ -15,15 +14,17 @@ import io.github.xiewinson.smoothrefreshlayout.library.R;
 public class ClassicPageWrapper extends PageWrapper {
 
     @Override
-    protected View onCreateView(ViewGroup container, @PageState int state) {
-        switch (state) {
-            case PageState.LOADING:
-                return LayoutInflater.from(container.getContext()).inflate(R.layout.footer_loading_classic, container, false);
-            case PageState.ERROR:
-                return LayoutInflater.from(container.getContext()).inflate(R.layout.footer_error_classic, container, false);
-            case PageState.EMPTY:
-                return LayoutInflater.from(container.getContext()).inflate(R.layout.footer_empty_classic, container, false);
-        }
-        return null;
+    protected View onCreateLoadingView(ViewGroup container) {
+        return LayoutInflater.from(container.getContext()).inflate(R.layout.page_loading_classic, container, false);
+    }
+
+    @Override
+    protected View onCreateEmptyView(ViewGroup container) {
+        return LayoutInflater.from(container.getContext()).inflate(R.layout.page_empty_classic, container, false);
+    }
+
+    @Override
+    protected View onCreateErrorView(ViewGroup container) {
+        return LayoutInflater.from(container.getContext()).inflate(R.layout.page_error_classic, container, false);
     }
 }

@@ -5,12 +5,10 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import io.github.xiewinson.smoothrefresh.library.SmoothRefreshLayout;
 import io.github.xiewinson.smoothrefresh.library.listener.OnRefreshListener;
-import io.github.xiewinson.smoothrefresh.library.wrapper.header.classic.Classic1HeaderWrapper;
 import io.github.xiewinson.smoothrefresh.library.wrapper.header.classic.ClassicHeaderWrapper;
 import io.github.xiewinson.smoothrefresh.library.wrapper.page.classic.ClassicPageWrapper;
 
@@ -41,6 +39,7 @@ public class ListViewActivity extends BaseActivity {
                     @Override
                     public void run() {
                         refreshLayout.setRefreshing(false);
+                        data.clear();
                         for (int i = 0; i < 20; i++) {
                             data.add("ListView Item" + i);
                         }

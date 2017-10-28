@@ -10,7 +10,6 @@ import android.widget.TextView;
 
 import io.github.xiewinson.smoothrefresh.library.ScreenUtil;
 import io.github.xiewinson.smoothrefresh.library.SmoothRefreshLayout;
-import io.github.xiewinson.smoothrefresh.library.annotation.PageState;
 import io.github.xiewinson.smoothrefresh.library.listener.OnRefreshListener;
 import io.github.xiewinson.smoothrefresh.library.wrapper.header.classic.Classic1HeaderWrapper;
 import io.github.xiewinson.smoothrefresh.library.wrapper.page.classic.ClassicPageWrapper;
@@ -41,17 +40,16 @@ public class NestedScrollViewActivity extends BaseActivity {
 
         refreshLayout.setRefreshHeader(new Classic1HeaderWrapper());
         refreshLayout.setPages(new ClassicPageWrapper() {
+
             @Override
-            protected View onCreateView(ViewGroup container, int state) {
-                View v = super.onCreateView(container, state);
-                if (state == PageState.ERROR) {
-                    v.findViewById(R.id.btn).setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            refreshLayout.setRefreshing(true);
-                        }
-                    });
-                }
+            protected View onCreateErrorView(ViewGroup container) {
+                View v = super.onCreateErrorView(container);
+                v.findViewById(R.id.btn).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        refreshLayout.setRefreshing(true);
+                    }
+                });
                 return v;
             }
         });
