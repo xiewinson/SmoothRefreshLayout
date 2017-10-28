@@ -9,11 +9,13 @@ import android.support.v4.view.NestedScrollingParentHelper;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
 
+import io.github.xiewinson.smoothrefresh.library.annotation.PageState;
 import io.github.xiewinson.smoothrefresh.library.annotation.RefreshHeaderState;
 import io.github.xiewinson.smoothrefresh.library.listener.OnContentViewScrollListener;
 import io.github.xiewinson.smoothrefresh.library.listener.OnRefreshListener;
@@ -22,6 +24,8 @@ import io.github.xiewinson.smoothrefresh.library.wrapper.content.IContentViewWra
 import io.github.xiewinson.smoothrefresh.library.wrapper.content.ListWrapper;
 import io.github.xiewinson.smoothrefresh.library.wrapper.header.HeaderWrapper;
 import io.github.xiewinson.smoothrefresh.library.wrapper.header.IHeaderWrapper;
+import io.github.xiewinson.smoothrefresh.library.wrapper.page.IPageWrapper;
+import io.github.xiewinson.smoothrefresh.library.wrapper.page.PageWrapper;
 
 /**
  * Created by winson on 2017/10/3.
@@ -67,6 +71,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
 
     private int currentHeaderTop = 0;
     private int currentContentTop = 0;
+    private int currentPageTop = 0;
 
     private int correctOverScrollMode;
     private float lastHeaderY = -1;
@@ -80,6 +85,11 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
     private ValueAnimator headerAnimator;
 
     private OnRefreshListener onRefreshListener;
+
+    private IPageWrapper pageWrapper;
+    private View pageView;
+
+    private int currentPageState = PageState.NONE;
 
     public static final int DEFAULT_ANIMATOR_DURATION = 300;
 
@@ -117,6 +127,10 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
         this.headerWrapper = headerWrapper;
         this.headerView = headerWrapper.getView(this);
         initHeaderView();
+    }
+
+    public void setPages(PageWrapper pageWrapper) {
+        this.pageWrapper = pageWrapper;
     }
 
     private void initHeaderView() {
@@ -187,37 +201,49 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-//        if(getPaddingTop() != 0 || getPaddingBottom() != 0) {
-//            setPadding(getPaddingLeft(), 0, getPaddingRight(), 0);
-//        }
         int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
-            measureChild(getChildAt(i), widthMeasureSpec, heightMeasureSpec);
+            View chid = getChildAt(i);
+            if (chid.getVisibility() != GONE) {
+                measureChild(chid, widthMeasureSpec, heightMeasureSpec);
+            }
         }
 
     }
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        headerView.layout(getPaddingLeft(),
-                currentHeaderTop,
-                getPaddingLeft() + headerView.getMeasuredWidth(),
-                currentHeaderTop + headerView.getMeasuredHeight());
 
-        if (!contentWrapper.isList()) {
-            int pd = currentContentTop;
-            if (currentContentTop == 0) {
-                pd = pd + getPaddingTop();
+        if (headerView.getVisibility() != GONE) {
+            headerView.layout(getPaddingLeft(),
+                    currentHeaderTop,
+                    getPaddingLeft() + headerView.getMeasuredWidth(),
+                    currentHeaderTop + headerView.getMeasuredHeight());
+        }
+
+        if (contentView.getVisibility() != GONE) {
+            if (!contentWrapper.isList()) {
+                int pd = currentContentTop;
+                if (currentContentTop == 0) {
+                    pd = pd + getPaddingTop();
+                }
+                contentView.layout(getPaddingLeft(),
+                        pd,
+                        getPaddingLeft() + contentView.getMeasuredWidth(),
+                        pd + contentView.getMeasuredHeight());
+            } else {
+                contentView.layout(getPaddingLeft(),
+                        getPaddingTop(),
+                        getPaddingLeft() + contentView.getMeasuredWidth(),
+                        getPaddingTop() + contentView.getMeasuredHeight());
             }
-            contentView.layout(getPaddingLeft(),
-                    pd,
-                    getPaddingLeft() + contentView.getMeasuredWidth(),
-                    pd + contentView.getMeasuredHeight());
-        } else {
-            contentView.layout(getPaddingLeft(),
+        }
+
+        if (pageView != null && pageView.getVisibility() != GONE) {
+            pageView.layout(getPaddingLeft(),
                     getPaddingTop(),
-                    getPaddingLeft() + contentView.getMeasuredWidth(),
-                    getPaddingTop() + contentView.getMeasuredHeight());
+                    getPaddingLeft() + pageView.getMeasuredWidth(),
+                    getPaddingTop() + pageView.getMeasuredHeight());
         }
 
     }
@@ -308,9 +334,9 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
         result = Math.min(result, contentMaxTop);
 
         if (result >= contentRefreshingTop) {
-            setState(RefreshHeaderState.RELEASE_TO_REFRESH);
+            setHeaderState(RefreshHeaderState.RELEASE_TO_REFRESH);
         } else {
-            setState(RefreshHeaderState.PULL_TO_REFRESH);
+            setHeaderState(RefreshHeaderState.PULL_TO_REFRESH);
         }
 
         moveContentView(result);
@@ -329,7 +355,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
             showEnterRefreshAnim(true);
             return true;
         } else if (isHeaderPartVisible()) {
-            setState(RefreshHeaderState.PULL_TO_REFRESH);
+            setHeaderState(RefreshHeaderState.PULL_TO_REFRESH);
             showExitRefreshAnim();
         } else if (isHeaderInVisible()) {
             onExitRefreshAnimEnd();
@@ -360,6 +386,54 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
         return moveContentView(top, true);
     }
 
+    private void setPageState(@PageState int state) {
+        if (pageWrapper == null)
+            throw new IllegalArgumentException("you must use setPages() before change pages");
+        if (this.currentPageState == state) return;
+        this.currentPageState = state;
+        if (pageView != null) removeView(pageView);
+
+        pageView = pageWrapper.getView(this, state);
+        switch (state) {
+            case PageState.NONE:
+                contentView.setVisibility(VISIBLE);
+                break;
+            case PageState.LOADING:
+                contentView.setVisibility(GONE);
+                break;
+            case PageState.ERROR:
+                contentView.setVisibility(GONE);
+                onExitRefreshAnimEnd();
+                break;
+
+            case PageState.EMPTY:
+                contentView.setVisibility(GONE);
+                onExitRefreshAnimEnd();
+                break;
+        }
+        if (pageView != null) {
+            addView(pageView);
+        }
+    }
+
+    public void showErrorPage() {
+        post(new Runnable() {
+            @Override
+            public void run() {
+                setPageState(PageState.ERROR);
+            }
+        });
+    }
+
+    public void showEmptyPage() {
+        post(new Runnable() {
+            @Override
+            public void run() {
+                setPageState(PageState.EMPTY);
+            }
+        });
+    }
+
     public void setRefreshing(boolean refreshing) {
 
         if (headerWrapper == null) {
@@ -370,6 +444,27 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
             return;
         }
 
+        if (pageWrapper != null
+                && pageWrapper.getView(this, PageState.LOADING) != null
+                && refreshing
+                && !contentWrapper.hasListItemChild()) {
+            setPageState(PageState.LOADING);
+            this.refreshing = true;
+            onRefreshListener.onRefresh();
+        }
+
+        if (!refreshing) {
+            setPageState(PageState.NONE);
+        }
+
+        if ((currentPageState == PageState.EMPTY ||
+                currentPageState == PageState.LOADING ||
+                currentPageState == PageState.ERROR)) {
+            this.refreshing = refreshing;
+            return;
+        }
+
+
         if (refreshing) {
             this.refreshing = true;
             post(new Runnable() {
@@ -379,7 +474,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
                 }
             });
         } else {
-            setState(RefreshHeaderState.REFRESH_COMPLETED);
+            setHeaderState(RefreshHeaderState.REFRESH_COMPLETED);
             postDelayed(new Runnable() {
                 @Override
                 public void run() {
@@ -401,7 +496,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
         if (headerAnimator != null) {
             headerAnimator.cancel();
         }
-        setState(RefreshHeaderState.REFRESHING);
+        setHeaderState(RefreshHeaderState.REFRESHING);
 
         headerAnimator = headerAnimator(contentWrapper.getTopOffset(), contentRefreshingTop);
 
@@ -516,7 +611,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
         return refreshing;
     }
 
-    private void setState(@RefreshHeaderState int state) {
+    private void setHeaderState(@RefreshHeaderState int state) {
         if (state != this.currentRefreshState && headerWrapper != null) {
             headerWrapper.onStateChanged(state);
         }

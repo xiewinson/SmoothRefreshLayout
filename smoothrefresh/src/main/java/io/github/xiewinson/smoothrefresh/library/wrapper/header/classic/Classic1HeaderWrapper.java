@@ -1,6 +1,5 @@
 package io.github.xiewinson.smoothrefresh.library.wrapper.header.classic;
 
-import android.content.Context;
 import android.support.annotation.FloatRange;
 import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
@@ -19,7 +18,6 @@ import io.github.xiewinson.smoothrefreshlayout.library.R;
  */
 
 public class Classic1HeaderWrapper extends PartlyVisibleHeaderWrapper {
-    private Context context;
     private View view;
     private TextView titleTv;
     private ImageView iconIv;
@@ -27,7 +25,7 @@ public class Classic1HeaderWrapper extends PartlyVisibleHeaderWrapper {
     @NonNull
     @Override
     public View onCreateView(ViewGroup container) {
-        view = LayoutInflater.from(context).inflate(R.layout.header_refresh_classic1, container, false);
+        view = LayoutInflater.from(container.getContext()).inflate(R.layout.header_refresh_classic1, container, false);
         titleTv = view.findViewById(R.id.title_tv);
         iconIv = view.findViewById(R.id.icon_iv);
         return view;

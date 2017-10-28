@@ -66,4 +66,9 @@ public class ContentViewWrapper implements IContentViewWrapper {
     public boolean isList() {
         return false;
     }
+
+    @Override
+    public boolean hasListItemChild() {
+        return false;
+    }
 }

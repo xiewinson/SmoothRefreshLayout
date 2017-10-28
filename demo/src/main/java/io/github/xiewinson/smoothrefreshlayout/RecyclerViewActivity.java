@@ -13,18 +13,20 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import io.github.xiewinson.smoothrefresh.library.ScreenUtil;
 import io.github.xiewinson.smoothrefresh.library.SmoothRefreshLayout;
+import io.github.xiewinson.smoothrefresh.library.annotation.PageState;
 import io.github.xiewinson.smoothrefresh.library.listener.OnRefreshListener;
 import io.github.xiewinson.smoothrefresh.library.wrapper.header.classic.ClassicHeaderWrapper;
+import io.github.xiewinson.smoothrefresh.library.wrapper.page.classic.ClassicPageWrapper;
 
 public class RecyclerViewActivity extends BaseActivity {
 
     private RecyclerView recyclerView;
     private SmoothRefreshLayout refreshLayout;
+    private boolean first = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,23 +51,46 @@ public class RecyclerViewActivity extends BaseActivity {
         final ListAdapter listAdapter = new ListAdapter();
         recyclerView.setAdapter(listAdapter);
         final List<String> data = new ArrayList<>();
-        for (int i = 0; i < 100; i++) {
-            data.add(String.valueOf(i));
-        }
+
         listAdapter.setItems(data);
+
 
         refreshLayout.setRefreshHeader(new ClassicHeaderWrapper());
         refreshLayout.setOnRefreshListener(new OnRefreshListener() {
             @Override
             public void onRefresh() {
+
                 refreshLayout.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        refreshLayout.setRefreshing(false);
-                        Collections.shuffle(data);
-                        listAdapter.setItems(data);
+                        if (first) {
+                            first = false;
+                            refreshLayout.showErrorPage();
+                        } else {
+                            for (int i = 0; i < 10; i++) {
+                                data.add(String.valueOf(i));
+                            }
+                            listAdapter.setItems(data);
+                            refreshLayout.setRefreshing(false);
+                        }
+
                     }
-                }, 1000);
+                }, 2000);
+            }
+        });
+        refreshLayout.setPages(new ClassicPageWrapper() {
+            @Override
+            protected View onCreateView(ViewGroup container, @PageState int state) {
+                View v = super.onCreateView(container, state);
+                if (state == PageState.ERROR) {
+                    v.findViewById(R.id.btn).setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            refreshLayout.setRefreshing(true);
+                        }
+                    });
+                }
+                return v;
             }
         });
         refreshLayout.setRefreshing(true);

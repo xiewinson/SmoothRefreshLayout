@@ -57,4 +57,9 @@ public class RecyclerViewWrapper extends ListWrapper {
         View child = recyclerView.getChildAt(0);
         return child != null && recyclerView.getChildAdapterPosition(child) == 0;
     }
+
+    @Override
+    public boolean hasListItemChild() {
+        return recyclerView.getAdapter().getItemCount() != 0;
+    }
 }

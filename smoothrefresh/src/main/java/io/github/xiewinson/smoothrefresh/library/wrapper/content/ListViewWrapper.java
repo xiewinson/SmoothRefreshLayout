@@ -52,4 +52,9 @@ public class ListViewWrapper extends ListWrapper {
     public void smoothScrollVerticalToTop() {
         listView.smoothScrollToPosition(0);
     }
+
+    @Override
+    public boolean hasListItemChild() {
+        return !listView.getAdapter().isEmpty();
+    }
 }

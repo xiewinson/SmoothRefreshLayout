@@ -5,14 +5,8 @@
     android:gravity="center"
     android:orientation="vertical">
 
-    <TextView
-        android:text="出错了"
+    <ProgressBar
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 
-    <Button
-        android:id="@+id/btn"
-        android:text="点击重试"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
 </LinearLayout>
