@@ -3,7 +3,7 @@ package io.github.xiewinson.smoothrefresh.library.wrapper.content;
 import android.widget.AbsListView;
 import android.widget.ListView;
 
-import io.github.xiewinson.smoothrefresh.library.listener.OnContentViewScrollListener;
+import io.github.xiewinson.smoothrefresh.library.listener.OnListScrollListener;
 
 /**
  * Created by winson on 2017/10/10.
@@ -19,8 +19,8 @@ public class ListViewWrapper extends ListWrapper {
     }
 
     @Override
-    public void setContentViewScrollListener(final OnContentViewScrollListener onContentViewScrollListener) {
-        super.setContentViewScrollListener(onContentViewScrollListener);
+    public void setOnListScrollListener(final OnListScrollListener onListScrollListener) {
+        super.setOnListScrollListener(onListScrollListener);
         listView.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(AbsListView view, int scrollState) {
@@ -29,8 +29,8 @@ public class ListViewWrapper extends ListWrapper {
 
             @Override
             public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-                if (onContentViewScrollListener != null && firstVisibleItem == 0 && listView.getChildAt(0) != null) {
-                    onContentViewScrollListener.onFirstItemScroll((int) listView.getChildAt(0).getY());
+                if (onListScrollListener != null && firstVisibleItem == 0 && listView.getChildAt(0) != null) {
+                    onListScrollListener.onFirstItemScroll((int) listView.getChildAt(0).getY());
                 }
             }
         });

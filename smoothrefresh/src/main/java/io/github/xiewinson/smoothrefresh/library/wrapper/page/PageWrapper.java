@@ -2,6 +2,7 @@ package io.github.xiewinson.smoothrefresh.library.wrapper.page;
 
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Space;
 
 import java.util.WeakHashMap;
 
@@ -17,7 +18,6 @@ public abstract class PageWrapper implements IPageWrapper {
 
     @Override
     public final View getView(ViewGroup container, @PageState int state) {
-        if (state == PageState.NONE) return null;
         View view = viewMap.get(state);
         if (view == null) {
             switch (state) {
@@ -42,8 +42,18 @@ public abstract class PageWrapper implements IPageWrapper {
                 case PageState.NO_MORE_FOOTER:
                     view = onCreateNoMoreFooterView(container);
                     break;
+                case PageState.NONE:
+                    view = onCreateLoadingFooterView(container);
+                    if (view != null) {
+                        Space space = new Space(container.getContext());
+                        space.setLayoutParams(view.getLayoutParams());
+                        view = space;
+                    }
+                    break;
             }
-            viewMap.put(state, view);
+            if (view != null) {
+                viewMap.put(state, view);
+            }
         }
         return view;
     }

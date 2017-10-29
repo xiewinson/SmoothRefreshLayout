@@ -2,7 +2,7 @@ package io.github.xiewinson.smoothrefresh.library.wrapper.content;
 
 import android.view.ViewGroup;
 
-import io.github.xiewinson.smoothrefresh.library.listener.OnContentViewScrollListener;
+import io.github.xiewinson.smoothrefresh.library.listener.OnListScrollListener;
 
 /**
  * Created by winson on 2017/10/23.
@@ -10,7 +10,7 @@ import io.github.xiewinson.smoothrefresh.library.listener.OnContentViewScrollLis
 
 public class ListWrapper extends ContentViewWrapper implements IListWrapper {
     private ViewGroup viewGroup;
-    private OnContentViewScrollListener onViewGroupScrollListener;
+    private OnListScrollListener onListScrollListener;
 
     public ListWrapper(ViewGroup viewGroup) {
         super(viewGroup);
@@ -38,8 +38,8 @@ public class ListWrapper extends ContentViewWrapper implements IListWrapper {
     }
 
     @Override
-    public void setContentViewScrollListener(OnContentViewScrollListener onViewGroupScrollListener) {
-        this.onViewGroupScrollListener = onViewGroupScrollListener;
+    public void setOnListScrollListener(OnListScrollListener onListScrollListener) {
+        this.onListScrollListener = onListScrollListener;
     }
 
     @Override
@@ -49,6 +49,6 @@ public class ListWrapper extends ContentViewWrapper implements IListWrapper {
 
     @Override
     public void recycle() {
-        this.onViewGroupScrollListener = null;
+        this.onListScrollListener = null;
     }
 }

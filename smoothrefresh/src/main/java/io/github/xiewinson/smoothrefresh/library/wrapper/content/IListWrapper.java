@@ -1,6 +1,6 @@
 package io.github.xiewinson.smoothrefresh.library.wrapper.content;
 
-import io.github.xiewinson.smoothrefresh.library.listener.OnContentViewScrollListener;
+import io.github.xiewinson.smoothrefresh.library.listener.OnListScrollListener;
 
 /**
  * Created by winson on 2017/10/23.
@@ -8,6 +8,6 @@ import io.github.xiewinson.smoothrefresh.library.listener.OnContentViewScrollLis
 
 public interface IListWrapper {
 
-    void setContentViewScrollListener(OnContentViewScrollListener onViewGroupScrollListener);
+    void setOnListScrollListener(OnListScrollListener onViewGroupScrollListener);
 
 }

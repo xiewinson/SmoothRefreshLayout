@@ -17,6 +17,7 @@ import java.util.List;
 
 import io.github.xiewinson.smoothrefresh.library.ScreenUtil;
 import io.github.xiewinson.smoothrefresh.library.SmoothRefreshLayout;
+import io.github.xiewinson.smoothrefresh.library.listener.OnLoadMoreListener;
 import io.github.xiewinson.smoothrefresh.library.listener.OnRefreshListener;
 import io.github.xiewinson.smoothrefresh.library.wrapper.header.classic.ClassicHeaderWrapper;
 import io.github.xiewinson.smoothrefresh.library.wrapper.page.classic.ClassicPageWrapper;
@@ -25,7 +26,8 @@ public class RecyclerViewActivity extends BaseActivity {
 
     private RecyclerView recyclerView;
     private SmoothRefreshLayout refreshLayout;
-    private boolean first = true;
+    private boolean first = false;
+    private int ii = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,8 +69,10 @@ public class RecyclerViewActivity extends BaseActivity {
                             refreshLayout.showErrorPage();
                         } else {
                             data.clear();
+                            ii = 0;
                             for (int i = 0; i < 10; i++) {
-                                data.add(String.valueOf(i));
+                                data.add(String.valueOf
+                                        (ii++));
                             }
                             listAdapter.setItems(data);
                             refreshLayout.setRefreshing(false);
@@ -78,6 +82,23 @@ public class RecyclerViewActivity extends BaseActivity {
                 }, 2000);
             }
         });
+        refreshLayout.setOnLoadMoreListener(new OnLoadMoreListener() {
+            @Override
+            public void onLoadMore() {
+                refreshLayout.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        refreshLayout.showErrorFooter();
+//                        for (int i = 0; i < 10; i++) {
+//                            data.add(String.valueOf(ii++));
+//                        }
+//                        listAdapter.setItems(data);
+//                        refreshLayout.setLoadMoreCompleted();
+                    }
+                }, 2000);
+            }
+        });
+
         refreshLayout.setPages(new ClassicPageWrapper() {
             @Override
             protected View onCreateErrorView(ViewGroup container) {
