@@ -11,7 +11,6 @@ import android.support.v4.view.NestedScrollingParentHelper;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -308,7 +307,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
         int action = ev.getAction();
         float currentY = ev.getY();
 
-        if (isLoadMore || !isEnabled() || refreshing || animatorRunning) {
+        if (!isEnabled() || refreshing || animatorRunning) {
             return super.dispatchTouchEvent(ev);
         }
         switch (action) {
@@ -391,7 +390,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
         }
 
         int headerResult = computeHeaderTopByContentTop(result);
-        if (dy < 0) {
+        if (dy < 0 && pageView != null) {
             movePageView((int) (headerResult - headerView.getTop() + pageView.getY()));
         }
         moveContentView(result);
@@ -469,10 +468,6 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
             movePageView(this.currentPageTop);
         }
 
-//        if (state != PageState.NONE) {
-//            refreshing = false;
-//        }
-
         if (pageView != null && !isFullScreenPage() && contentWrapper.isList()) {
             pageView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
                 @Override
@@ -509,9 +504,6 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
                 onExitRefreshAnimEnd();
                 break;
 
-            case PageState.LOADING_FOOTER:
-
-                break;
         }
 
     }
@@ -531,7 +523,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
         post(new Runnable() {
             @Override
             public void run() {
-                isLoadMore = false;
+//                isLoadMore = false;
                 setPageState(PageState.ERROR_FOOTER);
             }
         });
@@ -543,6 +535,17 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
             @Override
             public void run() {
                 setPageState(PageState.EMPTY);
+            }
+        });
+    }
+
+    @UiThread
+    public void showEmptyFooter() {
+        post(new Runnable() {
+            @Override
+            public void run() {
+//                isLoadMore = false;
+                setPageState(PageState.EMPTY_FOOTER);
             }
         });
     }
@@ -785,7 +788,6 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
     public void onNestedPreScroll(View target, int dx, int dy, int[] consumed) {
 
         if (!refreshing && !animatorRunning) {
-            Log.d("winson", "dy -> " + dy);
             if (dy < 0 && !canChildScrollUp()) {
                 handleTouchActionMove(-dy);
                 enterPullRefreshHeader = true;

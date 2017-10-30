@@ -26,7 +26,8 @@ public class RecyclerViewActivity extends BaseActivity {
 
     private RecyclerView recyclerView;
     private SmoothRefreshLayout refreshLayout;
-    private boolean first = true;
+    private boolean flag = true;
+    private boolean flag1 = true;
     private int ii = 0;
 
     @Override
@@ -64,13 +65,13 @@ public class RecyclerViewActivity extends BaseActivity {
                 refreshLayout.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        if (first) {
-                            first = false;
+                        if (flag) {
+                            flag = false;
                             refreshLayout.showErrorPage();
                         } else {
                             data.clear();
                             ii = 0;
-                            for (int i = 0; i < 4; i++) {
+                            for (int i = 0; i < 10; i++) {
                                 data.add(String.valueOf
                                         (ii++));
                             }
@@ -88,12 +89,20 @@ public class RecyclerViewActivity extends BaseActivity {
                 refreshLayout.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        refreshLayout.showErrorFooter();
-//                        refreshLayout.setLoadMore(false);
-//                        for (int i = 0; i < 10; i++) {
-//                            data.add(String.valueOf(ii++));
-//                        }
-//                        listAdapter.setItems(data);
+
+                        if (flag1) {
+                            refreshLayout.showErrorFooter();
+                            flag1 = false;
+                        } else {
+                            refreshLayout.setLoadMore(false);
+                            for (int i = 0; i < 10; i++) {
+                                data.add(String.valueOf(ii++));
+                            }
+                            listAdapter.setItems(data);
+                            if (ii >= 39) {
+                                refreshLayout.showEmptyFooter();
+                            }
+                        }
                     }
                 }, 2000);
             }
