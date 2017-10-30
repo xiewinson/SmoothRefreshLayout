@@ -464,9 +464,10 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
             movePageView(this.currentPageTop);
         }
 
-        if (state != PageState.NONE) {
-            refreshing = false;
-        }
+//        if (state != PageState.NONE) {
+//            refreshing = false;
+//        }
+
         if (pageView != null && !isFullScreenPage() && contentWrapper.isList()) {
             pageView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
                 @Override
@@ -784,12 +785,6 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
                 enterPullRefreshHeader = true;
             } else if (dy > 0 && enterPullRefreshHeader) {
                 handleTouchActionMove(-dy);
-            }
-        }
-        if (enterPullRefreshHeader) {
-            if (isLoadMore) {
-                isLoadMore = false;
-                setPageState(PageState.NONE);
             }
         }
 

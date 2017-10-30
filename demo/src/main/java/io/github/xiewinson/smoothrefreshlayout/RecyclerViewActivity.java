@@ -70,7 +70,7 @@ public class RecyclerViewActivity extends BaseActivity {
                         } else {
                             data.clear();
                             ii = 0;
-                            for (int i = 0; i < 10; i++) {
+                            for (int i = 0; i < 4; i++) {
                                 data.add(String.valueOf
                                         (ii++));
                             }
@@ -88,12 +88,12 @@ public class RecyclerViewActivity extends BaseActivity {
                 refreshLayout.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-//                        refreshLayout.showErrorFooter();
-                        refreshLayout.setLoadMore(false);
-                        for (int i = 0; i < 10; i++) {
-                            data.add(String.valueOf(ii++));
-                        }
-                        listAdapter.setItems(data);
+                        refreshLayout.showErrorFooter();
+//                        refreshLayout.setLoadMore(false);
+//                        for (int i = 0; i < 10; i++) {
+//                            data.add(String.valueOf(ii++));
+//                        }
+//                        listAdapter.setItems(data);
                     }
                 }, 2000);
             }
