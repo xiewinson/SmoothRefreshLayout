@@ -11,6 +11,7 @@ import android.support.v4.view.NestedScrollingParentHelper;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -390,8 +391,12 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
         }
 
         int headerResult = computeHeaderTopByContentTop(result);
+        if (dy < 0) {
+            movePageView((int) (headerResult - headerView.getTop() + pageView.getY()));
+        }
         moveContentView(result);
         moveHeaderView(headerResult);
+
     }
 
     /**
@@ -780,6 +785,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
     public void onNestedPreScroll(View target, int dx, int dy, int[] consumed) {
 
         if (!refreshing && !animatorRunning) {
+            Log.d("winson", "dy -> " + dy);
             if (dy < 0 && !canChildScrollUp()) {
                 handleTouchActionMove(-dy);
                 enterPullRefreshHeader = true;
