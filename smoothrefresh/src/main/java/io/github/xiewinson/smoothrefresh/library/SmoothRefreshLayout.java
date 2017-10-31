@@ -1,6 +1,7 @@
 package io.github.xiewinson.smoothrefresh.library;
 
 import android.animation.Animator;
+import android.animation.LayoutTransition;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.os.Build;
@@ -98,6 +99,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
 
     private IPageWrapper pageWrapper;
     private View pageView;
+    private boolean footerEnable = true;
 
     private int currentPageState = PageState.NONE;
 
@@ -119,6 +121,9 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
 
     private void init() {
 
+        LayoutTransition transition = new LayoutTransition();
+        setLayoutTransition(transition);
+
         contentView = getChildAt(0);
         isRecyclerView = contentView instanceof RecyclerView;
         if (contentView == null) {
@@ -138,22 +143,22 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
                 @Override
                 public void onBottomItemScroll(int lastItemY) {
                     currentPageTop = lastItemY;
-                    if (pageView != null) {
+                    if (footerEnable && pageView != null) {
                         movePageView(currentPageTop);
                     }
                 }
 
                 @Override
                 public void onReachBottom() {
-                    if (!enterPullRefreshHeader
+                    if (footerEnable
+                            && onLoadMoreListener != null
+                            && !enterPullRefreshHeader
                             && !refreshing
                             && !isLoadMore
                             && currentPageState == PageState.NONE) {
-                        if (onLoadMoreListener != null) {
-                            isLoadMore = true;
-                            setPageState(PageState.LOADING_FOOTER);
-                            onLoadMoreListener.onLoadMore();
-                        }
+                        isLoadMore = true;
+                        setPageState(PageState.LOADING_FOOTER);
+                        onLoadMoreListener.onLoadMore();
                     }
                 }
             });
@@ -168,6 +173,10 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
 
     public void setPages(PageWrapper pageWrapper) {
         this.pageWrapper = pageWrapper;
+    }
+
+    public void setFooterEnable(boolean enable) {
+        this.footerEnable = enable;
     }
 
     private void initHeaderView() {
@@ -465,10 +474,14 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
         pageView = pageWrapper.getView(this, state);
         if (pageView != null) {
             addView(pageView);
-            movePageView(this.currentPageTop);
+            if (!isFullScreenPage()) movePageView(this.currentPageTop);
         }
 
-        if (pageView != null && !isFullScreenPage() && contentWrapper.isList()) {
+        if (footerEnable
+                && pageView != null
+                && !isFullScreenPage()
+                && contentWrapper.isList()) {
+
             pageView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
                 @Override
                 public void onGlobalLayout() {
@@ -520,6 +533,9 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
 
 
     public void showErrorFooter() {
+        if (!footerEnable) {
+            return;
+        }
         post(new Runnable() {
             @Override
             public void run() {
@@ -541,6 +557,9 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
 
     @UiThread
     public void showEmptyFooter() {
+        if (!footerEnable) {
+            return;
+        }
         post(new Runnable() {
             @Override
             public void run() {
@@ -552,6 +571,9 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
 
     @UiThread
     public void setLoadMore(final boolean loadMore) {
+        if (!footerEnable) {
+            return;
+        }
         post(new Runnable() {
             @Override
             public void run() {
@@ -588,7 +610,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
         if (pageWrapper != null
                 && pageWrapper.getView(this, PageState.LOADING) != null
                 && refreshing
-                && !contentWrapper.hasListItemChild()) {
+                && (!contentWrapper.hasListItemChild() || isFullScreenPage())) {
             setPageState(PageState.LOADING);
             this.refreshing = true;
             onRefreshListener.onRefresh();

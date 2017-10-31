@@ -29,8 +29,16 @@ public class ListViewWrapper extends ListWrapper {
 
             @Override
             public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-                if (onListScrollListener != null && firstVisibleItem == 0 && listView.getChildAt(0) != null) {
-                    onListScrollListener.onFirstItemScroll((int) listView.getChildAt(0).getY());
+                if (onListScrollListener != null) {
+                    if (firstVisibleItem == 0
+                            && listView.getChildAt(0) != null) {
+                        onListScrollListener.onFirstItemScroll((int) listView.getChildAt(0).getY());
+                    } else if (listView.getLastVisiblePosition() == totalItemCount - 1
+                            && listView.getChildAt(listView.getChildCount() - 1) != null) {
+                        onListScrollListener.onReachBottom();
+                        onListScrollListener.onBottomItemScroll((int) listView.getChildAt(listView.getChildCount() - 1).getBottom());
+
+                    }
                 }
             }
         });

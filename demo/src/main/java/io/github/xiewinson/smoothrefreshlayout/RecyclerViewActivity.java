@@ -100,7 +100,7 @@ public class RecyclerViewActivity extends BaseActivity {
                             }
                             listAdapter.setItems(data);
                             if (ii >= 39) {
-                                refreshLayout.showEmptyFooter();
+                                refreshLayout.showErrorPage();
                             }
                         }
                     }

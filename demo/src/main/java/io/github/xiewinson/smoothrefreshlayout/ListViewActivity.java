@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.github.xiewinson.smoothrefresh.library.SmoothRefreshLayout;
+import io.github.xiewinson.smoothrefresh.library.listener.OnLoadMoreListener;
 import io.github.xiewinson.smoothrefresh.library.listener.OnRefreshListener;
 import io.github.xiewinson.smoothrefresh.library.wrapper.header.classic.ClassicHeaderWrapper;
 import io.github.xiewinson.smoothrefresh.library.wrapper.page.classic.ClassicPageWrapper;
@@ -32,6 +33,7 @@ public class ListViewActivity extends BaseActivity {
 
         refreshLayout.setRefreshHeader(new ClassicHeaderWrapper());
         refreshLayout.setPages(new ClassicPageWrapper());
+//        refreshLayout.setFooterEnable(false);
         refreshLayout.setOnRefreshListener(new OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -46,6 +48,18 @@ public class ListViewActivity extends BaseActivity {
                         adapter.notifyDataSetChanged();
                     }
                 }, 1000);
+            }
+        });
+
+        refreshLayout.setOnLoadMoreListener(new OnLoadMoreListener() {
+            @Override
+            public void onLoadMore() {
+                refreshLayout.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        refreshLayout.showErrorFooter();
+                    }
+                }, 2000);
             }
         });
         refreshLayout.setRefreshing(true);
