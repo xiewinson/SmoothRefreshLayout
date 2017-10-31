@@ -14,9 +14,11 @@ import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.animation.AccelerateDecelerateInterpolator;
+import android.widget.ListView;
 
 import io.github.xiewinson.smoothrefresh.library.annotation.PageState;
 import io.github.xiewinson.smoothrefresh.library.annotation.RefreshHeaderState;
@@ -73,6 +75,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
     private int headerMaxOffset;
 
     private boolean enterPullRefreshHeader;
+    private int touchSlop;
 
     private int currentHeaderOffset = 0;
     private int currentContentOffset = 0;
@@ -107,6 +110,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
     public static final int DEFAULT_ANIMATOR_DURATION = 300;
 
     private boolean isRecyclerView = false;
+    private boolean isListView = false;
 
     public OnRefreshListener getOnRefreshListener() {
         return onRefreshListener;
@@ -122,28 +126,32 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
 
     private void init() {
 
+        touchSlop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
         LayoutTransition transition = new LayoutTransition();
         setLayoutTransition(transition);
 
         contentView = getChildAt(0);
-        isRecyclerView = contentView instanceof RecyclerView;
+
         if (contentView == null) {
-            throw new NullPointerException("you must put a contentView");
+            throw new NullPointerException("you must add a contentView");
         }
+        isRecyclerView = contentView instanceof RecyclerView;
+        isListView = contentView instanceof ListView;
+
         contentWrapper = ContentViewWrapper.Factory.getInstance(contentView);
         if (contentWrapper instanceof ListWrapper) {
             ((ListWrapper) contentWrapper).setOnListScrollListener(new OnListScrollListener() {
                 @Override
                 public void onFirstItemScroll(int firstItemY) {
-                    if (headerView != null && refreshing) {
+                    if (headerView != null && (refreshing || isListView)) {
                         moveHeaderView(computeHeaderTopByContentTop(firstItemY));
                     }
 
                 }
 
                 @Override
-                public void onBottomItemScroll(int lastItemY) {
-                    currentPageOffset = lastItemY;
+                public void onBottomItemScroll(int bottomItemY) {
+                    currentPageOffset = bottomItemY;
                     if (footerEnable && pageView != null) {
                         movePageView(currentPageOffset);
                     }
@@ -315,39 +323,33 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
         }
 
         int action = ev.getAction();
-        float currentY = ev.getY();
 
-        if (!isFullScreenPage() && isEnabled() && !refreshing && !animatorRunning) {
+        if (isFullScreenPage() || !isEnabled() || refreshing || animatorRunning) {
             return super.dispatchTouchEvent(ev);
         }
         switch (action) {
             case MotionEvent.ACTION_DOWN:
-                lastHeaderY = currentY;
+                lastHeaderY = ev.getY();
                 correctOverScrollMode = contentView.getOverScrollMode();
 //                initHeaderParams();
                 break;
 
 
             case MotionEvent.ACTION_MOVE:
+                float currentY = ev.getY();
                 float dy = currentY - lastHeaderY;
                 //下拉
-                if (dy > 0) {
-                    if ((!canChildScrollUp()
-                            && headerView.getTop() != contentMaxOffset)) {
-                        enterPullRefreshHeader = true;
-                        contentView.setOverScrollMode(OVER_SCROLL_NEVER);
-                        handleTouchActionMove(dy);
-                    }
+                if (dy > 0 && (enterPullRefreshHeader || Math.abs(dy) > touchSlop) && !canChildScrollUp()) {
+                    enterPullRefreshHeader = true;
+                    contentView.setOverScrollMode(OVER_SCROLL_NEVER);
+                    handleTouchActionMove(dy);
+                    lastHeaderY = currentY;
                 }
                 //上滑
                 else if (enterPullRefreshHeader && dy < 0) {
-                    if (headerView.getTop() != contentMinOffset) {
-                        handleTouchActionMove(dy);
-
-                    }
+                    handleTouchActionMove(dy);
+                    lastHeaderY = currentY;
                 }
-                lastHeaderY = currentY;
-                lastHeaderY = currentY;
                 break;
             case MotionEvent.ACTION_POINTER_DOWN:
                 break;
@@ -414,8 +416,10 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
         if (isRecyclerView && dy < 0 && pageView != null) {
             movePageView((int) (headerResult - headerView.getTop() + pageView.getY()));
         }
+        if (!isListView) {
+            moveHeaderView(headerResult);
+        }
         moveContentView(result);
-        moveHeaderView(headerResult);
 
     }
 
@@ -808,7 +812,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
     public void onNestedPreScroll(View target, int dx, int dy, int[] consumed) {
 
         if (!isFullScreenPage() && isEnabled() && !refreshing && !animatorRunning) {
-            if (dy < 0 && !canChildScrollUp()) {
+            if (dy < 0 && !canChildScrollUp() && (enterPullRefreshHeader || Math.abs(dy) > touchSlop)) {
                 handleTouchActionMove(-dy);
                 enterPullRefreshHeader = true;
             } else if (dy > 0 && enterPullRefreshHeader) {

@@ -46,7 +46,7 @@ public class ListViewActivity extends BaseActivity {
                         }
                         adapter.notifyDataSetChanged();
                     }
-                }, 1000);
+                }, 2000);
             }
         });
 
