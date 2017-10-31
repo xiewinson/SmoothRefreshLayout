@@ -1,5 +1,6 @@
 package io.github.xiewinson.smoothrefresh.library.wrapper.content;
 
+import android.view.View;
 import android.widget.AbsListView;
 import android.widget.ListView;
 
@@ -32,15 +33,13 @@ public class ListViewWrapper extends ListWrapper {
             @Override
             public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
                 if (onListScrollListener != null) {
-                    if (firstVisibleItem == 0
-                            && listView.getChildAt(0) != null) {
-                        onListScrollListener.onFirstItemScroll(listView.getChildAt(0).getTop());
-                    }
-                    if (listView.getLastVisiblePosition() == totalItemCount - 1
-                            && listView.getChildAt(listView.getChildCount() - 1) != null) {
-                        onListScrollListener.onBottomItemScroll(listView.getChildAt(listView.getChildCount() - 1).getBottom());
 
-                    }
+                    View topChild = listView.getChildAt(0);
+                    onListScrollListener.onFirstItemScroll(firstVisibleItem == 0 && topChild != null ? topChild.getTop() : 0);
+
+                    View bottomChild = listView.getChildAt(listView.getChildCount() - 1);
+                    onListScrollListener.onBottomItemScroll(listView.getLastVisiblePosition() == totalItemCount - 1
+                            && bottomChild != null ? bottomChild.getBottom() : listView.getBottom());
                 }
             }
         });

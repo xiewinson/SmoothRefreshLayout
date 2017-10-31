@@ -41,7 +41,7 @@ public class ListViewActivity extends BaseActivity {
                     public void run() {
                         refreshLayout.setRefreshing(false);
                         data.clear();
-                        for (int i = 0; i < 6; i++) {
+                        for (int i = 0; i < 15; i++) {
                             data.add("ListView Item" + i);
                         }
                         adapter.notifyDataSetChanged();
