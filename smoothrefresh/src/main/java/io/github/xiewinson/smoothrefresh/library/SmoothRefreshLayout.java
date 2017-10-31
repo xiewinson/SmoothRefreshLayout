@@ -79,6 +79,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
     private int currentPageTop = 0;
 
     private int correctOverScrollMode;
+    private int activePointerId;
     private float lastHeaderY = -1;
     private int currentRefreshState = RefreshHeaderState.NONE;
 
@@ -331,8 +332,9 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
                 float dy = currentY - lastHeaderY;
                 //下拉
                 if (dy > 0) {
-                    if (enterPullRefreshHeader || (!canChildScrollUp()
+                    if ((!canChildScrollUp()
                             && headerView.getTop() != contentMaxTop)) {
+                        enterPullRefreshHeader = true;
                         contentView.setOverScrollMode(OVER_SCROLL_NEVER);
                         handleTouchActionMove(dy);
                     }
@@ -374,12 +376,22 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
         return super.onInterceptTouchEvent(ev);
     }
 
+    private void onSecondaryPointerUp(MotionEvent ev) {
+        final int pointerIndex = ev.getActionIndex();
+        final int pointerId = ev.getPointerId(pointerIndex);
+        if (pointerId == activePointerId) {
+            // This was our active pointer going up. Choose a new
+            // active pointer and adjust accordingly.
+            final int newPointerIndex = pointerIndex == 0 ? 1 : 0;
+            activePointerId = ev.getPointerId(newPointerIndex);
+        }
+    }
+
     private boolean canChildScrollUp() {
         return contentView != null && contentView.canScrollVertically(-1);
     }
 
     private void handleTouchActionMove(float dy) {
-        enterPullRefreshHeader = true;
         if (dy > 0) {
             dy *= 0.2f;
         }
@@ -399,7 +411,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
         }
 
         int headerResult = computeHeaderTopByContentTop(result);
-        if (dy < 0 && pageView != null) {
+        if (isRecyclerView && dy < 0 && pageView != null) {
             movePageView((int) (headerResult - headerView.getTop() + pageView.getY()));
         }
         moveContentView(result);
@@ -454,7 +466,11 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
         this.currentPageTop = lastItemY;
         if (pageView != null) {
 //            pageView.offsetTopAndBottom(-pageView.getTop() + lastItemY);
-            pageView.setY(lastItemY);
+            if (isFullScreenPage()) {
+                pageView.setY(0);
+            } else {
+                pageView.setY(lastItemY);
+            }
             pageView.setVisibility(pageView.getY() > getBottom()
                     || currentPageState == PageState.NONE ? INVISIBLE : VISIBLE);
         }
@@ -523,12 +539,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
 
     @UiThread
     public void showErrorPage() {
-        post(new Runnable() {
-            @Override
-            public void run() {
-                setPageState(PageState.ERROR);
-            }
-        });
+        setPageState(PageState.ERROR);
     }
 
 
@@ -536,23 +547,14 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
         if (!footerEnable) {
             return;
         }
-        post(new Runnable() {
-            @Override
-            public void run() {
 //                isLoadMore = false;
-                setPageState(PageState.ERROR_FOOTER);
-            }
-        });
+        setPageState(PageState.ERROR_FOOTER);
     }
 
     @UiThread
     public void showEmptyPage() {
-        post(new Runnable() {
-            @Override
-            public void run() {
-                setPageState(PageState.EMPTY);
-            }
-        });
+
+        setPageState(PageState.EMPTY);
     }
 
     @UiThread
@@ -560,13 +562,9 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
         if (!footerEnable) {
             return;
         }
-        post(new Runnable() {
-            @Override
-            public void run() {
 //                isLoadMore = false;
-                setPageState(PageState.EMPTY_FOOTER);
-            }
-        });
+        setPageState(PageState.EMPTY_FOOTER);
+
     }
 
     @UiThread
@@ -574,18 +572,13 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
         if (!footerEnable) {
             return;
         }
-        post(new Runnable() {
-            @Override
-            public void run() {
-                isLoadMore = loadMore;
-                if (isLoadMore) {
-                    setPageState(PageState.LOADING_FOOTER);
-                    onLoadMoreListener.onLoadMore();
-                } else {
-                    setPageState(PageState.NONE);
-                }
-            }
-        });
+        isLoadMore = loadMore;
+        if (isLoadMore) {
+            setPageState(PageState.LOADING_FOOTER);
+            onLoadMoreListener.onLoadMore();
+        } else {
+            setPageState(PageState.NONE);
+        }
     }
 
     private boolean isFullScreenPage() {
@@ -596,9 +589,9 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
 
     @UiThread
     public void setRefreshing(boolean refreshing) {
-        if (isLoadMore) {
-            return;
-        }
+//        if (isLoadMore) {
+//            return;
+//        }
         if (headerWrapper == null) {
             throw new IllegalArgumentException("please use setRefreshHeader before setRefreshing");
         }
@@ -613,7 +606,12 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
                 && (!contentWrapper.hasListItemChild() || isFullScreenPage())) {
             setPageState(PageState.LOADING);
             this.refreshing = true;
-            onRefreshListener.onRefresh();
+            post(new Runnable() {
+                @Override
+                public void run() {
+                    onRefreshListener.onRefresh();
+                }
+            });
         }
 
         if (!refreshing) {

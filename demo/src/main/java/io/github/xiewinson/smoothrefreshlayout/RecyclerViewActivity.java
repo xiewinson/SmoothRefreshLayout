@@ -71,7 +71,7 @@ public class RecyclerViewActivity extends BaseActivity {
                         } else {
                             data.clear();
                             ii = 0;
-                            for (int i = 0; i < 10; i++) {
+                            for (int i = 0; i < 6; i++) {
                                 data.add(String.valueOf
                                         (ii++));
                             }

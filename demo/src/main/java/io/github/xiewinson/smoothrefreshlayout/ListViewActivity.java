@@ -33,7 +33,6 @@ public class ListViewActivity extends BaseActivity {
 
         refreshLayout.setRefreshHeader(new ClassicHeaderWrapper());
         refreshLayout.setPages(new ClassicPageWrapper());
-//        refreshLayout.setFooterEnable(false);
         refreshLayout.setOnRefreshListener(new OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -42,7 +41,7 @@ public class ListViewActivity extends BaseActivity {
                     public void run() {
                         refreshLayout.setRefreshing(false);
                         data.clear();
-                        for (int i = 0; i < 20; i++) {
+                        for (int i = 0; i < 6; i++) {
                             data.add("ListView Item" + i);
                         }
                         adapter.notifyDataSetChanged();
