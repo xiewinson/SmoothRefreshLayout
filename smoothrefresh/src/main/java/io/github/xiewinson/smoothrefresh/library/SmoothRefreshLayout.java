@@ -317,7 +317,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
         int action = ev.getAction();
         float currentY = ev.getY();
 
-        if (!isEnabled() || refreshing || animatorRunning) {
+        if (!isFullScreenPage() && isEnabled() && !refreshing && !animatorRunning) {
             return super.dispatchTouchEvent(ev);
         }
         switch (action) {
@@ -807,7 +807,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
     @Override
     public void onNestedPreScroll(View target, int dx, int dy, int[] consumed) {
 
-        if (!refreshing && !animatorRunning) {
+        if (!isFullScreenPage() && isEnabled() && !refreshing && !animatorRunning) {
             if (dy < 0 && !canChildScrollUp()) {
                 handleTouchActionMove(-dy);
                 enterPullRefreshHeader = true;
