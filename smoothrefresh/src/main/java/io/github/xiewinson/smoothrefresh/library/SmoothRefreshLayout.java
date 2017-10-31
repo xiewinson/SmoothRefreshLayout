@@ -63,20 +63,20 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
     private View headerView;
     private View contentView;
 
-    private int contentRefreshingTop;
-    private int contentMinTop;
-    private int contentMaxTop;
+    private int contentRefreshingOffset;
+    private int contentMinOffset;
+    private int contentMaxOffset;
     private int correctContentPaddingBottom;
 
-    private int headerRefreshingTop;
-    private int headerMinTop;
-    private int headerMaxTop;
+    private int headerRefreshingOffset;
+    private int headerMinOffset;
+    private int headerMaxOffset;
 
     private boolean enterPullRefreshHeader;
 
-    private int currentHeaderTop = 0;
-    private int currentContentTop = 0;
-    private int currentPageTop = 0;
+    private int currentHeaderOffset = 0;
+    private int currentContentOffset = 0;
+    private int currentPageOffset = 0;
 
     private int correctOverScrollMode;
     private int activePointerId;
@@ -143,9 +143,9 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
 
                 @Override
                 public void onBottomItemScroll(int lastItemY) {
-                    currentPageTop = lastItemY;
+                    currentPageOffset = lastItemY;
                     if (footerEnable && pageView != null) {
-                        movePageView(currentPageTop);
+                        movePageView(currentPageOffset);
                     }
                 }
 
@@ -200,49 +200,49 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
                 contentView.getTop(),
                 contentView.getPaddingTop());
 
-        headerMinTop = params[0];
-        headerRefreshingTop = params[1];
-        headerMaxTop = params[2];
+        headerMinOffset = params[0];
+        headerRefreshingOffset = params[1];
+        headerMaxOffset = params[2];
 
-        contentMinTop = contentWrapper.getTopOffset();
-        contentRefreshingTop = contentWrapper.getTopOffset() + (headerRefreshingTop - headerMinTop);
-        contentMaxTop = computeContentTopByHeaderTop(headerMaxTop);
+        contentMinOffset = contentWrapper.getTopOffset();
+        contentRefreshingOffset = contentWrapper.getTopOffset() + (headerRefreshingOffset - headerMinOffset);
+        contentMaxOffset = computeContentTopByHeaderTop(headerMaxOffset);
 
         correctContentPaddingBottom = contentView.getPaddingBottom();
-        moveHeaderView(headerMinTop);
+        moveHeaderView(headerMinOffset);
 
     }
 
     private int computeHeaderTopByContentTop(int currentContentTop) {
-        return currentContentTop - contentMinTop + headerMinTop;
+        return currentContentTop - contentMinOffset + headerMinOffset;
     }
 
     private int computeContentTopByHeaderTop(int currentRefreshHeaderTop) {
-        return currentRefreshHeaderTop - headerMinTop + contentMinTop;
+        return currentRefreshHeaderTop - headerMinOffset + contentMinOffset;
     }
 
     private boolean isHeaderVisible() {
-        return headerView.getTop() > headerMinTop;
+        return headerView.getTop() > headerMinOffset;
     }
 
     private boolean isHeaderPartVisible() {
         int top = headerView.getTop();
-        return top > headerMinTop
-                && top <= headerRefreshingTop;
+        return top > headerMinOffset
+                && top <= headerRefreshingOffset;
     }
 
     private boolean isHeaderOverPull() {
         int top = headerView.getTop();
-        return top > headerRefreshingTop
-                && top <= headerMaxTop;
+        return top > headerRefreshingOffset
+                && top <= headerMaxOffset;
     }
 
     private boolean isHeaderFullVisible() {
-        return headerView.getTop() == headerRefreshingTop;
+        return headerView.getTop() == headerRefreshingOffset;
     }
 
     private boolean isHeaderInVisible() {
-        return headerView.getTop() <= headerMinTop;
+        return headerView.getTop() <= headerMinOffset;
     }
 
 
@@ -272,15 +272,15 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
 
         if (headerView.getVisibility() != GONE) {
             headerView.layout(getPaddingLeft(),
-                    currentHeaderTop,
+                    currentHeaderOffset,
                     getPaddingLeft() + headerView.getMeasuredWidth(),
-                    currentHeaderTop + headerView.getMeasuredHeight());
+                    currentHeaderOffset + headerView.getMeasuredHeight());
         }
 
         if (contentView.getVisibility() != GONE) {
             if (!contentWrapper.isList()) {
-                int contentTop = currentContentTop;
-                if (currentContentTop == 0) {
+                int contentTop = currentContentOffset;
+                if (currentContentOffset == 0) {
                     contentTop = contentTop + getPaddingTop();
                 }
                 contentView.layout(getPaddingLeft(),
@@ -298,7 +298,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
         if (pageView != null && pageView.getVisibility() != GONE) {
             int contentTop = getPaddingTop();
 //            if (pageIsFooter()) {
-//                contentTop = currentPageTop;
+//                contentTop = currentPageOffset;
 //            }
             pageView.layout(getPaddingLeft(),
                     contentTop,
@@ -333,7 +333,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
                 //下拉
                 if (dy > 0) {
                     if ((!canChildScrollUp()
-                            && headerView.getTop() != contentMaxTop)) {
+                            && headerView.getTop() != contentMaxOffset)) {
                         enterPullRefreshHeader = true;
                         contentView.setOverScrollMode(OVER_SCROLL_NEVER);
                         handleTouchActionMove(dy);
@@ -341,7 +341,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
                 }
                 //上滑
                 else if (enterPullRefreshHeader && dy < 0) {
-                    if (headerView.getTop() != contentMinTop) {
+                    if (headerView.getTop() != contentMinOffset) {
                         handleTouchActionMove(dy);
 
                     }
@@ -401,10 +401,10 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
             dy = -1;
         }
         int result = (int) (dy + contentWrapper.getTopOffset());
-        result = Math.max(result, contentMinTop);
-        result = Math.min(result, contentMaxTop);
+        result = Math.max(result, contentMinOffset);
+        result = Math.min(result, contentMaxOffset);
 
-        if (result >= contentRefreshingTop) {
+        if (result >= contentRefreshingOffset) {
             setHeaderState(RefreshHeaderState.RELEASE_TO_REFRESH);
         } else {
             setHeaderState(RefreshHeaderState.PULL_TO_REFRESH);
@@ -439,16 +439,16 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
     }
 
     private void moveHeaderView(int top) {
-        this.currentHeaderTop = top;
+        this.currentHeaderOffset = top;
         headerView.offsetTopAndBottom(-headerView.getTop() + top);
-        headerView.setVisibility(headerView.getTop() <= headerMinTop ? INVISIBLE : VISIBLE);
+        headerView.setVisibility(headerView.getTop() <= headerMinOffset ? INVISIBLE : VISIBLE);
     }
 
     private float moveContentView(int top, boolean triggerCallback) {
-        this.currentContentTop = top;
+        this.currentContentOffset = top;
         contentWrapper.moveContentView(top);
 
-        float ratio = (Math.abs(top - contentMinTop)) / (float) (contentRefreshingTop - contentMinTop);
+        float ratio = (Math.abs(top - contentMinOffset)) / (float) (contentRefreshingOffset - contentMinOffset);
         ratio = ratio < 0 ? 0 : ratio;
         ratio = ratio > 1 ? 1 : ratio;
         if (triggerCallback) {
@@ -463,7 +463,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
 
 
     private void movePageView(int lastItemY) {
-        this.currentPageTop = lastItemY;
+        this.currentPageOffset = lastItemY;
         if (pageView != null) {
 //            pageView.offsetTopAndBottom(-pageView.getTop() + lastItemY);
             if (isFullScreenPage()) {
@@ -490,7 +490,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
         pageView = pageWrapper.getView(this, state);
         if (pageView != null) {
             addView(pageView);
-            if (!isFullScreenPage()) movePageView(this.currentPageTop);
+            if (!isFullScreenPage()) movePageView(this.currentPageOffset);
         }
 
         if (footerEnable
@@ -658,7 +658,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
         }
         setHeaderState(RefreshHeaderState.REFRESHING);
 
-        headerAnimator = headerAnimator(contentWrapper.getTopOffset(), contentRefreshingTop);
+        headerAnimator = headerAnimator(contentWrapper.getTopOffset(), contentRefreshingOffset);
 
         headerAnimator.addListener(new Animator.AnimatorListener() {
             @Override
@@ -686,8 +686,8 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
     private void onEnterRefreshAnimEnd(boolean isTouchTrigger) {
         isLoadMore = false;
         setPageState(PageState.NONE);
-        moveContentView(contentRefreshingTop);
-        moveHeaderView(headerRefreshingTop);
+        moveContentView(contentRefreshingOffset);
+        moveHeaderView(headerRefreshingOffset);
         animatorRunning = false;
         refreshing = true;
         if (onRefreshListener != null) {
@@ -704,7 +704,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
         if (headerAnimator != null) {
             headerAnimator.cancel();
         }
-        headerAnimator = headerAnimator(contentWrapper.getTopOffset(), contentMinTop);
+        headerAnimator = headerAnimator(contentWrapper.getTopOffset(), contentMinOffset);
         headerAnimator.addListener(new Animator.AnimatorListener() {
             @Override
             public void onAnimationStart(Animator animation) {
@@ -729,8 +729,8 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
     }
 
     private void onExitRefreshAnimEnd() {
-        moveContentView(contentMinTop);
-        moveHeaderView(headerMinTop);
+        moveContentView(contentMinOffset);
+        moveHeaderView(headerMinOffset);
 
         animatorRunning = false;
         refreshing = false;
@@ -764,7 +764,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
         if (startValue < endValue) {
             duration = DEFAULT_ANIMATOR_DURATION;
         } else {
-            duration = Math.min((int) (((float) startValue - contentMinTop) / (headerRefreshingTop - headerMinTop) * DEFAULT_ANIMATOR_DURATION),
+            duration = Math.min((int) (((float) startValue - contentMinOffset) / (headerRefreshingOffset - headerMinOffset) * DEFAULT_ANIMATOR_DURATION),
                     DEFAULT_ANIMATOR_DURATION);
         }
         valueAnimator.setDuration(duration);
@@ -823,8 +823,8 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
 
             if (refreshing) {
                 int result = contentView.getTop() - dy;
-                if (result > contentRefreshingTop) result = contentRefreshingTop;
-                if (result < contentMinTop) result = contentMinTop;
+                if (result > contentRefreshingOffset) result = contentRefreshingOffset;
+                if (result < contentMinOffset) result = contentMinOffset;
                 if (dy > 0 || !canChildScrollUp()) {
                     moveContentView(result, false);
                     moveHeaderView(computeHeaderTopByContentTop(result));
