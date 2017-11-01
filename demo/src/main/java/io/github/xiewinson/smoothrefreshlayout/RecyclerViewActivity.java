@@ -4,6 +4,7 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -44,11 +45,12 @@ public class RecyclerViewActivity extends BaseActivity {
         Drawable divider = new ColorDrawable(Color.TRANSPARENT) {
             @Override
             public int getIntrinsicHeight() {
-                return ScreenUtil.getPxByDp(RecyclerViewActivity.this, 8);
+                return ScreenUtil.getPxByDp(RecyclerViewActivity.this, 0);
             }
         };
         decoration.setDrawable(divider);
         recyclerView.addItemDecoration(decoration);
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
 
         final ListAdapter listAdapter = new ListAdapter();
         recyclerView.setAdapter(listAdapter);
@@ -71,7 +73,7 @@ public class RecyclerViewActivity extends BaseActivity {
                         } else {
                             data.clear();
                             ii = 0;
-                            for (int i = 0; i < 6; i++) {
+                            for (int i = 0; i < 15; i++) {
                                 data.add(String.valueOf
                                         (ii++));
                             }
@@ -89,19 +91,14 @@ public class RecyclerViewActivity extends BaseActivity {
                 refreshLayout.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-
-                        if (flag1) {
-                            refreshLayout.showErrorFooter();
-                            flag1 = false;
-                        } else {
-                            refreshLayout.setLoadMore(false);
-                            for (int i = 0; i < 10; i++) {
-                                data.add(String.valueOf(ii++));
-                            }
-                            listAdapter.setItems(data);
-                            if (ii >= 39) {
-                                refreshLayout.showErrorPage();
-                            }
+                        refreshLayout.setLoadMore(false);
+                        List<String> data = new ArrayList<>();
+                        for (int i = 0; i < 15; i++) {
+                            data.add(String.valueOf(ii++));
+                        }
+                        listAdapter.addItems(data);
+                        if (ii >= 39) {
+                            refreshLayout.showNoMoreFooter();
                         }
                     }
                 }, 2000);
@@ -144,9 +141,10 @@ public class RecyclerViewActivity extends BaseActivity {
         }
 
 
-        private void addItems(String item) {
-            data.add(item);
-            notifyItemRangeInserted(0, 1);
+        private void addItems(List<String> items) {
+            int oldSize = data.size();
+            data.addAll(items);
+            notifyItemRangeInserted(oldSize, items.size());
         }
 
         private void setItems(List<String> list) {

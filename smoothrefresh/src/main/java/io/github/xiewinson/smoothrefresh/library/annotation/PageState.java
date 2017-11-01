@@ -22,7 +22,7 @@ import static io.github.xiewinson.smoothrefresh.library.annotation.PageState.NO_
 
 @Documented
 @Retention(RetentionPolicy.SOURCE)
-@IntDef(value = {LOADING, EMPTY, ERROR, LOADING_FOOTER, EMPTY_FOOTER, ERROR_FOOTER, NONE})
+@IntDef(value = {LOADING, EMPTY, ERROR, LOADING_FOOTER, EMPTY_FOOTER, ERROR_FOOTER, NO_MORE_FOOTER, NONE})
 public @interface PageState {
     int LOADING = 0;
     int EMPTY = 1;

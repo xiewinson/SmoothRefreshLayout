@@ -38,6 +38,11 @@ public abstract class PageWrapper implements IPageWrapper {
                 case PageState.LOADING_FOOTER:
                     view = onCreateLoadingFooterView(container);
                     break;
+
+                case PageState.NO_MORE_FOOTER:
+                    view = onCreateNoMoreFooterView(container);
+                    break;
+
                 case PageState.NONE:
                     view = onCreateLoadingFooterView(container);
                     break;
@@ -68,8 +73,8 @@ public abstract class PageWrapper implements IPageWrapper {
         return null;
     }
 
-//    protected View onCreateNoMoreFooterView(ViewGroup container) {
-//        return null;
-//    }
+    protected View onCreateNoMoreFooterView(ViewGroup container) {
+        return null;
+    }
 
 }

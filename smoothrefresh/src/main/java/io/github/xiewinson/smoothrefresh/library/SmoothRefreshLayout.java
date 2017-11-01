@@ -12,7 +12,6 @@ import android.support.v4.view.NestedScrollingParentHelper;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -129,7 +128,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
 
         touchSlop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
         LayoutTransition transition = new LayoutTransition();
-        setLayoutTransition(transition);
+//        setLayoutTransition(transition);
 
         contentView = getChildAt(0);
 
@@ -492,8 +491,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
             } else {
                 pageView.setY(newY);
             }
-            pageView.setVisibility(pageView.getY() > getBottom()
-                    || currentPageState == PageState.NONE ? INVISIBLE : VISIBLE);
+//
         }
     }
 
@@ -540,6 +538,9 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
 
         switch (state) {
             case PageState.NONE:
+                if (pageView != null) {
+                    pageView.setVisibility(INVISIBLE);
+                }
                 contentView.setVisibility(VISIBLE);
                 break;
             case PageState.LOADING:
@@ -555,40 +556,68 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
                 onExitRefreshAnimEnd();
                 break;
 
+            default:
+                contentView.setVisibility(VISIBLE);
+                break;
+
         }
 
     }
 
+    /**
+     * 展示错误页面
+     */
     @UiThread
     public void showErrorPage() {
         setPageState(PageState.ERROR);
     }
 
-
+    /**
+     * 展示错误footer
+     */
+    @UiThread
     public void showErrorFooter() {
         if (!footerEnable) {
             return;
         }
-//                isLoadMore = false;
         setPageState(PageState.ERROR_FOOTER);
     }
 
+
+    /**
+     * 展示空数据页面
+     */
     @UiThread
     public void showEmptyPage() {
-
         setPageState(PageState.EMPTY);
     }
 
+
+    /**
+     * 展示空数据的footer
+     */
     @UiThread
     public void showEmptyFooter() {
         if (!footerEnable) {
             return;
         }
-//                isLoadMore = false;
         setPageState(PageState.EMPTY_FOOTER);
-
     }
 
+    /**
+     * 展示没有更多的footer
+     */
+    @UiThread
+    public void showNoMoreFooter() {
+        if (!footerEnable) {
+            return;
+        }
+        setPageState(PageState.NO_MORE_FOOTER);
+    }
+
+    /**
+     * 加载更多开始或结束
+     */
     @UiThread
     public void setLoadMore(final boolean loadMore) {
         if (!footerEnable) {
@@ -609,6 +638,9 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
                 currentPageState == PageState.ERROR);
     }
 
+    /**
+     * 下拉刷新开始或结束
+     */
     @UiThread
     public void setRefreshing(boolean refreshing) {
 //        if (isLoadMore) {

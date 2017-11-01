@@ -42,4 +42,9 @@ public class ClassicPageWrapper extends PageWrapper {
     protected View onCreateEmptyFooterView(ViewGroup container) {
         return LayoutInflater.from(container.getContext()).inflate(R.layout.footer_empty_classic, container, false);
     }
+
+    @Override
+    protected View onCreateNoMoreFooterView(ViewGroup container) {
+        return LayoutInflater.from(container.getContext()).inflate(R.layout.footer_no_more_classic, container, false);
+    }
 }
