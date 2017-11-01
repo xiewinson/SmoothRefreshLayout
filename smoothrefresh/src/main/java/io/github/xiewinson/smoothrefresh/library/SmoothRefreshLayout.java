@@ -12,6 +12,7 @@ import android.support.v4.view.NestedScrollingParentHelper;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -329,14 +330,18 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
         }
         switch (action) {
             case MotionEvent.ACTION_DOWN:
-                lastHeaderY = ev.getY();
+                activePointerId = ev.getPointerId(0);
+                lastHeaderY = ev.getY(0);
                 correctOverScrollMode = contentView.getOverScrollMode();
 //                initHeaderParams();
                 break;
 
 
             case MotionEvent.ACTION_MOVE:
-                float currentY = ev.getY();
+                if (activePointerId == -1) {
+                    return super.dispatchTouchEvent(ev);
+                }
+                float currentY = ev.getY(ev.findPointerIndex(activePointerId));
                 float dy = currentY - lastHeaderY;
                 //下拉
                 if (dy > 0 && (enterPullRefreshHeader || Math.abs(dy) > touchSlop) && !canChildScrollUp()) {
@@ -352,8 +357,21 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
                 }
                 break;
             case MotionEvent.ACTION_POINTER_DOWN:
+                int downPointIndex = ev.getActionIndex();
+                if (downPointIndex < 0) {
+                    return super.dispatchTouchEvent(ev);
+                }
+                activePointerId = ev.getPointerId(downPointIndex);
+                lastHeaderY = ev.getY(downPointIndex);
                 break;
             case MotionEvent.ACTION_POINTER_UP:
+                int upPointIndex = ev.getActionIndex();
+                int upPointerId = ev.getPointerId(upPointIndex);
+                if (upPointerId == activePointerId) {
+                    int newPointIndex = upPointIndex == 0 ? 1 : 0;
+                    activePointerId = ev.getPointerId(newPointIndex);
+                }
+                lastHeaderY = ev.getY(ev.findPointerIndex(activePointerId));
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
@@ -405,7 +423,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
         int result = (int) (dy + contentWrapper.getTopOffset());
         result = Math.max(result, contentMinOffset);
         result = Math.min(result, contentMaxOffset);
-
+        Log.d("winson", "result -> " + result + " contentRefreshingOffset -> " + contentRefreshingOffset);
         if (result >= contentRefreshingOffset) {
             setHeaderState(RefreshHeaderState.RELEASE_TO_REFRESH);
         } else {
@@ -466,14 +484,14 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
     }
 
 
-    private void movePageView(int lastItemY) {
-        this.currentPageOffset = lastItemY;
+    private void movePageView(int newY) {
+        this.currentPageOffset = newY;
         if (pageView != null) {
 //            pageView.offsetTopAndBottom(-pageView.getTop() + lastItemY);
             if (isFullScreenPage()) {
                 pageView.setY(0);
             } else {
-                pageView.setY(lastItemY);
+                pageView.setY(newY);
             }
             pageView.setVisibility(pageView.getY() > getBottom()
                     || currentPageState == PageState.NONE ? INVISIBLE : VISIBLE);
@@ -812,7 +830,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
     public void onNestedPreScroll(View target, int dx, int dy, int[] consumed) {
 
         if (!isFullScreenPage() && isEnabled() && !refreshing && !animatorRunning) {
-            if (dy < 0 && !canChildScrollUp() && (enterPullRefreshHeader || Math.abs(dy) > touchSlop)) {
+            if (dy < 0 && !canChildScrollUp()) {
                 handleTouchActionMove(-dy);
                 enterPullRefreshHeader = true;
             } else if (dy > 0 && enterPullRefreshHeader) {

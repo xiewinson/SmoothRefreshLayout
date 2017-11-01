@@ -10,7 +10,7 @@ import java.util.List;
 import io.github.xiewinson.smoothrefresh.library.SmoothRefreshLayout;
 import io.github.xiewinson.smoothrefresh.library.listener.OnLoadMoreListener;
 import io.github.xiewinson.smoothrefresh.library.listener.OnRefreshListener;
-import io.github.xiewinson.smoothrefresh.library.wrapper.header.classic.ClassicHeaderWrapper;
+import io.github.xiewinson.smoothrefresh.library.wrapper.header.classic.Classic1HeaderWrapper;
 import io.github.xiewinson.smoothrefresh.library.wrapper.page.classic.ClassicPageWrapper;
 
 
@@ -23,6 +23,7 @@ public class ListViewActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list_view);
         initActionBar("ListView");
+
         listView = findViewById(R.id.listView);
         refreshLayout = findViewById(R.id.refreshLayout);
 
@@ -31,7 +32,8 @@ public class ListViewActivity extends BaseActivity {
         final ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.item, R.id.tv, data);
         listView.setAdapter(adapter);
 
-        refreshLayout.setRefreshHeader(new ClassicHeaderWrapper());
+
+        refreshLayout.setRefreshHeader(new Classic1HeaderWrapper());
         refreshLayout.setPages(new ClassicPageWrapper());
         refreshLayout.setOnRefreshListener(new OnRefreshListener() {
             @Override
