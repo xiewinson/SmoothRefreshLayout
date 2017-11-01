@@ -5,6 +5,7 @@ import android.support.v4.view.NestedScrollingParent;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebView;
 import android.widget.ListView;
 
 /**
@@ -27,6 +28,8 @@ public class ContentViewWrapper implements IContentViewWrapper {
             } else if (viewGroup instanceof ListView) {
                 return new ListViewWrapper((ListView) viewGroup);
             } else if (viewGroup instanceof NestedScrollingParent) {
+                return new ContentViewWrapper((ViewGroup) viewGroup);
+            }else if (viewGroup instanceof WebView) {
                 return new ContentViewWrapper((ViewGroup) viewGroup);
             }
             throw new IllegalArgumentException("only support nestedScrollParent and listView");

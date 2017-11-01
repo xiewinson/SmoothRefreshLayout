@@ -279,7 +279,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
 
-        if (headerView.getVisibility() != GONE) {
+        if (headerView != null && headerView.getVisibility() != GONE) {
             headerView.layout(getPaddingLeft(),
                     currentHeaderOffset,
                     getPaddingLeft() + headerView.getMeasuredWidth(),
@@ -423,7 +423,6 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
         int result = (int) (dy + contentWrapper.getTopOffset());
         result = Math.max(result, contentMinOffset);
         result = Math.min(result, contentMaxOffset);
-        Log.d("winson", "result -> " + result + " contentRefreshingOffset -> " + contentRefreshingOffset);
         if (result >= contentRefreshingOffset) {
             setHeaderState(RefreshHeaderState.RELEASE_TO_REFRESH);
         } else {
@@ -503,8 +502,9 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
 //        if (!isFullScreenPage() && !contentWrapper.isList()) {
 //            return;
 //        }
-        if (pageWrapper == null)
-            throw new IllegalArgumentException("you must use setPages() before change pages");
+
+        if (pageWrapper == null) return;
+//            throw new IllegalArgumentException("you must use setPages() before change pages");
         if (this.currentPageState == state) return;
         this.currentPageState = state;
         if (pageView != null) removeView(pageView);

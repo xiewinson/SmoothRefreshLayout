@@ -33,6 +33,13 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(new Intent(v.getContext(), NestedScrollViewActivity.class));
             }
         });
+
+        findViewById(R.id.web_view).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(v.getContext(), WebViewActivity.class));
+            }
+        });
     }
 
 }
