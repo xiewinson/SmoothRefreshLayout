@@ -686,23 +686,15 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
 
         if (refreshing) {
             this.refreshing = true;
-            post(new Runnable() {
-                @Override
-                public void run() {
-                    showEnterRefreshAnim(false);
-                }
-            });
+            post(() -> showEnterRefreshAnim(false));
         } else {
             setHeaderState(RefreshHeaderState.REFRESH_COMPLETED);
-            postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    SmoothRefreshLayout.this.refreshing = false;
-                    if (contentWrapper.topChildIsFirstItem()) {
-                        showExitRefreshAnim();
-                    } else {
-                        onExitRefreshAnimEnd();
-                    }
+            postDelayed(() -> {
+                SmoothRefreshLayout.this.refreshing = false;
+                if (contentWrapper.topChildIsFirstItem()) {
+                    showExitRefreshAnim();
+                } else {
+                    onExitRefreshAnimEnd();
                 }
             }, DEFAULT_ANIMATOR_DURATION);
         }
@@ -899,7 +891,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
                     moveContentView(result, false);
                     moveHeaderView(computeHeaderTopByContentTop(result));
                 }
-                if (isHeaderVisible()) {
+                if (isHeaderVisible() && dy > 0) {
                     consumed[1] = newDy;
                 }
             }

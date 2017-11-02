@@ -83,9 +83,9 @@ public class RecyclerViewActivity extends BaseActivity {
                     data1.add(String.valueOf(ii++));
                 }
                 listAdapter.addItems(data1);
-                if (ii >= 39) {
-                    refreshLayout.showNoMoreFooter();
-                }
+//                if (ii >= 39) {
+//                    refreshLayout.showNoMoreFooter();
+//                }
             }
         }, 2000));
         refreshLayout.setPages(new ClassicPageWrapper() {
