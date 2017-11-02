@@ -16,7 +16,6 @@ import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.ListViewCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -162,7 +161,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
                 @Override
                 public void onBottomItemScroll(int bottomItemY) {
                     currentPageOffset = bottomItemY;
-                    if (footerEnable && pageView != null) {
+                    if (footerEnable && pageView != null && isFooterPage()) {
                         movePageView(currentPageOffset);
                     }
                 }
@@ -278,14 +277,6 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
 
     }
 
-    private boolean pageIsFooter() {
-        return contentWrapper.isList()
-                && (currentPageState == PageState.EMPTY_FOOTER
-                || currentPageState == PageState.ERROR_FOOTER
-                || currentPageState == PageState.LOADING_FOOTER
-                || currentPageState == PageState.NO_MORE_FOOTER);
-    }
-
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
 
@@ -316,7 +307,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
 
         if (pageView != null && pageView.getVisibility() != GONE) {
             int contentTop = getPaddingTop();
-//            if (pageIsFooter()) {
+//            if (isFooterPage()) {
 //                contentTop = currentPageOffset;
 //            }
             pageView.layout(getPaddingLeft(),
@@ -648,6 +639,14 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
                 currentPageState == PageState.ERROR);
     }
 
+    private boolean isFooterPage() {
+        return contentWrapper.isList()
+                && (currentPageState == PageState.EMPTY_FOOTER
+                || currentPageState == PageState.ERROR_FOOTER
+                || currentPageState == PageState.LOADING_FOOTER
+                || currentPageState == PageState.NO_MORE_FOOTER);
+    }
+
     /**
      * 下拉刷新开始或结束
      */
@@ -878,11 +877,11 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
             }
         }
 
-        if (!contentWrapper.isList()) {
-            if (!refreshing && newDy > 0 && isHeaderVisible()) {
-                consumed[1] = newDy;
-            }
+//        if (!refreshing && newDy > 0 && isHeaderVisible()) {
+//            consumed[1] = newDy;
+//        }
 
+        if (!contentWrapper.isList()) {
             if (refreshing) {
                 int result = contentView.getTop() - newDy;
                 if (result > contentRefreshingOffset) result = contentRefreshingOffset;
@@ -891,18 +890,22 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
                     moveContentView(result, false);
                     moveHeaderView(computeHeaderTopByContentTop(result));
                 }
-                if (isHeaderVisible() && dy > 0) {
-                    consumed[1] = newDy;
-                }
+
+            }
+            if (isHeaderVisible() && newDy > 0) {
+                consumed[1] = newDy;
             }
         }
+
 
     }
 
 
     @Override
     public void onNestedScroll(View target, int dxConsumed, int dyConsumed, int dxUnconsumed, int dyUnconsumed) {
-        dispatchNestedScroll(dxConsumed, dyConsumed, dxUnconsumed, dyUnconsumed, null);
+        if (!refreshing || (dyUnconsumed < 0 && isHeaderFullVisible())) {
+            dispatchNestedScroll(dxConsumed, dyConsumed, dxUnconsumed, dyUnconsumed, null);
+        }
     }
 
     @Override

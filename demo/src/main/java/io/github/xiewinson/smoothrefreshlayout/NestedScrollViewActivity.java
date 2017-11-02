@@ -23,7 +23,7 @@ public class NestedScrollViewActivity extends BaseActivity {
     private SmoothRefreshLayout refreshLayout;
     private NestedScrollView nestedScrollView;
     private int i;
-    private boolean first = true;
+    private boolean first = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,13 +63,13 @@ public class NestedScrollViewActivity extends BaseActivity {
                             first = false;
                             refreshLayout.showErrorPage();
                         } else {
-                            refreshLayout.setRefreshing(false);
+//                            refreshLayout.setRefreshing(false);
                         }
                     }
                 }, 2000);
             }
         });
-        refreshLayout.setRefreshing(true);
+//        refreshLayout.setRefreshing(true);
     }
 
     private void addItem() {
