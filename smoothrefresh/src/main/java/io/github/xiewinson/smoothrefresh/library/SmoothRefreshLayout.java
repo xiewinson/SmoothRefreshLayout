@@ -6,7 +6,10 @@ import android.animation.ValueAnimator;
 import android.content.Context;
 import android.os.Build;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.annotation.UiThread;
+import android.support.v4.view.NestedScrollingChild;
+import android.support.v4.view.NestedScrollingChildHelper;
 import android.support.v4.view.NestedScrollingParent;
 import android.support.v4.view.NestedScrollingParentHelper;
 import android.support.v4.view.ViewCompat;
@@ -37,9 +40,10 @@ import io.github.xiewinson.smoothrefresh.library.wrapper.page.PageWrapper;
  * Created by winson on 2017/10/3.
  */
 
-public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingParent {
+public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingParent, NestedScrollingChild {
 
     private NestedScrollingParentHelper parentHelper;
+    private NestedScrollingChildHelper childHelper;
 
     public SmoothRefreshLayout(Context context) {
         this(context, null);
@@ -52,6 +56,8 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
     public SmoothRefreshLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         parentHelper = new NestedScrollingParentHelper(this);
+        childHelper = new NestedScrollingChildHelper(this);
+        setNestedScrollingEnabled(true);
     }
 
     @Override
@@ -74,7 +80,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
     private int headerMinOffset;
     private int headerMaxOffset;
 
-    private boolean enterPullRefreshHeader;
+    private boolean isBeingDragged;
     private int touchSlop;
 
     private int currentHeaderOffset = 0;
@@ -111,6 +117,8 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
 
     private boolean isRecyclerView = false;
     private boolean isListView = false;
+
+    private int[] parentConsumed = new int[2];
 
     public OnRefreshListener getOnRefreshListener() {
         return onRefreshListener;
@@ -160,8 +168,9 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
                 @Override
                 public void onReachBottom() {
                     if (footerEnable
+                            && isEnabled()
                             && onLoadMoreListener != null
-                            && !enterPullRefreshHeader
+                            && !isBeingDragged
                             && !refreshing
                             && !isLoadMore
                             && currentPageState == PageState.NONE) {
@@ -343,16 +352,19 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
                 float currentY = ev.getY(ev.findPointerIndex(activePointerId));
                 float dy = currentY - lastHeaderY;
                 //下拉
-                if (dy > 0 && (enterPullRefreshHeader || Math.abs(dy) > touchSlop) && !canChildScrollUp()) {
-                    enterPullRefreshHeader = true;
+                if (dy > 0 && (isBeingDragged || Math.abs(dy) > touchSlop) && !canChildScrollUp()) {
+                    isBeingDragged = true;
                     contentView.setOverScrollMode(OVER_SCROLL_NEVER);
                     handleTouchActionMove(dy);
                     lastHeaderY = currentY;
                 }
                 //上滑
-                else if (enterPullRefreshHeader && dy < 0) {
+                else if (isBeingDragged && dy < 0) {
                     handleTouchActionMove(dy);
                     lastHeaderY = currentY;
+                    if (currentHeaderOffset <= headerMinOffset) {
+                        isBeingDragged = false;
+                    }
                 }
                 break;
             case MotionEvent.ACTION_POINTER_DOWN:
@@ -379,7 +391,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
                 }
                 contentView.setOverScrollMode(correctOverScrollMode);
                 lastHeaderY = -1;
-                enterPullRefreshHeader = false;
+                isBeingDragged = false;
 
                 break;
         }
@@ -514,6 +526,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
         }
 
         if (footerEnable
+                && isEnabled()
                 && pageView != null
                 && !isFullScreenPage()
                 && contentWrapper.isList()) {
@@ -860,31 +873,42 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
 
     @Override
     public void onNestedPreScroll(View target, int dx, int dy, int[] consumed) {
-
+        if (!isBeingDragged) {
+            dispatchNestedPreScroll(dx, dy, parentConsumed, null);
+        }
+        int newDy = dy - parentConsumed[1];
+        if (parentConsumed[1] != 0) {
+            consumed[1] = dy;
+            return;
+        }
         if (!isFullScreenPage() && isEnabled() && !refreshing && !animatorRunning) {
-            if (dy < 0 && !canChildScrollUp()) {
-                handleTouchActionMove(-dy);
-                enterPullRefreshHeader = true;
-            } else if (dy > 0 && enterPullRefreshHeader) {
-                handleTouchActionMove(-dy);
+            if (newDy < 0 && !canChildScrollUp()) {
+                handleTouchActionMove(-newDy);
+                isBeingDragged = true;
+
+            } else if (newDy > 0 && isBeingDragged) {
+                handleTouchActionMove(-newDy);
+                if (currentHeaderOffset <= headerMinOffset) {
+                    isBeingDragged = false;
+                }
             }
         }
 
         if (!contentWrapper.isList()) {
-            if (!refreshing && dy > 0 && isHeaderVisible()) {
-                consumed[1] = dy;
+            if (!refreshing && newDy > 0 && isHeaderVisible()) {
+                consumed[1] = newDy;
             }
 
             if (refreshing) {
-                int result = contentView.getTop() - dy;
+                int result = contentView.getTop() - newDy;
                 if (result > contentRefreshingOffset) result = contentRefreshingOffset;
                 if (result < contentMinOffset) result = contentMinOffset;
-                if (dy > 0 || !canChildScrollUp()) {
+                if (newDy > 0 || !canChildScrollUp()) {
                     moveContentView(result, false);
                     moveHeaderView(computeHeaderTopByContentTop(result));
                 }
                 if (isHeaderVisible()) {
-                    consumed[1] = dy;
+                    consumed[1] = newDy;
                 }
             }
         }
@@ -894,6 +918,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
 
     @Override
     public void onNestedScroll(View target, int dxConsumed, int dyConsumed, int dxUnconsumed, int dyUnconsumed) {
+        dispatchNestedScroll(dxConsumed, dyConsumed, dxUnconsumed, dyUnconsumed, null);
     }
 
     @Override
@@ -912,15 +937,68 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
     @Override
     public void onNestedScrollAccepted(View child, View target, int axes) {
         parentHelper.onNestedScrollAccepted(child, target, axes);
+        startNestedScroll(axes & ViewCompat.SCROLL_AXIS_VERTICAL);
     }
 
     @Override
     public void onStopNestedScroll(View child) {
         parentHelper.onStopNestedScroll(child);
-        if (enterPullRefreshHeader) {
+        if (isBeingDragged) {
             handleTouchActionUp();
         }
-        enterPullRefreshHeader = false;
+        isBeingDragged = false;
+        stopNestedScroll();
     }
 
+    @Override
+    public void setNestedScrollingEnabled(boolean enabled) {
+        childHelper.setNestedScrollingEnabled(enabled);
+    }
+
+    @Override
+    public boolean isNestedScrollingEnabled() {
+        return childHelper.isNestedScrollingEnabled();
+    }
+
+
+    @Override
+    public boolean startNestedScroll(@ViewCompat.ScrollAxis int axes) {
+        return childHelper.startNestedScroll(axes);
+    }
+
+    @Override
+    public void stopNestedScroll() {
+        childHelper.stopNestedScroll();
+    }
+
+
+    @Override
+    public boolean hasNestedScrollingParent() {
+        return childHelper.hasNestedScrollingParent();
+    }
+
+
+    @Override
+    public boolean dispatchNestedScroll(int dxConsumed, int dyConsumed,
+                                        int dxUnconsumed, int dyUnconsumed, @Nullable int[] offsetInWindow) {
+        return childHelper.dispatchNestedScroll(dxConsumed, dyConsumed, dxUnconsumed, dyUnconsumed, offsetInWindow);
+    }
+
+
+    @Override
+    public boolean dispatchNestedPreScroll(int dx, int dy, @Nullable int[] consumed,
+                                           @Nullable int[] offsetInWindow) {
+        return childHelper.dispatchNestedPreScroll(dx, dy, consumed, offsetInWindow);
+    }
+
+
+    @Override
+    public boolean dispatchNestedFling(float velocityX, float velocityY, boolean consumed) {
+        return childHelper.dispatchNestedFling(velocityX, velocityY, consumed);
+    }
+
+    @Override
+    public boolean dispatchNestedPreFling(float velocityX, float velocityY) {
+        return childHelper.dispatchNestedPreFling(velocityX, velocityY);
+    }
 }

@@ -18,8 +18,6 @@ import java.util.List;
 
 import io.github.xiewinson.smoothrefresh.library.ScreenUtil;
 import io.github.xiewinson.smoothrefresh.library.SmoothRefreshLayout;
-import io.github.xiewinson.smoothrefresh.library.listener.OnLoadMoreListener;
-import io.github.xiewinson.smoothrefresh.library.listener.OnRefreshListener;
 import io.github.xiewinson.smoothrefresh.library.wrapper.header.classic.Classic1HeaderWrapper;
 import io.github.xiewinson.smoothrefresh.library.wrapper.page.classic.ClassicPageWrapper;
 
@@ -27,7 +25,7 @@ public class RecyclerViewActivity extends BaseActivity {
 
     private RecyclerView recyclerView;
     private SmoothRefreshLayout refreshLayout;
-    private boolean flag = true;
+    private boolean flag = false;
     private boolean flag1 = true;
     private int ii = 0;
 
@@ -60,73 +58,48 @@ public class RecyclerViewActivity extends BaseActivity {
 
 
         refreshLayout.setRefreshHeader(new Classic1HeaderWrapper());
-        refreshLayout.setOnRefreshListener(new OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-
-                refreshLayout.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (flag) {
-                            flag = false;
-                            refreshLayout.showErrorPage();
-                        } else {
-                            data.clear();
-                            ii = 0;
-                            for (int i = 0; i < 15; i++) {
-                                data.add(String.valueOf
-                                        (ii++));
-                            }
-                            listAdapter.setItems(data);
-                            refreshLayout.setRefreshing(false);
-                        }
-
-                    }
-                }, 2000);
+        refreshLayout.setOnRefreshListener(() -> refreshLayout.postDelayed(() -> {
+            if (flag) {
+                flag = false;
+                refreshLayout.showErrorPage();
+            } else {
+                data.clear();
+                ii = 0;
+                for (int i = 0; i < 15; i++) {
+                    data.add(String.valueOf
+                            (ii++));
+                }
+                listAdapter.setItems(data);
+                refreshLayout.setRefreshing(false);
             }
-        });
-        refreshLayout.setOnLoadMoreListener(new OnLoadMoreListener() {
-            @Override
-            public void onLoadMore() {
-                refreshLayout.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        refreshLayout.setLoadMore(false);
-                        List<String> data = new ArrayList<>();
-                        for (int i = 0; i < 15; i++) {
-                            data.add(String.valueOf(ii++));
-                        }
-                        listAdapter.addItems(data);
-                        if (ii >= 39) {
-                            refreshLayout.showNoMoreFooter();
-                        }
-                    }
-                }, 2000);
-            }
-        });
 
+        }, 2000));
+        refreshLayout.setOnLoadMoreListener(() -> refreshLayout.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                refreshLayout.setLoadMore(false);
+                List<String> data1 = new ArrayList<>();
+                for (int i = 0; i < 15; i++) {
+                    data1.add(String.valueOf(ii++));
+                }
+                listAdapter.addItems(data1);
+                if (ii >= 39) {
+                    refreshLayout.showNoMoreFooter();
+                }
+            }
+        }, 2000));
         refreshLayout.setPages(new ClassicPageWrapper() {
             @Override
             protected View onCreateErrorView(ViewGroup container) {
                 View v = super.onCreateErrorView(container);
-                v.findViewById(R.id.btn).setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        refreshLayout.setRefreshing(true);
-                    }
-                });
+                v.findViewById(R.id.btn).setOnClickListener(v1 -> refreshLayout.setRefreshing(true));
                 return v;
             }
 
             @Override
             protected View onCreateErrorFooterView(ViewGroup container) {
                 View v = super.onCreateErrorFooterView(container);
-                v.findViewById(R.id.btn).setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        refreshLayout.setLoadMore(true);
-                    }
-                });
+                v.findViewById(R.id.btn).setOnClickListener(v12 -> refreshLayout.setLoadMore(true));
                 return v;
             }
         });
