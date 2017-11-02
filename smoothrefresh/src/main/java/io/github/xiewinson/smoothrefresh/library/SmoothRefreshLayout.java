@@ -13,6 +13,7 @@ import android.support.v4.view.NestedScrollingChildHelper;
 import android.support.v4.view.NestedScrollingParent;
 import android.support.v4.view.NestedScrollingParentHelper;
 import android.support.v4.view.ViewCompat;
+import android.support.v4.widget.ListViewCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
@@ -419,6 +420,9 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
     }
 
     private boolean canChildScrollUp() {
+        if (isListView) {
+            return ListViewCompat.canScrollList((ListView) contentView, -1);
+        }
         return contentView != null && contentView.canScrollVertically(-1);
     }
 
@@ -556,9 +560,11 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
                 }
                 contentView.setVisibility(VISIBLE);
                 break;
+
             case PageState.LOADING:
                 contentView.setVisibility(GONE);
                 break;
+
             case PageState.ERROR:
                 contentView.setVisibility(GONE);
                 onExitRefreshAnimEnd();
@@ -673,12 +679,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
                 && (!contentWrapper.hasListItemChild() || isFullScreenPage())) {
             setPageState(PageState.LOADING);
             this.refreshing = true;
-            post(new Runnable() {
-                @Override
-                public void run() {
-                    onRefreshListener.onRefresh();
-                }
-            });
+            post(() -> onRefreshListener.onRefresh());
         }
 
         if (!refreshing) {

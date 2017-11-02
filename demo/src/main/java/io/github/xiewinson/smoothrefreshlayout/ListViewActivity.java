@@ -35,34 +35,18 @@ public class ListViewActivity extends BaseActivity {
 
         refreshLayout.setRefreshHeader(new Classic1HeaderWrapper());
         refreshLayout.setPages(new ClassicPageWrapper());
-        refreshLayout.setOnRefreshListener(new OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                refreshLayout.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        refreshLayout.setRefreshing(false);
-                        data.clear();
-                        for (int i = 0; i < 15; i++) {
-                            data.add("ListView Item" + i);
-                        }
-                        adapter.notifyDataSetChanged();
-                    }
-                }, 2000);
+        refreshLayout.setOnRefreshListener(() -> refreshLayout.postDelayed(() -> {
+            refreshLayout.setRefreshing(false);
+            data.clear();
+            for (int i = 0; i < 15; i++) {
+                data.add("ListView Item" + i);
             }
-        });
+            adapter.notifyDataSetChanged();
+        }, 2000));
 
-        refreshLayout.setOnLoadMoreListener(new OnLoadMoreListener() {
-            @Override
-            public void onLoadMore() {
-                refreshLayout.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        refreshLayout.showErrorFooter();
-                    }
-                }, 2000);
-            }
-        });
+        refreshLayout.setOnLoadMoreListener(() ->
+                refreshLayout.postDelayed(() ->
+                        refreshLayout.showErrorFooter(), 2000));
         refreshLayout.setRefreshing(true);
     }
 
