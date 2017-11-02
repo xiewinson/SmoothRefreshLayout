@@ -16,6 +16,7 @@ import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.ListViewCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -408,16 +409,6 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
         return super.onInterceptTouchEvent(ev);
     }
 
-    private void onSecondaryPointerUp(MotionEvent ev) {
-        final int pointerIndex = ev.getActionIndex();
-        final int pointerId = ev.getPointerId(pointerIndex);
-        if (pointerId == activePointerId) {
-            // This was our active pointer going up. Choose a new
-            // active pointer and adjust accordingly.
-            final int newPointerIndex = pointerIndex == 0 ? 1 : 0;
-            activePointerId = ev.getPointerId(newPointerIndex);
-        }
-    }
 
     private boolean canChildScrollUp() {
         if (isListView) {
