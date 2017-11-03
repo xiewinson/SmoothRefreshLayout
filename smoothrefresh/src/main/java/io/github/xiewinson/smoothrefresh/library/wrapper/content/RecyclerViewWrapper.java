@@ -28,14 +28,16 @@ public class RecyclerViewWrapper extends ListWrapper {
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
                 if (onListScrollListener != null) {
-                    RecyclerView.LayoutManager layoutManager = recyclerView.getLayoutManager();
 
                     View topChild = recyclerView.getChildAt(0);
                     onListScrollListener.onFirstItemScroll((topChild == null || !topChildIsFirstItem()) ? 0 : topChild.getTop());
 
                     View bottomChild = recyclerView.getChildAt(recyclerView.getChildCount() - 1);
-
-                    onListScrollListener.onBottomItemScroll((bottomChild == null || !bottomChildIsLastItem()) ? recyclerView.getBottom() : (int) (bottomChild.getY() + bottomChild.getMeasuredHeight()));
+                    int pos = recyclerView.getChildAdapterPosition(bottomChild);
+                    if (pos >= recyclerView.getAdapter().getItemCount() - 1) {
+                        onListScrollListener.onReachBottom();
+                    }
+                    onListScrollListener.onBottomItemScroll((int) (bottomChild.getY() + bottomChild.getMeasuredHeight()));
 
                 }
             }
@@ -43,14 +45,14 @@ public class RecyclerViewWrapper extends ListWrapper {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
-                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    View bottomChild = recyclerView.getChildAt(recyclerView.getChildCount() - 1);
-                    int pos = recyclerView.getChildAdapterPosition(bottomChild);
-                    if (pos >= recyclerView.getAdapter().getItemCount() - 1) {
-                        onListScrollListener.onReachBottom();
-                        onListScrollListener.onBottomItemScroll((int) (bottomChild.getY() + bottomChild.getMeasuredHeight()));
-                    }
-                }
+//                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+//                    View bottomChild = recyclerView.getChildAt(recyclerView.getChildCount() - 1);
+//                    int pos = recyclerView.getChildAdapterPosition(bottomChild);
+//                    if (pos >= recyclerView.getAdapter().getItemCount() - 1) {
+//                        onListScrollListener.onReachBottom();
+//                        onListScrollListener.onBottomItemScroll((int) (bottomChild.getY() + bottomChild.getMeasuredHeight()));
+//                    }
+//                }
 
 
             }

@@ -1,7 +1,6 @@
 package io.github.xiewinson.smoothrefresh.library;
 
 import android.animation.Animator;
-import android.animation.LayoutTransition;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.os.Build;
@@ -136,7 +135,8 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
     private void init() {
 
         touchSlop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
-        LayoutTransition transition = new LayoutTransition();
+//        LayoutTransition transition = new LayoutTransition();
+//        transition.setAnimator(DISAPPEARING, ObjectAnimator.ofFloat(null, "alpha", 0));
 //        setLayoutTransition(transition);
 
         contentView = getChildAt(0);
@@ -507,7 +507,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
 
         pageView = pageWrapper.getView(this, state);
         if (pageView != null) {
-            addView(pageView);
+            addView(pageView, 0);
             if (!isFullScreenPage()) movePageView(this.currentPageOffset);
         }
 
