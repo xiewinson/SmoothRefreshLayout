@@ -13,6 +13,7 @@ import android.support.v4.view.NestedScrollingParent;
 import android.support.v4.view.NestedScrollingParentHelper;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.ListViewCompat;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
@@ -113,7 +114,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
 
     private int currentPageState = PageState.NONE;
 
-    public static final int DEFAULT_ANIMATOR_DURATION = 300;
+    public static final int DEFAULT_ANIMATOR_DURATION = 200;
 
     private boolean isRecyclerView = false;
     private boolean isListView = false;
@@ -176,8 +177,15 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
                             && !isLoadMore
                             && currentPageState == PageState.NONE) {
                         isLoadMore = true;
-                        setPageState(PageState.LOADING_FOOTER);
-                        onLoadMoreListener.onLoadMore();
+                        post(() -> {
+                            if (currentPageState == PageState.NONE) {
+                                setPageState(PageState.LOADING_FOOTER);
+                                onLoadMoreListener.onLoadMore();
+                            } else {
+                                isLoadMore = false;
+                            }
+                        });
+
                     }
                 }
             });
@@ -507,7 +515,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
 
         pageView = pageWrapper.getView(this, state);
         if (pageView != null) {
-            addView(pageView, 0);
+            addView(pageView);
             if (!isFullScreenPage()) movePageView(this.currentPageOffset);
         }
 
@@ -791,6 +799,11 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
 
     private ValueAnimator headerAnimator(final int startValue, final int endValue) {
         ValueAnimator valueAnimator = ValueAnimator.ofInt(startValue, endValue);
+        ViewGroup vg = (ViewGroup) contentView;
+
+        boolean footerVisiblie = isFooterPage()
+                && pageView != null
+                && currentPageOffset < getMeasuredHeight();
         valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
@@ -801,7 +814,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
                 if (headerView.getTop() > newHeaderValue) {
                     moveHeaderView(newHeaderValue);
                 }
-                if (pageView != null) {
+                if (footerVisiblie) {
                     movePageView((int) (newHeaderValue - oldHeaderValue + pageView.getY()));
                 }
                 if (isRecyclerView && startValue < endValue) {

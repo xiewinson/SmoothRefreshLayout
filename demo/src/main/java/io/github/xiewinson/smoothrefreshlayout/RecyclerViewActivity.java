@@ -65,7 +65,7 @@ public class RecyclerViewActivity extends BaseActivity {
             } else {
                 data.clear();
                 ii = 0;
-                for (int i = 0; i < 15; i++) {
+                for (int i = 0; i < 5; i++) {
                     data.add(String.valueOf
                             (ii++));
                 }
@@ -77,15 +77,16 @@ public class RecyclerViewActivity extends BaseActivity {
         refreshLayout.setOnLoadMoreListener(() -> refreshLayout.postDelayed(new Runnable() {
             @Override
             public void run() {
-                refreshLayout.setLoadMore(false);
+//                refreshLayout.showNoMoreFooter();
                 List<String> data1 = new ArrayList<>();
-                for (int i = 0; i < 15; i++) {
+                for (int i = 0; i < 4; i++) {
                     data1.add(String.valueOf(ii++));
                 }
                 listAdapter.addItems(data1);
-//                if (ii >= 39) {
-//                    refreshLayout.showNoMoreFooter();
-//                }
+                if (ii >= 39) {
+                    refreshLayout.showNoMoreFooter();
+                }
+                refreshLayout.setLoadMore(false);
             }
         }, 2000));
         refreshLayout.setPages(new ClassicPageWrapper() {
