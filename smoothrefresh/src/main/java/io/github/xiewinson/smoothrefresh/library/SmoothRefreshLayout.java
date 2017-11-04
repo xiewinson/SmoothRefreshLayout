@@ -145,7 +145,6 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
 //        LayoutTransition transition = new LayoutTransition();
 //        transition.setAnimator(DISAPPEARING, ObjectAnimator.ofFloat(null, "alpha", 0));
 //        setLayoutTransition(transition);
-
         contentView = getChildAt(0);
 
         if (contentView == null) {
@@ -472,6 +471,10 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
             return ListViewCompat.canScrollList((ListView) contentView, -1);
         }
         return contentView != null && contentView.canScrollVertically(-1);
+    }
+
+    private boolean canChildScrollDown() {
+        return contentView != null && contentView.canScrollVertically(1);
     }
 
     private void handleTouchActionMove(float dy) {
@@ -880,9 +883,10 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
         }
         int newDy = dy - parentConsumed[1];
         if (parentConsumed[1] != 0) {
-            consumed[1] = dy;
+            consumed[1] = newDy;
             return;
         }
+
         if (!isFullScreenPage() && isEnabled() && !refreshing && !animatorRunning) {
             if (newDy < 0 && !canChildScrollUp()) {
                 handleTouchActionMove(-newDy);

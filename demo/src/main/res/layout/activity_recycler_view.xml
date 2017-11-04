@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context="io.github.xiewinson.smoothrefreshlayout.RecyclerViewActivity">
 
     <android.support.design.widget.AppBarLayout
@@ -16,9 +16,9 @@
 
     <io.github.xiewinson.smoothrefresh.library.SmoothRefreshLayout
         android:id="@+id/refreshLayout"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/recyclerview"
@@ -26,4 +26,4 @@
             android:layout_height="match_parent" />
     </io.github.xiewinson.smoothrefresh.library.SmoothRefreshLayout>
 
-</LinearLayout>
+</android.support.design.widget.CoordinatorLayout>
