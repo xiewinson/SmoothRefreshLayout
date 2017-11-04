@@ -29,7 +29,7 @@ public class ContentViewWrapper implements IContentViewWrapper {
                 return new ListViewWrapper((ListView) viewGroup);
             } else if (viewGroup instanceof NestedScrollingParent) {
                 return new ContentViewWrapper((ViewGroup) viewGroup);
-            }else if (viewGroup instanceof WebView) {
+            } else if (viewGroup instanceof WebView) {
                 return new ContentViewWrapper((ViewGroup) viewGroup);
             }
             throw new IllegalArgumentException("only support nestedScrollParent and listView");
@@ -58,6 +58,11 @@ public class ContentViewWrapper implements IContentViewWrapper {
     @Override
     public boolean topChildIsFirstItem() {
         return true;
+    }
+
+    @Override
+    public void scrollVerticalBy(int y) {
+        viewGroup.scrollBy(0, y);
     }
 
     @Override

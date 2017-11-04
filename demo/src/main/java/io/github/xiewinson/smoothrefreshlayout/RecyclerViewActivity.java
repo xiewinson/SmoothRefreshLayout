@@ -53,7 +53,10 @@ public class RecyclerViewActivity extends BaseActivity {
         final ListAdapter listAdapter = new ListAdapter();
         recyclerView.setAdapter(listAdapter);
         final List<String> data = new ArrayList<>();
-
+        for (int i = 0; i < 15; i++) {
+            data.add(String.valueOf
+                    (ii++));
+        }
         listAdapter.setItems(data);
 
 
