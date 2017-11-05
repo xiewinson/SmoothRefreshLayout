@@ -50,7 +50,7 @@ public class RecyclerViewWrapper extends ListWrapper {
                     View bottomChild = recyclerView.getChildAt(recyclerView.getChildCount() - 1);
                     if (bottomChildIsLastItem(bottomChild)) {
                         onListScrollListener.onReachBottom();
-                        onListScrollListener.onBottomItemScroll((int) (bottomChild.getY() + bottomChild.getMeasuredHeight()));
+//                        onListScrollListener.onBottomItemScroll((int) (bottomChild.getY() + bottomChild.getMeasuredHeight()));
                     }
                 }
             }

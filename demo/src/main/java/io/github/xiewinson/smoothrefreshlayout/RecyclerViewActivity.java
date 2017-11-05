@@ -25,7 +25,7 @@ public class RecyclerViewActivity extends BaseActivity {
 
     private RecyclerView recyclerView;
     private SmoothRefreshLayout refreshLayout;
-    private boolean flag = false;
+    private boolean flag = true;
     private boolean flag1 = true;
     private int ii = 0;
 
@@ -64,7 +64,7 @@ public class RecyclerViewActivity extends BaseActivity {
         refreshLayout.setOnRefreshListener(() -> refreshLayout.postDelayed(() -> {
             if (flag) {
                 flag = false;
-                refreshLayout.showErrorPage();
+//                refreshLayout.showErrorPage();
             } else {
                 data.clear();
                 ii = 0;
@@ -81,6 +81,10 @@ public class RecyclerViewActivity extends BaseActivity {
             @Override
             public void run() {
 //                refreshLayout.showNoMoreFooter();
+                if (flag1) {
+                    refreshLayout.showErrorFooter();
+                    return;
+                }
                 List<String> data1 = new ArrayList<>();
                 for (int i = 0; i < 10; i++) {
                     data1.add(String.valueOf(ii++));
@@ -105,7 +109,12 @@ public class RecyclerViewActivity extends BaseActivity {
             @Override
             protected View onCreateErrorFooterView(ViewGroup container) {
                 View v = super.onCreateErrorFooterView(container);
-                v.findViewById(R.id.btn).setOnClickListener(v12 -> refreshLayout.setLoadMore(true));
+                v.findViewById(R.id.btn).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        refreshLayout.setLoadMore(true);
+                    }
+                });
                 return v;
             }
         });
