@@ -17,7 +17,6 @@ import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.ListViewCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -345,14 +344,10 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
                 measureChild(chid, widthMeasureSpec, heightMeasureSpec);
             }
         }
-
     }
-
-    private int i;
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        Log.d("winson", "重新layout" + (i++));
         if (headerView != null && headerView.getVisibility() != GONE) {
             headerView.layout(getPaddingLeft(),
                     currentHeaderOffset,
