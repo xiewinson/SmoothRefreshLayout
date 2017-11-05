@@ -1,6 +1,8 @@
 package io.github.xiewinson.smoothrefresh.library;
 
 import android.animation.Animator;
+import android.animation.LayoutTransition;
+import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.os.Build;
@@ -15,6 +17,7 @@ import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.ListViewCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -35,6 +38,8 @@ import io.github.xiewinson.smoothrefresh.library.wrapper.header.HeaderWrapper;
 import io.github.xiewinson.smoothrefresh.library.wrapper.header.IHeaderWrapper;
 import io.github.xiewinson.smoothrefresh.library.wrapper.page.IPageWrapper;
 import io.github.xiewinson.smoothrefresh.library.wrapper.page.PageWrapper;
+
+import static android.animation.LayoutTransition.DISAPPEARING;
 
 /**
  * Created by winson on 2017/10/3.
@@ -74,7 +79,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
     private int contentRefreshingOffset;
     private int contentMinOffset;
     private int contentMaxOffset;
-    private int correctContentPaddingBottom;
+    private int correctContentPaddingBottom = -1;
 
     private int headerRefreshingOffset;
     private int headerMinOffset;
@@ -117,7 +122,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
     private boolean footerEnable = true;
     private boolean footerVisiblie = false;
 
-    private int currentPageState = PageState.NONE;
+    private int currentPageState;
 
     public static final int DEFAULT_ANIMATOR_DURATION = 200;
 
@@ -142,8 +147,10 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
 
         touchSlop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
         initRefreshAnimator();
-//        LayoutTransition transition = new LayoutTransition();
-//        transition.setAnimator(DISAPPEARING, ObjectAnimator.ofFloat(null, "alpha", 0));
+        LayoutTransition transition = new LayoutTransition();
+        ObjectAnimator anim = ObjectAnimator.ofFloat(null, "translationY", 300.0f);
+        anim.setDuration(3000);
+        transition.setAnimator(DISAPPEARING, anim);
 //        setLayoutTransition(transition);
         contentView = getChildAt(0);
 
@@ -257,6 +264,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
 
     public void setPages(PageWrapper pageWrapper) {
         this.pageWrapper = pageWrapper;
+        setPageState(PageState.NONE);
     }
 
     public void setFooterEnable(boolean enable) {
@@ -290,8 +298,6 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
         contentMinOffset = contentWrapper.getTopOffset();
         contentRefreshingOffset = contentWrapper.getTopOffset() + (headerRefreshingOffset - headerMinOffset);
         contentMaxOffset = computeContentTopByHeaderTop(headerMaxOffset);
-
-        correctContentPaddingBottom = contentView.getPaddingBottom();
         moveHeaderView(headerMinOffset);
 
     }
@@ -342,9 +348,11 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
 
     }
 
+    private int i;
+
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-
+        Log.d("winson", "重新layout" + (i++));
         if (headerView != null && headerView.getVisibility() != GONE) {
             headerView.layout(getPaddingLeft(),
                     currentHeaderOffset,
@@ -572,23 +580,27 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
         if (pageWrapper == null) return;
 //            throw new IllegalArgumentException("you must use setPages() before change pages");
         if (this.currentPageState == state) return;
+        View newPageView = pageWrapper.getView(this, state);
+        if (pageView != null && pageView != newPageView)
+            removeView(pageView);
         this.currentPageState = state;
 
-        if (pageView != null) removeView(pageView);
-        pageView = pageWrapper.getView(this, state);
-        if (pageView != null) {
+        pageView = newPageView;
+        if (pageView != null && pageView.getParent() == null) {
             addView(pageView, 0);
-            if (!isFullScreenPage()) movePageView(this.currentPageOffset);
             if (footerEnable
                     && isEnabled()
                     && !isFullScreenPage()
                     && contentWrapper.isList()) {
-
+                pageView.getViewTreeObserver();
                 pageView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
                     @Override
                     public void onGlobalLayout() {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                             pageView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                        }
+                        if (correctContentPaddingBottom < 0) {
+                            correctContentPaddingBottom = contentView.getPaddingBottom();
                         }
                         int newPaddingBottom = correctContentPaddingBottom + pageView.getMeasuredHeight();
                         if (newPaddingBottom > contentView.getPaddingBottom()) {
@@ -602,7 +614,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
                 });
             }
         }
-
+        if (pageView != null && !isFullScreenPage()) movePageView(this.currentPageOffset);
 
         switch (state) {
             case PageState.NONE:
@@ -624,6 +636,12 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
             case PageState.EMPTY:
                 contentView.setVisibility(GONE);
                 onExitRefreshAnimEnd();
+                break;
+
+            case PageState.LOADING_FOOTER:
+                if (pageView != null) {
+                    pageView.setVisibility(VISIBLE);
+                }
                 break;
 
             default:

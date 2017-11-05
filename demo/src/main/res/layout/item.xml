@@ -4,9 +4,6 @@
     android:layout_height="wrap_content"
     android:background="?colorAccent"
     android:orientation="vertical">
-    <ImageView
-        android:layout_width="200dp"
-        android:layout_height="200dp" />
     <TextView
         android:id="@+id/tv"
         android:layout_width="match_parent"

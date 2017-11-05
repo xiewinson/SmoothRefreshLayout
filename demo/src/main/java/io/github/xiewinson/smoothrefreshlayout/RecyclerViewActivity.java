@@ -68,7 +68,7 @@ public class RecyclerViewActivity extends BaseActivity {
             } else {
                 data.clear();
                 ii = 0;
-                for (int i = 0; i < 5; i++) {
+                for (int i = 0; i < 15; i++) {
                     data.add(String.valueOf
                             (ii++));
                 }
@@ -82,16 +82,18 @@ public class RecyclerViewActivity extends BaseActivity {
             public void run() {
 //                refreshLayout.showNoMoreFooter();
                 List<String> data1 = new ArrayList<>();
-                for (int i = 0; i < 4; i++) {
+                for (int i = 0; i < 10; i++) {
                     data1.add(String.valueOf(ii++));
                 }
                 listAdapter.addItems(data1);
                 if (ii >= 39) {
                     refreshLayout.showNoMoreFooter();
+                    return;
                 }
                 refreshLayout.setLoadMore(false);
             }
         }, 2000));
+
         refreshLayout.setPages(new ClassicPageWrapper() {
             @Override
             protected View onCreateErrorView(ViewGroup container) {
@@ -107,7 +109,7 @@ public class RecyclerViewActivity extends BaseActivity {
                 return v;
             }
         });
-        refreshLayout.setRefreshing(true);
+//        refreshLayout.setRefreshing(true);
 
     }
 

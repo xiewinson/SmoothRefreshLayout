@@ -17,6 +17,9 @@ public abstract class PageWrapper implements IPageWrapper {
 
     @Override
     public final View getView(ViewGroup container, @PageState int state) {
+        if(state == PageState.NONE) {
+            state = PageState.LOADING_FOOTER;
+        }
         View view = viewMap.get(state);
         if (view == null) {
             switch (state) {
