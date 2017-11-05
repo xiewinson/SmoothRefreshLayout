@@ -573,37 +573,36 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
 //            throw new IllegalArgumentException("you must use setPages() before change pages");
         if (this.currentPageState == state) return;
         this.currentPageState = state;
-        if (pageView != null) removeView(pageView);
 
+        if (pageView != null) removeView(pageView);
         pageView = pageWrapper.getView(this, state);
         if (pageView != null) {
             addView(pageView, 0);
             if (!isFullScreenPage()) movePageView(this.currentPageOffset);
+            if (footerEnable
+                    && isEnabled()
+                    && !isFullScreenPage()
+                    && contentWrapper.isList()) {
+
+                pageView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                    @Override
+                    public void onGlobalLayout() {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                            pageView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                        }
+                        int newPaddingBottom = correctContentPaddingBottom + pageView.getMeasuredHeight();
+                        if (newPaddingBottom > contentView.getPaddingBottom()) {
+                            contentView.setPadding(contentView.getPaddingLeft(),
+                                    contentView.getPaddingTop(),
+                                    contentView.getPaddingRight(),
+                                    newPaddingBottom);
+                        }
+
+                    }
+                });
+            }
         }
 
-        if (footerEnable
-                && isEnabled()
-                && pageView != null
-                && !isFullScreenPage()
-                && contentWrapper.isList()) {
-
-            pageView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-                @Override
-                public void onGlobalLayout() {
-                    int newPaddingBottom = correctContentPaddingBottom + pageView.getMeasuredHeight();
-                    if (newPaddingBottom > contentView.getPaddingBottom()
-                            || currentPageState == PageState.NONE) {
-                        contentView.setPadding(contentView.getPaddingLeft(),
-                                contentView.getPaddingTop(),
-                                contentView.getPaddingRight(),
-                                newPaddingBottom);
-                    }
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                        pageView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                    }
-                }
-            });
-        }
 
         switch (state) {
             case PageState.NONE:
@@ -933,6 +932,9 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
 
     @Override
     public boolean onNestedPreFling(View target, float velocityX, float velocityY) {
+        if (velocityY > 0 && !canChildScrollDown()) {
+            return true;
+        }
         if (!contentWrapper.isList() && isHeaderVisible()) {
             return true;
         }
@@ -941,6 +943,9 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
 
     @Override
     public boolean onNestedFling(View target, float velocityX, float velocityY, boolean consumed) {
+        if (velocityY > 0 && !canChildScrollDown()) {
+            return true;
+        }
         return false;
     }
 
