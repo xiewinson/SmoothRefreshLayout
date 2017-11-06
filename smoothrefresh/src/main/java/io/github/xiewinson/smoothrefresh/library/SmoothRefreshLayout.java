@@ -917,13 +917,13 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
     public void onNestedPreScroll(View target, int dx, int dy, int[] consumed) {
 
         if (!isBeingDragged) {
-            dispatchNestedPreScroll(dx, dy, parentConsumed, null);
+//            dispatchNestedPreScroll(dx, dy, parentConsumed, null);
         }
-        int newDy = dy - parentConsumed[1];
-        if (parentConsumed[1] != 0) {
-            consumed[1] = newDy;
-            return;
-        }
+        int newDy = dy;
+//        if (parentConsumed[1] != 0) {
+//            consumed[1] = newDy;
+//            return;
+//        }
 
         if (!isFullScreenPage() && isEnabled() && !refreshing && !animatorRunning) {
             if (newDy < 0 && !canChildScrollUp()) {
@@ -938,9 +938,6 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
             }
         }
 
-        if (!refreshing && newDy > 0 && isHeaderVisible()) {
-            consumed[1] = newDy;
-        }
 
         if (!contentWrapper.isList()) {
             if (refreshing) {
@@ -953,10 +950,15 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
                 }
 
             }
-            if (isHeaderVisible() && dy > 0) {
-                consumed[1] = newDy;
-            }
+
+//            if (isHeaderVisible() && dy > 0) {
+//                consumed[1] = newDy;
+//            }
         }
+        if ((!refreshing || !contentWrapper.isList()) && newDy > 0 && isHeaderVisible()) {
+            consumed[1] = newDy;
+        }
+        dispatchNestedPreScroll(dx - consumed[0], dy - consumed[1], parentConsumed, null);
 
 
     }

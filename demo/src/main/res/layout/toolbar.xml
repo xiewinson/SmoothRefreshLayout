@@ -6,7 +6,7 @@
         android:id="@+id/toolbar"
         app:layout_scrollFlags="scroll"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="100dp"
         android:background="?colorPrimary"
         app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
 
