@@ -64,7 +64,7 @@ public class RecyclerViewActivity extends BaseActivity {
         refreshLayout.setOnRefreshListener(() -> refreshLayout.postDelayed(() -> {
             if (flag) {
                 flag = false;
-//                refreshLayout.showErrorPage();
+                refreshLayout.showErrorPage();
             } else {
                 data.clear();
                 ii = 0;
@@ -118,7 +118,7 @@ public class RecyclerViewActivity extends BaseActivity {
                 return v;
             }
         });
-//        refreshLayout.setRefreshing(true);
+        refreshLayout.setRefreshing(true);
 
     }
 

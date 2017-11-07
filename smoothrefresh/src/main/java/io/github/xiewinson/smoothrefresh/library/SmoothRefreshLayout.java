@@ -17,7 +17,6 @@ import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.ListViewCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -130,8 +129,6 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
     private boolean isRecyclerView = false;
     private boolean isListView = false;
 
-    private int[] parentConsumed = new int[2];
-
     public OnRefreshListener getOnRefreshListener() {
         return onRefreshListener;
     }
@@ -233,7 +230,6 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
                 if (contentWrapper.isList() && !isExpandingAnimator) {
                     moveContentView(headerView.getBottom());
                     contentView.setPadding(contentView.getPaddingLeft(), contentMinOffset, contentView.getPaddingRight(), contentView.getPaddingBottom());
-
                 }
             }
 
@@ -675,10 +671,20 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
      */
     @UiThread
     public void showErrorFooter() {
-        if (!footerEnable) {
-            return;
-        }
+        if (handleWhenShowFooter()) return;
         setPageState(PageState.ERROR_FOOTER);
+    }
+
+    private boolean handleWhenShowFooter() {
+        if (!footerEnable) {
+            return true;
+        }
+        if (refreshing) {
+            isLoadMore = false;
+            setPageState(PageState.NONE);
+            return true;
+        }
+        return false;
     }
 
 
@@ -696,9 +702,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
      */
     @UiThread
     public void showEmptyFooter() {
-        if (!footerEnable) {
-            return;
-        }
+        if (handleWhenShowFooter()) return;
         setPageState(PageState.EMPTY_FOOTER);
     }
 
@@ -707,9 +711,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
      */
     @UiThread
     public void showNoMoreFooter() {
-        if (!footerEnable) {
-            return;
-        }
+        if (handleWhenShowFooter()) return;
         setPageState(PageState.NO_MORE_FOOTER);
     }
 
@@ -749,9 +751,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
      */
     @UiThread
     public void setRefreshing(boolean refreshing) {
-//        if (isLoadMore) {
-//            return;
-//        }
+
         if (headerWrapper == null) {
             throw new IllegalArgumentException("please use setRefreshHeader before setRefreshing");
         }
@@ -916,50 +916,42 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
     @Override
     public void onNestedPreScroll(View target, int dx, int dy, int[] consumed) {
 
-        if (!isBeingDragged) {
-//            dispatchNestedPreScroll(dx, dy, parentConsumed, null);
-        }
-        int newDy = dy;
-//        if (parentConsumed[1] != 0) {
-//            consumed[1] = newDy;
-//            return;
-//        }
 
         if (!isFullScreenPage() && isEnabled() && !refreshing && !animatorRunning) {
-            if (newDy < 0 && !canChildScrollUp()) {
-                handleTouchActionMove(-newDy);
+            if (dy < 0 && !canChildScrollUp()) {
+                handleTouchActionMove(-dy);
                 isBeingDragged = true;
 
-            } else if (newDy > 0 && isBeingDragged) {
-                handleTouchActionMove(-newDy);
+            } else if (dy > 0 && isBeingDragged) {
+                handleTouchActionMove(-dy);
                 if (currentHeaderOffset <= headerMinOffset) {
                     isBeingDragged = false;
                 }
             }
         }
 
-
         if (!contentWrapper.isList()) {
             if (refreshing) {
-                int result = contentView.getTop() - newDy;
+                int result = contentView.getTop() - dy;
                 if (result > contentRefreshingOffset) result = contentRefreshingOffset;
                 if (result < contentMinOffset) result = contentMinOffset;
-                if (newDy > 0 || !canChildScrollUp()) {
+                if (dy > 0 || !canChildScrollUp()) {
                     moveContentView(result, false);
                     moveHeaderView(computeHeaderTopByContentTop(result));
                 }
 
             }
+        }
+        if ((!refreshing || !contentWrapper.isList()) && dy > 0 && isHeaderVisible()) {
+            consumed[1] = dy;
+        }
 
-//            if (isHeaderVisible() && dy > 0) {
-//                consumed[1] = newDy;
-//            }
-        }
-        if ((!refreshing || !contentWrapper.isList()) && newDy > 0 && isHeaderVisible()) {
-            consumed[1] = newDy;
-        }
+        final int[] parentConsumed = new int[2];
         dispatchNestedPreScroll(dx - consumed[0], dy - consumed[1], parentConsumed, null);
-
+        if (parentConsumed[1] != 0) {
+            consumed[0] += parentConsumed[0];
+            consumed[1] += parentConsumed[1];
+        }
 
     }
 
