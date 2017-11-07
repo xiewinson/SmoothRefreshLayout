@@ -25,34 +25,17 @@ public class ContentViewWrapper implements IContentViewWrapper {
         public static IContentViewWrapper getInstance(View viewGroup) {
             if (viewGroup instanceof RecyclerView) {
                 return new RecyclerViewWrapper((RecyclerView) viewGroup);
-            } else if (viewGroup instanceof ListView) {
-                return new ListViewWrapper((ListView) viewGroup);
             } else if (viewGroup instanceof NestedScrollingParent) {
-                return new ContentViewWrapper((ViewGroup) viewGroup);
-            } else if (viewGroup instanceof WebView) {
                 return new ContentViewWrapper((ViewGroup) viewGroup);
             }
             throw new IllegalArgumentException("only support nestedScrollParent and listView");
         }
     }
 
-    @Override
-    public void smoothScrollVerticalToTop() {
-    }
 
     @Override
     public boolean isSupportNestedScroll() {
         return this.viewGroup instanceof NestedScrollingChild;
-    }
-
-    @Override
-    public void moveContentView(int top) {
-        viewGroup.offsetTopAndBottom(-viewGroup.getTop() + top);
-    }
-
-    @Override
-    public int getTopOffset() {
-        return viewGroup.getTop();
     }
 
     @Override

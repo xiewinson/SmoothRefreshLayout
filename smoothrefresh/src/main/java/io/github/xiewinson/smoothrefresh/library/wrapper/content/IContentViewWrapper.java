@@ -10,17 +10,11 @@ public interface IContentViewWrapper {
 
     void scrollVerticalBy(int y);
 
-    void smoothScrollVerticalToTop();
-
     boolean isSupportNestedScroll();
 
     boolean isList();
 
     boolean hasListItemChild();
-
-    void moveContentView(int top);
-
-    int getTopOffset();
 
     void recycle();
 

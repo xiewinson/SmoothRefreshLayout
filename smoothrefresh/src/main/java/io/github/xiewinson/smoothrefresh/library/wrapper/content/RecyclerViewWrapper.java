@@ -66,12 +66,6 @@ public class RecyclerViewWrapper extends ListWrapper {
     }
 
     @Override
-    public void smoothScrollVerticalToTop() {
-        super.smoothScrollVerticalToTop();
-//        recyclerView.smoothScrollToPosition(0);
-    }
-
-    @Override
     public boolean topChildIsFirstItem() {
         View child = recyclerView.getChildAt(0);
         return child != null && recyclerView.getChildAdapterPosition(child) == 0;
