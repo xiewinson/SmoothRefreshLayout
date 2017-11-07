@@ -14,8 +14,6 @@ import android.support.v4.view.NestedScrollingChildHelper;
 import android.support.v4.view.NestedScrollingParent;
 import android.support.v4.view.NestedScrollingParentHelper;
 import android.support.v4.view.ViewCompat;
-import android.support.v4.widget.ListViewCompat;
-import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -23,7 +21,6 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.animation.AccelerateDecelerateInterpolator;
-import android.widget.ListView;
 
 import io.github.xiewinson.smoothrefresh.library.annotation.PageState;
 import io.github.xiewinson.smoothrefresh.library.annotation.RefreshHeaderState;
@@ -125,8 +122,6 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
 
     public static final int DEFAULT_ANIMATOR_DURATION = 200;
 
-    private boolean isRecyclerView = false;
-
     public OnRefreshListener getOnRefreshListener() {
         return onRefreshListener;
     }
@@ -153,7 +148,6 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
         if (contentView == null) {
             throw new NullPointerException("you must add a contentView");
         }
-        isRecyclerView = contentView instanceof RecyclerView;
 
         contentWrapper = ContentViewWrapper.Factory.getInstance(contentView);
         if (contentWrapper instanceof ListWrapper) {
@@ -215,7 +209,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
                     movePageView((int) (headerView.getTop() - oldHeaderValue + pageView.getY()));
                 }
 
-                if (isRecyclerView && startAnimValue < endAnimValue) {
+                if (contentWrapper.isList() && startAnimValue < endAnimValue) {
                     contentWrapper.scrollVerticalBy(oldHeaderValue - newContentValue);
                 }
             }
@@ -498,7 +492,7 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
         }
 
         int headerResult = computeHeaderTopByContentTop(result);
-        if (isRecyclerView && pageView != null) {
+        if (contentWrapper.isList() && pageView != null) {
             movePageView((int) (headerResult - headerView.getTop() + pageView.getY()));
         }
         moveHeaderView(headerResult);
@@ -902,14 +896,25 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
     @Override
     public void onNestedPreScroll(View target, int dx, int dy, int[] consumed) {
 
+        final int[] parentConsumed = new int[2];
+        if (!isBeingDragged) {
+            dispatchNestedPreScroll(dx, dy, parentConsumed, null);
+        }
+
+        int newDy = dy - parentConsumed[1];
+        if (parentConsumed[1] != 0) {
+            consumed[0] = dx;
+            consumed[1] = dy;
+            return;
+        }
 
         if (!isFullScreenPage() && isEnabled() && !refreshing && !animatorRunning) {
-            if (dy < 0 && !canChildScrollUp()) {
-                handleTouchActionMove(-dy);
+            if (newDy < 0 && !canChildScrollUp()) {
+                handleTouchActionMove(-newDy);
                 isBeingDragged = true;
 
-            } else if (dy > 0 && isBeingDragged) {
-                handleTouchActionMove(-dy);
+            } else if (newDy > 0 && isBeingDragged) {
+                handleTouchActionMove(-newDy);
                 if (currentHeaderOffset <= headerMinOffset) {
                     isBeingDragged = false;
                 }
@@ -918,27 +923,19 @@ public class SmoothRefreshLayout extends ViewGroup implements NestedScrollingPar
 
         if (!contentWrapper.isList()) {
             if (refreshing) {
-                int result = contentView.getTop() - dy;
+                int result = contentView.getTop() - newDy;
                 if (result > contentRefreshingOffset) result = contentRefreshingOffset;
                 if (result < contentMinOffset) result = contentMinOffset;
-                if (dy > 0 || !canChildScrollUp()) {
+                if (newDy > 0 || !canChildScrollUp()) {
                     moveContentView(result, false);
                     moveHeaderView(computeHeaderTopByContentTop(result));
                 }
 
             }
         }
-        if ((!refreshing || !contentWrapper.isList()) && dy > 0 && isHeaderVisible()) {
-            consumed[1] = dy;
+        if ((!refreshing || !contentWrapper.isList()) && newDy > 0 && isHeaderVisible()) {
+            consumed[1] = newDy;
         }
-
-        final int[] parentConsumed = new int[2];
-        dispatchNestedPreScroll(dx - consumed[0], dy - consumed[1], parentConsumed, null);
-        if (parentConsumed[1] != 0) {
-            consumed[0] += parentConsumed[0];
-            consumed[1] += parentConsumed[1];
-        }
-
     }
 
 

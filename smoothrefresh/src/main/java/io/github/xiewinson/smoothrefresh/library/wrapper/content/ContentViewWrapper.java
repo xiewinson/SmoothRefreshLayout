@@ -28,7 +28,7 @@ public class ContentViewWrapper implements IContentViewWrapper {
             } else if (viewGroup instanceof NestedScrollingParent) {
                 return new ContentViewWrapper((ViewGroup) viewGroup);
             }
-            throw new IllegalArgumentException("only support nestedScrollParent and listView");
+            throw new IllegalArgumentException("only support nestedScrollParent");
         }
     }
 

@@ -20,11 +20,6 @@ public class ListWrapper extends ContentViewWrapper implements IListWrapper {
     }
 
     @Override
-    public boolean topChildIsFirstItem() {
-        return false;
-    }
-
-    @Override
     public void setOnListScrollListener(OnListScrollListener onListScrollListener) {
         this.onListScrollListener = onListScrollListener;
     }

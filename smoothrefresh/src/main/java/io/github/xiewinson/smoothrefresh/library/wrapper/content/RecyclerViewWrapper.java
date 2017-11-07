@@ -30,10 +30,10 @@ public class RecyclerViewWrapper extends ListWrapper {
                 if (onListScrollListener != null) {
 
                     View topChild = recyclerView.getChildAt(0);
-                    onListScrollListener.onFirstItemScroll((topChild == null || !topChildIsFirstItem()) ? 0 : topChild.getTop());
+                    onListScrollListener.onFirstItemScroll((topChild == null || !isFirstItem(topChild)) ? 0 : topChild.getTop());
 
                     View bottomChild = recyclerView.getChildAt(recyclerView.getChildCount() - 1);
-                    if (bottomChildIsLastItem(bottomChild)) {
+                    if (isLastItem(bottomChild)) {
                         onListScrollListener.onReachBottom();
                         onListScrollListener.onBottomItemScroll((int) (bottomChild.getY() + bottomChild.getMeasuredHeight()));
                     } else {
@@ -48,7 +48,7 @@ public class RecyclerViewWrapper extends ListWrapper {
                 super.onScrollStateChanged(recyclerView, newState);
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                     View bottomChild = recyclerView.getChildAt(recyclerView.getChildCount() - 1);
-                    if (bottomChildIsLastItem(bottomChild)) {
+                    if (isLastItem(bottomChild)) {
                         onListScrollListener.onReachBottom();
 //                        onListScrollListener.onBottomItemScroll((int) (bottomChild.getY() + bottomChild.getMeasuredHeight()));
                     }
@@ -68,10 +68,15 @@ public class RecyclerViewWrapper extends ListWrapper {
     @Override
     public boolean topChildIsFirstItem() {
         View child = recyclerView.getChildAt(0);
-        return child != null && recyclerView.getChildAdapterPosition(child) == 0;
+        return isFirstItem(child);
     }
 
-    public boolean bottomChildIsLastItem(View child) {
+    private boolean isFirstItem(View child) {
+        return child != null && recyclerView.getChildAdapterPosition(child) == 0;
+
+    }
+
+    private boolean isLastItem(View child) {
         return child != null && recyclerView.getChildAdapterPosition(child) == recyclerView.getAdapter().getItemCount() - 1;
     }
 
